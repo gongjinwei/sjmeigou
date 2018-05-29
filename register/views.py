@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from rest_framework.views import Response, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework_jwt.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 import requests
@@ -173,4 +173,4 @@ class GetUserInfoView(viewset.CreateOnlyViewSet):
 class ImageView(ModelViewSet):
     serializer_class = serializers.ImageSerializer
     queryset = models.Image.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
