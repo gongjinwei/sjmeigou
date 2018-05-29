@@ -1,5 +1,7 @@
 from django.db import models
 import datetime
+from jsonfield import JSONField
+
 
 # Create your models here.
 
@@ -19,5 +21,12 @@ class UserInfo(models.Model):
     def __str__(self):
         return self.nickName
 
+
 class Image(models.Model):
-    image=models.ImageField(upload_to='sjmeigou/%Y%m%d',max_length=256)
+    image = models.ImageField(upload_to='sjmeigou/%Y%m%d', max_length=256)
+
+
+class VodCallback(models.Model):
+    data = JSONField(default={})
+    version=models.CharField(max_length=10,default='')
+    eventType=models.CharField(max_length=100,default='')

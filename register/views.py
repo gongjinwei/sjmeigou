@@ -175,3 +175,11 @@ class ImageView(ModelViewSet):
     queryset = models.Image.objects.all()
     permission_classes = (IsAuthenticated,)
 
+
+class VodCallbackView(ModelViewSet):
+    serializer_class = serializers.VodCallbackSerializer
+    queryset = models.VodCallback.objects.all()
+    permission_classes = (AllowAny,)
+
+    def list(self, request, *args, **kwargs):
+        return Response('hello')

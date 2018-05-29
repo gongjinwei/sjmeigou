@@ -39,3 +39,11 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.Image
         fields='__all__'
+
+
+class VodCallbackSerializer(serializers.ModelSerializer):
+    data = serializers.JSONField()
+
+    class Meta:
+        model=models.VodCallback
+        fields='__all__'
