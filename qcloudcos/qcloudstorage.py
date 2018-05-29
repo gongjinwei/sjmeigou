@@ -24,7 +24,7 @@ class QcloudStorage(Storage):
         response = cos.get_object(name, True)
         return response.content
 
-    def _save(self, name, content):
+    def _save(self, name, content,max_length=None):
         # Called by Storage.save().
         # The name will already have gone through get_valid_name() and get_available_name(),
         # and the content will be a File object itself
@@ -34,7 +34,7 @@ class QcloudStorage(Storage):
             # 直接存的URL，直接返回，这类数据不支持取content
             return name
         name = self._get_valid_name(name)
-        name = self._get_available_name(name)
+        name = self._get_available_name(name,max_length=max_length)
         content = content.read()
         cos_object = CosObject()
         response = cos_object.put_object(name, content)
@@ -49,6 +49,8 @@ class QcloudStorage(Storage):
             # 直接存的URL，直接返回，这类数据不支持取content
             return name
         dir_name, file_name = os.path.split(name)
+        if len(file_name)>30:
+            file_name=file_name[-30:-1]+file_name[-1]
         file_name = get_valid_filename(file_name)
         name = '/'.join(os.path.join(dir_name, file_name).split('\\'))
         if name[0] != '/':
@@ -59,6 +61,7 @@ class QcloudStorage(Storage):
         # Returns a filename that is available in the storage mechanism,
         # possibly taking the provided filename into account.
         # The name argument passed to this method will have already cleaned to a filename valid for the storage system, according to the get_valid_name() method described above.
+
         dir_name, file_name = os.path.split(name)
         file_root, file_ext = os.path.splitext(file_name)
         while self.exists(name) or (max_length and len(name) > max_length):

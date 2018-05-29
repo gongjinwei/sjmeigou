@@ -20,4 +20,4 @@ class UserInfo(models.Model):
         return self.nickName
 
 class Image(models.Model):
-    image=models.ImageField(upload_to='sjmeigou/%Y%m%d')
+    image=models.ImageField(upload_to='sjmeigou/%Y%m%d',max_length=256)

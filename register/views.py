@@ -174,3 +174,4 @@ class ImageView(ModelViewSet):
     serializer_class = serializers.ImageSerializer
     queryset = models.Image.objects.all()
     permission_classes = (IsAuthenticated,)
+
