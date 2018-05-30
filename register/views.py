@@ -1,12 +1,15 @@
 # from django.shortcuts import render
-import string, random, json, base64, hashlib, datetime
+import string, random, json, base64, hashlib, datetime,hmac,time
+from urllib.parse import urlencode
 from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
 
 from rest_framework.views import Response, status
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework_jwt.settings import api_settings
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.viewsets import ModelViewSet
 import requests
 from Crypto.Cipher import AES
@@ -22,6 +25,7 @@ from . import serializers, viewset, models
 sms_appid = getattr(settings, 'QCLOUD_SMS_APPID')
 sms_appkey = getattr(settings, 'QCLOUD_SMS_APPKEY')
 sms_timeout = getattr(settings, 'QCLOUD_SMS_TIMEOUT')
+qcloud_options=getattr(settings,'QCLOUD_STORAGE_OPTION')
 appId = getattr(settings, 'APPID')
 appSecret = getattr(settings, 'APPSECRET')
 template_id = '125560'
@@ -183,3 +187,42 @@ class VodCallbackView(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return Response('hello')
+
+
+class GetVodSignatureView(viewset.CreateOnlyViewSet):
+    serializer_class = serializers.GetVodSignatureSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def create(self, request, *args, **kwargs):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        userId=serializer.validated_data['userId']
+
+
+        # JSONWebTokenAuthentication assumes that the JWT will come in the header
+
+        obj=JSONWebTokenAuthentication()
+        try:
+            user,jwt_value=obj.authenticate(request)
+        except TypeError:
+            return Response({'errmsg':'请携带参数访问'},status=status.HTTP_400_BAD_REQUEST)
+
+
+        # 验证用户身份
+
+        if user.id==userId:
+            currentTimeStamp=int(time.time())
+            params = {
+                "secretId": qcloud_options['SecretID'],
+                "currentTimeStamp":currentTimeStamp ,
+                "expireTime": currentTimeStamp+600,
+                "random": get_random_string(8,'0123456789')
+            }
+
+            urlcode=urlencode(params).encode()
+            mac=hmac.new(qcloud_options['SecretKey'].encode(),urlcode,hashlib.sha1).digest()
+
+            return Response({"signature":base64.b64encode(mac+urlcode)})
+        else:
+            return Response({'errmsg':"不存在此用户"},status=status.HTTP_400_BAD_REQUEST)

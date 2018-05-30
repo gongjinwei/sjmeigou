@@ -47,3 +47,7 @@ class VodCallbackSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.VodCallback
         fields='__all__'
+
+class GetVodSignatureSerializer(serializers.Serializer):
+    userId=serializers.CharField(max_length=50,required=True)
+

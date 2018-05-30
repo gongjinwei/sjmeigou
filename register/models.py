@@ -30,3 +30,4 @@ class VodCallback(models.Model):
     data = JSONField(default={})
     version=models.CharField(max_length=10,default='')
     eventType=models.CharField(max_length=100,default='')
+
