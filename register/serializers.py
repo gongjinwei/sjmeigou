@@ -38,15 +38,75 @@ class GetUserInfoSerializer(serializers.Serializer):
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.Image
-        fields='__all__'
+        exclude = ('id',)
+
+
+class VideoStreamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=models.VideoStream
+        exclude = ('id',)
+
+
+class AudioStreamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=models.AudioStream
+        exclude = ('id',)
+
+
+class MetaDataSerializer(serializers.ModelSerializer):
+    videoStreamList=VideoStreamSerializer(many=True)
+    audioStreamList=AudioStreamSerializer(many=True)
+
+    class Meta:
+        model=models.VodMetaData
+        exclude = ('id',)
+
+    def create(self, validated_data):
+        video_stream_list=validated_data.pop('videoStreamList')
+        audio_stream_list=validated_data.pop('audioStreamList')
+        meta_data=models.VodMetaData.objects.create(**validated_data)
+
+        for video_stream in video_stream_list:
+            models.VideoStream.objects.create(metaData_id=meta_data.id,**video_stream)
+        for audio_stream in audio_stream_list:
+            models.AudioStream.objects.create(metaData_id=meta_data.id,**audio_stream)
+
+        return meta_data
+
+
+class VodDataSerializer(serializers.ModelSerializer):
+    metaData=MetaDataSerializer()
+
+    class Meta:
+        model=models.VodData
+        exclude=('id',)
+
+    def create(self, validated_data):
+        meta_data=validated_data.pop('metaData')
+        vod_data=models.VodData.objects.create(**validated_data)
+        meta_data.update(vodData_id=vod_data.id)
+        MetaDataSerializer().create(meta_data)
+
+        return vod_data
 
 
 class VodCallbackSerializer(serializers.ModelSerializer):
-    data = serializers.JSONField()
+    data = VodDataSerializer()
 
     class Meta:
         model=models.VodCallback
-        fields='__all__'
+        exclude = ('id',)
+
+    def create(self, validated_data):
+        vod_data=validated_data.pop('data')
+        vod_callback=models.VodCallback.objects.create(**validated_data)
+        vod_data.update(callback_id=vod_callback.id)
+        VodDataSerializer().create(vod_data)
+
+        return vod_callback
+
 
 class GetVodSignatureSerializer(serializers.Serializer):
     userId=serializers.CharField(max_length=50,required=True)

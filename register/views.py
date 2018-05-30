@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django.utils.crypto import get_random_string
 
 from rest_framework.views import Response, status
@@ -209,9 +210,11 @@ class GetVodSignatureView(viewset.CreateOnlyViewSet):
             return Response({'errmsg':'请携带参数访问'},status=status.HTTP_400_BAD_REQUEST)
 
 
-        # 验证用户身份
+        # 验证用户身份，把控视频上传权限
 
-        if user.id==userId:
+        user_auth=authenticate(username=user.username,password=userId)
+
+        if user_auth:
             currentTimeStamp=int(time.time())
             params = {
                 "secretId": qcloud_options['SecretID'],
