@@ -198,7 +198,7 @@ class GetVodSignatureView(viewset.CreateOnlyViewSet):
         serializer=self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        userId=serializer.validated_data['userId']
+        userId=serializer.validated_data['sourceContext']
 
 
         # JSONWebTokenAuthentication assumes that the JWT will come in the header
@@ -215,12 +215,17 @@ class GetVodSignatureView(viewset.CreateOnlyViewSet):
         user_auth=authenticate(username=user.username,password=userId)
 
         if user_auth:
+            videoSize=serializer.validated_data['videoSize']
+            # "procedure": "QCVB_SimpleProcessFile(1,0,10)",
             currentTimeStamp=int(time.time())
             params = {
                 "secretId": qcloud_options['SecretID'],
                 "currentTimeStamp":currentTimeStamp ,
                 "expireTime": currentTimeStamp+600,
-                "random": get_random_string(8,'0123456789')
+                "random": get_random_string(8,'0123456789'),
+                "sourceContext":user.username,
+                "procedure": "QCVB_SimpleProcessFile(0,0,10)",
+                "videoSize":videoSize
             }
 
             urlcode=urlencode(params).encode()

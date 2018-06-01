@@ -6,6 +6,10 @@ from django.utils.text import get_valid_filename
 from django.utils.crypto import get_random_string
 from qcloudcos.cos_object import CosObject
 
+videoTypes = ["WMV", "WM", "ASF", "ASX", "RM", "RMVB", "RA", "RAM", "MPG", "MPEG", "MPE", "VOB", "DAT", "MOV", "3GP", "MP4", "MP4V", "M4V", "MKV", "AVI", "FLV", "F4V"]
+audioTypes = ["MP3", "WMA", "WAV", "ASF", "AU", "SND", "RAW", "AFC", "ACC"]
+imageTypes = ["JPG", "JPEG", "JPE", "PSD", "SVG", "SVGZ", "TIFF", "TIF", "BMP", "GIF", "PNG"]
+
 
 class QcloudStorage(Storage):
     # Following methods will have to be overridden:delete(),exists(),listdir(),size(),url()

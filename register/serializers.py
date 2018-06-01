@@ -109,5 +109,6 @@ class VodCallbackSerializer(serializers.ModelSerializer):
 
 
 class GetVodSignatureSerializer(serializers.Serializer):
-    userId=serializers.CharField(max_length=50,required=True)
+    sourceContext=serializers.CharField(max_length=50,required=True)
+    videoSize=serializers.IntegerField(max_value=20971520)
 
