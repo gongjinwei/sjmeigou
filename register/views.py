@@ -3,6 +3,7 @@ import string, random, json, base64, hashlib, datetime,hmac,time
 from urllib.parse import urlencode
 from django.core.cache import cache
 from django.conf import settings
+from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils.crypto import get_random_string
@@ -19,6 +20,8 @@ from qcloudsms_py import SmsSingleSender
 from qcloudsms_py.httpclient import HTTPError
 
 from . import serializers, viewset, models
+from msg_app.models import ReceiveMsg
+from msg_app.serializers import ReceiveMsgSerializer
 
 # Create your views here.
 
@@ -30,6 +33,7 @@ qcloud_options=getattr(settings,'QCLOUD_STORAGE_OPTION')
 appId = getattr(settings, 'APPID')
 appSecret = getattr(settings, 'APPSECRET')
 template_id = '125560'
+msg_token =getattr(settings,"APP_MSG_TOKEN")
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -234,3 +238,22 @@ class GetVodSignatureView(viewset.CreateOnlyViewSet):
             return Response({"signature":base64.b64encode(mac+urlcode)})
         else:
             return Response({'errmsg':"不存在此用户"},status=status.HTTP_400_BAD_REQUEST)
+
+
+class MsgCheckView(viewset.CreateListDeleteViewSet):
+    serializer_class = ReceiveMsgSerializer
+    queryset = ReceiveMsg.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        signature=request.query_params.get("signature")
+        timestamp=request.query_params.get('timestamp')
+        nonce=request.query_params.get('nonce')
+        echostr=request.query_params.get("echostr")
+        token= msg_token
+        if signature:
+            tmpStr="".join(sorted([timestamp,token,nonce]))
+            tmpStr=hashlib.sha1(tmpStr.encode()).hexdigest()
+            if tmpStr==signature:
+                return HttpResponse(echostr.encode(),content_type='text')
+        return Response(False)
+

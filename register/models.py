@@ -21,6 +21,9 @@ class UserInfo(models.Model):
     def __str__(self):
         return self.nickName
 
+    class Meta:
+        managed=False
+
 
 class Image(models.Model):
     image = models.ImageField(upload_to='sjmeigou/%Y%m%d', max_length=256)
