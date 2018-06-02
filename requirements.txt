@@ -17,5 +17,7 @@ pytz==2018.4
 qcloudsms-py==0.1.1
 redis==2.10.6
 requests==2.18.4
+requests-toolbelt==0.8.0
 six==1.11.0
 urllib3==1.22
+weixin-python==0.5.3

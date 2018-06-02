@@ -11,6 +11,7 @@ from register import viewset
 from weixin.pay import WeixinPay
 
 from . import serializers
+from register.views import CustomerXMLRender,CustomerXMLParser
 
 # Create your views here.
 mch_id = getattr(settings, "WEIXIN_MCH_ID")
@@ -57,14 +58,13 @@ class UnifiedOrderView(viewset.CreateOnlyViewSet):
 class NotifyOrderView(viewset.CreateOnlyViewSet):
     serializer_class = serializers.NotifyOrderSerializer
     permission_classes = (AllowAny,)
+    renderer_classes = (CustomerXMLRender,)
+    parser_classes = (CustomerXMLParser,)
 
     def create(self, request, *args, **kwargs):
-        data = weixinpay.to_dict(request.body)
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return HttpResponse(
-            b"<xml> <return_code>SUCCESS</return_code><return_msg>OK</return_msg></xml>",
-            content_type="text/xml")
+        return Response({"return_code":"SUCCESS","return_msg":"OK"})
 
 
