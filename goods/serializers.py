@@ -18,6 +18,13 @@ class SecondClassSerializer(serializers.ModelSerializer):
         fields='__all__'
 
 
+class ThirdClassSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=models.ThirdClass
+        fields='__all__'
+
+
 class FirstPropetySerializer(serializers.ModelSerializer):
 
     class Meta:
