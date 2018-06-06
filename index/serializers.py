@@ -14,3 +14,10 @@ class SortTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.SortType
         fields = '__all__'
+
+
+class RecruitSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=models.RecruitMerchant
+        fields = '__all__'

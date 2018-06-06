@@ -30,6 +30,18 @@ class UmViewSets(ListOnlyViewSet):
     def list(self, request, *args, **kwargs):
         result={
             "banners":serializers.BannerSerializer(models.Banner.objects.all(),many=True).data,
-            "sorts":serializers.SortTypeSerializer(models.SortType.objects.all(),many=True).data
+            "sorts":serializers.SortTypeSerializer(models.SortType.objects.all(),many=True).data,
         }
         return Response(result)
+
+
+class RecruitView(ModelViewSet):
+    serializer_class = serializers.RecruitSerializer
+    queryset = models.RecruitMerchant.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data.update(last_operator=self.request.user)
+        image,created=self.queryset.update_or_create(defaults=serializer.validated_data,name='propagate')
+        return Response(image.image.url)
