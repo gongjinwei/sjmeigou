@@ -1,0 +1,12 @@
+# -*- coding:UTF-8 -*-
+from rest_framework.routers import DefaultRouter
+from . import views
+
+router=DefaultRouter()
+app_name='index'
+
+router.register('banner',views.BannerView,base_name='banner')
+router.register('sortType',views.SortTypeView,base_name='sortType')
+router.register('um',views.UmViewSets,base_name='Um')
+
+urlpatterns=router.urls

@@ -268,8 +268,7 @@ class MsgCheckView(viewset.CreateListDeleteViewSet):
         return Response(False)
 
     def create(self, request, *args, **kwargs):
-        with open('1.txt', 'wb') as fp:
-            fp.write(request.body)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

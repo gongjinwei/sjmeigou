@@ -23,6 +23,7 @@ urlpatterns = [
     path('api-token-refresh/',refresh_jwt_token),
     path('api-token-verify/',verify_jwt_token),
     path('register/',include('register.urls',namespace='register')),
-    path('wxpay/',include('wxpay.urls',namespace='wxpay'))
+    path('wxpay/',include('wxpay.urls',namespace='wxpay')),
+    path('index/',include('index.urls',namespace='index'))
 
 ]
