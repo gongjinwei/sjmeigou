@@ -16,3 +16,16 @@ class SecondClassSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.SecondClass
         fields='__all__'
+
+
+class FirstPropetySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=models.FirstProperty
+        fields='__all__'
+
+class SecondPropetySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=models.SecondProperty
+        fields='__all__'

@@ -21,3 +21,19 @@ class SecondClassView(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(last_operator=self.request.user)
+
+
+class FirstPropertyView(ModelViewSet):
+    serializer_class = serializers.FirstPropetySerializer
+    queryset = models.FirstProperty.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(last_operator=self.request.user)
+
+
+class SecondPropertyView(ModelViewSet):
+    serializer_class = serializers.SecondPropetySerializer
+    queryset = models.SecondProperty.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(last_operator=self.request.user)
