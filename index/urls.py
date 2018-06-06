@@ -6,7 +6,6 @@ router=DefaultRouter()
 app_name='index'
 
 router.register('banner',views.BannerView,base_name='banner')
-router.register('sortType',views.SortTypeView,base_name='sortType')
 router.register('recruit',views.RecruitView,base_name='recruit')
 router.register('um',views.UmViewSets,base_name='Um')
 

@@ -9,13 +9,6 @@ class BannerSerializer(serializers.ModelSerializer):
         fields='__all__'
 
 
-class SortTypeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model=models.SortType
-        fields = '__all__'
-
-
 class RecruitSerializer(serializers.ModelSerializer):
 
     class Meta:

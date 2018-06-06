@@ -19,23 +19,12 @@ class Banner(models.Model):
         ordering = ['banner_order']
 
 
-class SortType(models.Model):
-    sort_name = models.CharField(max_length=50)
-    cover_path = models.ImageField(upload_to='sjmeigou/index/sort/%Y%m%d')
-    sort_order = models.SmallIntegerField(unique=True)
-    last_operator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
-    create_time = models.DateTimeField(auto_now_add=True, editable=False)
-    update_time = models.DateTimeField(auto_now=True, editable=False)
-
-    class Meta:
-        ordering = ['sort_order']
-
-
 class RecruitMerchant(models.Model):
     name=models.CharField(max_length=50,default='propagate',editable=False)
     image=models.ImageField(upload_to='sjmeigou/index/recruit/%Y%m%d')
     last_operator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
     create_time = models.DateTimeField(auto_now_add=True, editable=False)
     update_time = models.DateTimeField(auto_now=True, editable=False)
+
 
 
