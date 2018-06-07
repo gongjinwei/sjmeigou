@@ -68,28 +68,34 @@ class SendView(viewset.CreateOnlyViewSet):
             return Response({'errmsg': "请在1分钟后再试"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             userId = request.query_params.get('userId', '')
-            if models.UserInfo.objects.filter(id=userId).exists():
-                tts = cache.get(userId + '_send_nums', 0)
-                if tts == 0:
-                    cache.set(userId + '_send_nums', 0, timeout=60 * 60)
-                if userId and tts <= 10:
-                    try:
-                        code = self.random_digits()
-                        params = [code, sms_timeout]
-                        result = ssender.send_with_param(86, mobile, template_id, params)
-                        cache.incr(userId + '_send_nums')
-                        cache.set(mobile + '_timeout', code, 60)
-                        cache.set(mobile + '_code', code, sms_timeout * 60)
-                        return Response(result)
-                    except HTTPError as e:
-                        return Response(e, status=status.HTTP_400_BAD_REQUEST)
-                    except Exception as e:
-                        return Response(e, status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    if tts > 10:
+
+            op = request.query_params.get('op', 'created')
+            user_info_filter = models.UserInfo.objects.filter(id=userId)
+
+            if user_info_filter.exists():
+                if not user_info_filter[0].user or op == 'update' or user_info_filter[0].user.username == mobile:
+                    tts = cache.get(userId + '_send_nums', 0)
+                    if tts == 0:
+                        cache.set(userId + '_send_nums', 0, timeout=60 * 60)
+                    if userId and tts <= 10:
+                        try:
+                            code = self.random_digits()
+                            params = [code, sms_timeout]
+                            result = ssender.send_with_param(86, mobile, template_id, params)
+                            cache.incr(userId + '_send_nums')
+                            cache.set(mobile + '_timeout', code, 60)
+                            cache.set(mobile + '_code', code, sms_timeout * 60)
+                            return Response(result)
+                        except HTTPError as e:
+                            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+                        except Exception as e:
+                            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+                    elif tts > 10:
                         return Response({'errmsg': '您发送验证码的次数过多，请稍后再试'}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return Response({'errmsg': '请带参数访问'}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response({'errmsg': '你绑定的手机号错误，更改手机号请到个人中心设置'})
             else:
                 return Response({'errmsg': '用户不存在'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -111,9 +117,12 @@ class CheckView(viewset.CreateOnlyViewSet):
 
             if models.UserInfo.objects.filter(id=userId).exists():
                 # 创建或获取用户
+                userInfo = models.UserInfo.objects.get(pk=userId)
                 user, created = User.objects.get_or_create(defaults={'username': mobile}, username=mobile)
+                userInfo.user = user
                 user.set_password(userId)
                 user.save()
+                userInfo.save()
 
                 # 生成token
                 payload = jwt_payload_handler(user)

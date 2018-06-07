@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 class FirstClass(models.Model):
-    first_class_name=models.CharField(max_length=100,help_text='一级类目名称')
+    first_class_name=models.CharField(max_length=100,help_text='一级类目名称',unique=True)
     cover_path=models.ImageField(upload_to='sjmeigou/goods/firstclass/%Y%m%d')
     sort_order = models.SmallIntegerField(unique=True)
     last_operator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
@@ -29,6 +29,9 @@ class SecondClass(models.Model):
     def __str__(self):
         return "%s:%s" % (self.first_class.first_class_name,self.second_class_name)
 
+    class Meta:
+        unique_together=['first_class','second_class_name']
+
 
 class ThirdClass(models.Model):
     second_class=models.ForeignKey(to='SecondClass',on_delete=models.CASCADE,help_text='选择二级类目')
@@ -40,6 +43,8 @@ class ThirdClass(models.Model):
     def __str__(self):
         return "%s:%s:%s" % (self.second_class.first_class.first_class_name,self.second_class.second_class_name,self.third_class_name)
 
+    class Meta:
+        unique_together=['second_class','third_class_name']
 
 class FirstProperty(models.Model):
     first_property_name=models.CharField(max_length=100,help_text='填写类目属性')
@@ -51,6 +56,8 @@ class FirstProperty(models.Model):
     def __str__(self):
         return "%s:%s:%s:%s" % (self.third_class.second_class.first_class.first_class_name,self.third_class.second_class.second_class_name,self.third_class.third_class_name,self.first_property_name)
 
+    class Meta:
+        unique_together=['third_class','first_property_name']
 
 class SecondProperty(models.Model):
     second_property_name=models.CharField(max_length=100,help_text='填写二级属性名称')
@@ -58,3 +65,6 @@ class SecondProperty(models.Model):
     last_operator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
     create_time = models.DateTimeField(auto_now_add=True, editable=False)
     update_time = models.DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        unique_together=['first_property','second_property_name']
