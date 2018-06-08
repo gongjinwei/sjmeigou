@@ -25,6 +25,7 @@ urlpatterns = [
     path('register/',include('register.urls',namespace='register')),
     path('wxpay/',include('wxpay.urls',namespace='wxpay')),
     path('index/',include('index.urls',namespace='index')),
-    path('goods/',include('goods.urls',namespace='goods'))
+    path('goods/',include('goods.urls',namespace='goods')),
+    path('shoppingcar/',include('shoppingcar.urls',namespace='shoppingcar'))
 
 ]

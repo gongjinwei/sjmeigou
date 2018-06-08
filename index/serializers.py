@@ -18,7 +18,7 @@ class RecruitSerializer(serializers.ModelSerializer):
 class StoreImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.StoreImage
-        fields = '__all__'
+        fields = ('store_image',)
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
@@ -33,6 +33,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
         application = models.Application.objects.create(**validated_data)
 
         for store_image in store_images_list:
-            models.StoreImage.objects.create(store_image=store_image,application=application)
+            models.StoreImage.objects.create(**store_image,application=application)
 
         return application
