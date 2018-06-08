@@ -73,7 +73,7 @@ class SendView(viewset.CreateOnlyViewSet):
             user_info_filter = models.UserInfo.objects.filter(id=userId)
 
             if user_info_filter.exists():
-                if not user_info_filter[0].user or op == 'update' or user_info_filter[0].user.username == mobile:
+                if not user_info_filter[0].user or op == 'update' or op == 'recruit' or user_info_filter[0].user.username == mobile:
                     tts = cache.get(userId + '_send_nums', 0)
                     if tts == 0:
                         cache.set(userId + '_send_nums', 0, timeout=60 * 60)
@@ -95,7 +95,7 @@ class SendView(viewset.CreateOnlyViewSet):
                     else:
                         return Response({'errmsg': '请带参数访问'}, status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    return Response({'errmsg': '你绑定的手机号错误，更改手机号请到个人中心设置'})
+                    return Response({'errmsg': '你绑定的手机号错误，更改手机号请到个人中心设置'},status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({'errmsg': '用户不存在'}, status=status.HTTP_400_BAD_REQUEST)
 

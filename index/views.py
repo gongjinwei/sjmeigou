@@ -39,3 +39,11 @@ class RecruitView(ModelViewSet):
         serializer.validated_data.update(last_operator=self.request.user)
         image,created=self.queryset.update_or_create(defaults=serializer.validated_data,name='propagate')
         return Response(image.image.url)
+
+
+class ApplicationViewSets(ModelViewSet):
+    serializer_class = serializers.ApplicationSerializer
+    queryset = models.Application.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(application_user=self.request.user)

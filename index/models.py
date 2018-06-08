@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from jsonfield import JSONField
 
 # Create your models here.
 
@@ -25,6 +25,33 @@ class RecruitMerchant(models.Model):
     last_operator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
     create_time = models.DateTimeField(auto_now_add=True, editable=False)
     update_time = models.DateTimeField(auto_now=True, editable=False)
+
+
+class Application(models.Model):
+    contract_name=models.CharField(max_length=100)
+    contract_mobile=models.IntegerField()
+    reference_code = models.CharField(max_length=50,default='')
+    social_credit_code=models.CharField(max_length=18)
+    store_name=models.CharField(max_length=100)
+    store_phone=models.IntegerField()
+    store_licence_pic=models.URLField()
+    store_business_scope=models.TextField()
+    store_address=models.CharField(max_length=255)
+    longitude = models.FloatField()
+    latitude = models.FloatField()
+    receiver_account_num=models.CharField(max_length=30)
+    receiver_bank_name=models.CharField(max_length=128)
+    receiver_name=models.CharField(max_length=50)
+    receiver_bank_no=models.IntegerField()
+    application_status=models.SmallIntegerField(choices=((1,'审核中'),(2,'打款验证中'),(3,'审核通过')),editable=False,default=1)
+    application_user=models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
+    application_time=models.DateTimeField(auto_now_add=True, editable=False)
+
+
+class StoreImage(models.Model):
+    application=models.ForeignKey(to='Application',on_delete=models.CASCADE,related_name='store_images')
+    store_image=models.URLField(blank=True,null=True)
+
 
 
 
