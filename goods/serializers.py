@@ -4,35 +4,39 @@ from rest_framework import serializers
 from . import models
 
 
-class FirstClassSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model=models.FirstClass
-        fields='__all__'
-
-
 class SecondClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.SecondClass
-        fields='__all__'
+        fields=('second_class_name','id')
+
+
+class FirstClassSerializer(serializers.ModelSerializer):
+    second_classes=SecondClassSerializer(many=True,read_only=True)
+
+    class Meta:
+        model=models.FirstClass
+        fields=('second_classes','first_class_name')
 
 
 class ThirdClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.ThirdClass
-        fields='__all__'
+        fields=('id','third_class_name')
 
 
-class FirstPropetySerializer(serializers.ModelSerializer):
+class FirstPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.FirstProperty
         fields='__all__'
 
-class SecondPropetySerializer(serializers.ModelSerializer):
+
+class SecondPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.SecondProperty
         fields='__all__'
+
+

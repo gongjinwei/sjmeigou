@@ -20,7 +20,7 @@ class FirstClass(models.Model):
 
 
 class SecondClass(models.Model):
-    first_class=models.ForeignKey(to='FirstClass',on_delete=models.CASCADE,help_text='选择一级类目')
+    first_class=models.ForeignKey(to='FirstClass',on_delete=models.CASCADE,help_text='选择一级类目',related_name='second_classes')
     second_class_name=models.CharField(max_length=100,help_text='填写二级类目名称')
     last_operator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
     create_time = models.DateTimeField(auto_now_add=True, editable=False)
@@ -46,6 +46,7 @@ class ThirdClass(models.Model):
     class Meta:
         unique_together=['second_class','third_class_name']
 
+
 class FirstProperty(models.Model):
     first_property_name=models.CharField(max_length=100,help_text='填写类目属性')
     third_class=models.ForeignKey(to='ThirdClass',on_delete=models.CASCADE,blank=True,help_text='选择三级类目')
@@ -59,6 +60,7 @@ class FirstProperty(models.Model):
     class Meta:
         unique_together=['third_class','first_property_name']
 
+
 class SecondProperty(models.Model):
     second_property_name=models.CharField(max_length=100,help_text='填写二级属性名称')
     first_property=models.ForeignKey(to='FirstProperty',on_delete=models.CASCADE,help_text='选择一级属性')
@@ -68,3 +70,12 @@ class SecondProperty(models.Model):
 
     class Meta:
         unique_together=['first_property','second_property_name']
+
+
+class ItemDesc(models.Model):
+    user=models.ForeignKey(to=User,on_delete=models.DO_NOTHING,related_name='itemDescriptions',editable=False)
+    item_order=models.IntegerField()
+    item_type=models.IntegerField()
+    item_content= models.CharField(max_length=255)
+    create_time = models.DateTimeField(auto_now_add=True, editable=False)
+    update_time = models.DateTimeField(auto_now=True, editable=False)
