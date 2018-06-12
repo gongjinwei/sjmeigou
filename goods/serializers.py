@@ -27,11 +27,13 @@ class ThirdClassSerializer(serializers.ModelSerializer):
 
 
 class FirstPropertySerializer(serializers.ModelSerializer):
-    third_class_name=serializers.ReadOnlyField(source='third_class.third_class_name')
-    second_class_name=serializers.ReadOnlyField(source='third_class.second_class.second_class_name')
+    # third_class_name=serializers.ReadOnlyField(source='third_class.third_class_name')
+    # second_class_name=serializers.ReadOnlyField(source='third_class.second_class.second_class_name')
+
     class Meta:
         model=models.FirstProperty
-        fields=('id','first_property_name','third_class','third_class_name','second_class_name')
+        fields=('id','first_property_name','third_class')
+        # fields=('id','first_property_name','third_class','third_class_name','second_class_name')
 
 
 class SecondPropertySerializer(serializers.ModelSerializer):
