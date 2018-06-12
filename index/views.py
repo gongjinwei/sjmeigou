@@ -45,5 +45,6 @@ class ApplicationViewSets(ModelViewSet):
     serializer_class = serializers.ApplicationSerializer
     queryset = models.Application.objects.all()
 
+
     def perform_create(self, serializer):
         serializer.save(application_user=self.request.user)
