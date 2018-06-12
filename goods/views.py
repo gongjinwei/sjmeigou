@@ -26,20 +26,35 @@ class SecondClassView(ModelViewSet):
         serializer.save(last_operator=self.request.user)
 
 
-class FirstPropertyView(ModelViewSet):
+class FirstPropertyView(ListOnlyViewSet):
     serializer_class = serializers.FirstPropertySerializer
     queryset = models.FirstProperty.objects.all()
 
-    def perform_create(self, serializer):
-        serializer.save(last_operator=self.request.user)
+    def get_queryset(self):
+        try:
+            third_class=int(self.request.query_params.get('third_class','0'))
+        except ValueError:
+            return models.FirstProperty.objects.none()
+
+        return models.FirstProperty.objects.filter(third_class_id=third_class)
+
+    # def perform_create(self, serializer):
+    #     serializer.save(last_operator=self.request.user)
 
 
-class SecondPropertyView(ModelViewSet):
+class SecondPropertyView(ListOnlyViewSet):
     serializer_class = serializers.SecondPropertySerializer
-    queryset = models.SecondProperty.objects.all()
 
-    def perform_create(self, serializer):
-        serializer.save(last_operator=self.request.user)
+    # def perform_create(self, serializer):
+    #     serializer.save(last_operator=self.request.user)
+
+    def get_queryset(self):
+        try:
+            first_property = int(self.request.query_params.get('first_property', '0'))
+        except ValueError:
+            return models.SecondProperty.objects.none()
+
+        return models.SecondProperty.objects.filter(first_property_id=first_property)
 
 
 class ThirdClassView(ModelViewSet):
