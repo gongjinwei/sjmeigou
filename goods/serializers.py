@@ -40,8 +40,8 @@ class FirstPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.FirstProperty
-        fields=('id','first_property_name','third_class')
-        # fields=('id','first_property_name','third_class','third_class_name','second_class_name')
+        fields=('id','first_property_name','third_class','secondProperties')
+        # fields=('id','first_property_name','third_class','third_class_name','second_class_name','secondProperties')
 
 
 
