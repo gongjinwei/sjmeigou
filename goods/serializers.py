@@ -30,13 +30,13 @@ class FirstPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.FirstProperty
-        fields='__all__'
+        fields=('id','first_property_name','third_class')
 
 
 class SecondPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.SecondProperty
-        fields='__all__'
+        fields=('id','second_property_name','first_property')
 
 
