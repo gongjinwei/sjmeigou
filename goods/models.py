@@ -63,7 +63,7 @@ class FirstProperty(models.Model):
 
 class SecondProperty(models.Model):
     second_property_name=models.CharField(max_length=100,help_text='填写二级属性名称')
-    first_property=models.ForeignKey(to='FirstProperty',on_delete=models.CASCADE,help_text='选择一级属性')
+    first_property=models.ForeignKey(to='FirstProperty',on_delete=models.CASCADE,help_text='选择一级属性',related_name='secondProperties')
     last_operator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
     create_time = models.DateTimeField(auto_now_add=True, editable=False)
     update_time = models.DateTimeField(auto_now=True, editable=False)
