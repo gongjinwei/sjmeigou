@@ -48,6 +48,8 @@ class SizeDescSerializer(serializers.ModelSerializer):
 
 
 class SizeGroupSerializer(serializers.ModelSerializer):
+    sizes=SizeDescSerializer(many=True,read_only=True)
+
     class Meta:
         model = models.SizeGroup
         fields = '__all__'
