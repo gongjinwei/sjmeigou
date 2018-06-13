@@ -71,3 +71,13 @@ class ThirdClassView(ModelViewSet):
         serializer.save(last_operator=self.request.user)
 
 
+class SizeGroupView(ModelViewSet):
+    serializer_class = serializers.SizeGroupSerializer
+    queryset = models.SizeGroup.objects.all()
+
+
+class SizeDescView(ModelViewSet):
+    serializer_class = serializers.SizeDescSerializer
+    queryset = models.SizeDesc.objects.all()
+
+
