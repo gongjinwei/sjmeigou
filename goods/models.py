@@ -98,3 +98,6 @@ class SizeGroup(models.Model):
 class SizeDesc(models.Model):
     size_group = models.ForeignKey(to='SizeGroup', on_delete=models.CASCADE, related_name='sizes')
     size_name = models.CharField(max_length=50)
+
+    class Meta:
+        unique_together=('size_group','size_name')
