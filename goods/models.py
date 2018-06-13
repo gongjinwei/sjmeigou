@@ -101,3 +101,4 @@ class SizeDesc(models.Model):
 
     class Meta:
         unique_together=('size_group','size_name')
+        ordering=('id',)
