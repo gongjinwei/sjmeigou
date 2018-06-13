@@ -44,7 +44,7 @@ class ThirdClass(models.Model):
 
     def __str__(self):
         return "%s:%s:%s" % (
-        self.second_class.first_class.first_class_name, self.second_class.second_class_name, self.third_class_name)
+            self.second_class.first_class.first_class_name, self.second_class.second_class_name, self.third_class_name)
 
     class Meta:
         unique_together = ['second_class', 'third_class_name']
@@ -59,8 +59,8 @@ class FirstProperty(models.Model):
 
     def __str__(self):
         return "%s:%s:%s:%s" % (
-        self.third_class.second_class.first_class.first_class_name, self.third_class.second_class.second_class_name,
-        self.third_class.third_class_name, self.first_property_name)
+            self.third_class.second_class.first_class.first_class_name, self.third_class.second_class.second_class_name,
+            self.third_class.third_class_name, self.first_property_name)
 
     class Meta:
         unique_together = ['third_class', 'first_property_name']
@@ -91,7 +91,10 @@ class SizeGroup(models.Model):
     group_name = models.CharField(max_length=50)
     third_class = models.ForeignKey(to='ThirdClass', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return '%s:%s' % (self.third_class.third_class_name, self.group_name)
+
 
 class SizeDesc(models.Model):
-    size_group = models.ForeignKey(to='SizeGroup', on_delete=models.CASCADE,related_name='sizes')
+    size_group = models.ForeignKey(to='SizeGroup', on_delete=models.CASCADE, related_name='sizes')
     size_name = models.CharField(max_length=50)
