@@ -105,6 +105,6 @@ class SizeDesc(models.Model):
 
 
 class SizeGroupClass(models.Model):
-    third_class = models.ForeignKey(to='ThirdClass', on_delete=models.CASCADE)
+    third_class = models.ForeignKey(to='ThirdClass', on_delete=models.CASCADE,related_name='size_group_classes')
     size_group = models.ForeignKey(to='SizeGroup', on_delete=models.CASCADE, related_name='size_classes')
 
