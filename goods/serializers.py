@@ -18,7 +18,15 @@ class FirstClassSerializer(serializers.ModelSerializer):
         fields = ('second_classes', 'first_class_name')
 
 
+class SizeGroupClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.SizeGroupClass
+        fields = '__all__'
+
+
 class ThirdClassSerializer(serializers.ModelSerializer):
+    size_classes = SizeGroupClassSerializer(many=True, read_only=True)
+
     class Meta:
         model = models.ThirdClass
         fields = ('id', 'third_class_name')
@@ -47,18 +55,9 @@ class SizeDescSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SizeGroupClassSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.SizeGroupClass
-        fields = '__all__'
-
-
 class SizeGroupSerializer(serializers.ModelSerializer):
-    sizes=SizeDescSerializer(many=True,read_only=True)
+    sizes = SizeDescSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.SizeGroup
         fields = '__all__'
-
-
-
