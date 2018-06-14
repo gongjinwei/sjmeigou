@@ -89,7 +89,7 @@ class ItemDesc(models.Model):
 
 class SizeGroup(models.Model):
     group_name = models.CharField(max_length=50)
-    second_class = models.OneToOneField(to='SecondClass', on_delete=models.CASCADE)
+    second_class = models.ForeignKey(to='SecondClass', on_delete=models.CASCADE)
 
     def __str__(self):
         return '%s:%s' % (self.second_class.second_class_name, self.group_name)
