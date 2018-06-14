@@ -29,7 +29,7 @@ class ThirdClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ThirdClass
-        fields = ('id', 'third_class_name')
+        fields = ('id', 'third_class_name','size_classes')
 
 
 class SecondPropertySerializer(serializers.ModelSerializer):
