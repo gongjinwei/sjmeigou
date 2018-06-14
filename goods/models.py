@@ -89,10 +89,10 @@ class ItemDesc(models.Model):
 
 class SizeGroup(models.Model):
     group_name = models.CharField(max_length=50)
-    third_class = models.ForeignKey(to='ThirdClass', on_delete=models.CASCADE)
+    second_class = models.OneToOneField(to='SecondClass', on_delete=models.CASCADE)
 
     def __str__(self):
-        return '%s:%s' % (self.third_class.third_class_name, self.group_name)
+        return '%s:%s' % (self.second_class.second_class_name, self.group_name)
 
 
 class SizeDesc(models.Model):
@@ -102,3 +102,9 @@ class SizeDesc(models.Model):
     class Meta:
         unique_together=('size_group','size_name')
         ordering=('id',)
+
+
+class SizeGroupClass(models.Model):
+    third_class = models.ForeignKey(to='ThirdClass', on_delete=models.CASCADE)
+    size_group = models.ForeignKey(to='SizeGroup', on_delete=models.CASCADE, related_name='size_classes')
+
