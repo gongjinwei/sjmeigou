@@ -57,10 +57,8 @@ class FirstPropertyView(ModelViewSet):
 
         return Response({
             'properties':serializer.data,
-            'third_class':third_class_data.data
+            'third_class_sizes':third_class_data.data
         })
-
-
 
     def perform_create(self, serializer):
         serializer.save(last_operator=self.request.user)
