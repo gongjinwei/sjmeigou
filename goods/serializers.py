@@ -17,10 +17,11 @@ class FirstClassSerializer(serializers.ModelSerializer):
         model = models.FirstClass
         fields = ('second_classes', 'first_class_name')
 
+
 class SizeDescSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SizeDesc
-        fields = '__all__'
+        exclude=("size_group",)
 
 
 class SizeGroupSerializer(serializers.ModelSerializer):
