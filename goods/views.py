@@ -52,7 +52,7 @@ class FirstPropertyView(ModelViewSet):
             third_class=models.ThirdClass.objects.get(pk=third_class_id)
             third_class_data = serializers.ThirdClassSerializer(instance=third_class).data
         else:
-            third_class_data=None
+            third_class_data=[]
 
         return Response({
             'properties':serializer.data,
