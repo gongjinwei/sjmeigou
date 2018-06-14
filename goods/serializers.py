@@ -50,7 +50,6 @@ class ThirdClassSerializer(serializers.ModelSerializer):
 
 class SecondPropertySerializer(serializers.ModelSerializer):
 
-
     class Meta:
         model = models.SecondProperty
         fields = ('id', 'second_property_name', 'first_property')

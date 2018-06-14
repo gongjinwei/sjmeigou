@@ -38,6 +38,30 @@ class FirstPropertyView(ModelViewSet):
 
         return models.FirstProperty.objects.filter(third_class_id=third_class)
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        try:
+            third_class_id=int(self.request.query_params.get('third_class','0'))
+        except ValueError:
+            return Response('类目不存在',status=status.HTTP_400_BAD_REQUEST)
+
+        if models.ThirdClass.objects.filter(pk=third_class_id).exists():
+            third_class=models.ThirdClass.objects.get(pk=third_class_id)
+        else:
+            third_class=models.ThirdClass.objects.none()
+
+        third_class_data=serializers.ThirdClassSerializer(instance=third_class)
+
+        return Response({
+            'properties':serializer.data,
+            'third_class':third_class_data.data
+        })
+
+
+
     def perform_create(self, serializer):
         serializer.save(last_operator=self.request.user)
 
