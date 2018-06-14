@@ -92,7 +92,7 @@ class SizeGroup(models.Model):
     second_class = models.ForeignKey(to='SecondClass', on_delete=models.CASCADE)
 
     def __str__(self):
-        return '%s:%s' % (self.second_class.second_class_name, self.group_name)
+        return '%s:%s-%s' % (self.second_class.second_class_name, self.group_name,self.id)
 
 
 class SizeDesc(models.Model):
