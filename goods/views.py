@@ -50,14 +50,13 @@ class FirstPropertyView(ModelViewSet):
 
         if models.ThirdClass.objects.filter(pk=third_class_id).exists():
             third_class=models.ThirdClass.objects.get(pk=third_class_id)
+            third_class_data = serializers.ThirdClassSerializer(instance=third_class).data
         else:
-            third_class=models.ThirdClass.objects.none()
-
-        third_class_data=serializers.ThirdClassSerializer(instance=third_class)
+            third_class_data=None
 
         return Response({
             'properties':serializer.data,
-            'third_class_sizes':third_class_data.data
+            'third_class_sizes':third_class_data
         })
 
     def perform_create(self, serializer):
