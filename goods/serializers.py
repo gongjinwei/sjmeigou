@@ -29,7 +29,7 @@ class SizeGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.SizeGroup
-        fields = '__all__'
+        exclude=('second_class',)
 
 
 class SizeGroupClassSerializer(serializers.ModelSerializer):
