@@ -25,11 +25,11 @@ class SizeGroupClassSerializer(serializers.ModelSerializer):
 
 
 class ThirdClassSerializer(serializers.ModelSerializer):
-    size_classes = SizeGroupClassSerializer(many=True, read_only=True)
+    size_group_classes = SizeGroupClassSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.ThirdClass
-        fields = ('id', 'third_class_name','size_classes')
+        fields = ('id', 'third_class_name')
 
 
 class SecondPropertySerializer(serializers.ModelSerializer):
