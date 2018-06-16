@@ -5,4 +5,6 @@ from . import views
 router=DefaultRouter()
 app_name='goods'
 
+router.register('orderCallback',views.OrderCallbackViewSets,base_name='orderCallback')
+
 urlpatterns=router.urls
