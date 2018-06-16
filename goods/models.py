@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from jsonfield import JSONField
 
 
 # Create your models here.
@@ -80,15 +81,7 @@ class SecondProperty(models.Model):
 
 class ItemsGroupDesc(models.Model):
     owner=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
-
-
-class ItemDesc(models.Model):
-    items_group=models.ForeignKey(to='ItemsGroupDesc',on_delete=models.CASCADE,related_name='items')
-    item_order = models.IntegerField()
-    item_type = models.IntegerField()
-    item_content = models.CharField(max_length=255)
-    create_time = models.DateTimeField(auto_now_add=True, editable=False)
-    update_time = models.DateTimeField(auto_now=True, editable=False)
+    items=JSONField()
 
 
 class SizeGroup(models.Model):

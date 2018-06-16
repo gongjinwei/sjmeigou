@@ -66,25 +66,9 @@ class FirstPropertySerializer(serializers.ModelSerializer):
         # fields=('id','first_property_name','third_class','third_class_name','second_class_name','secondProperties')
 
 
-class ItemDescSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model=models.ItemDesc
-        fields='__all__'
-
-
 class ItemsGroupDescSerializer(serializers.ModelSerializer):
-    items=ItemDescSerializer(many=True)
+    items=serializers.JSONField()
 
     class Meta:
         model=models.ItemsGroupDesc
         fields='__all__'
-
-    def create(self, validated_data):
-        item_list=validated_data.pop('items')
-        group=models.ItemsGroupDesc.objects.create(validated_data)
-
-        for item in item_list:
-            models.ItemDesc.objects.create(item,items_group=group)
-
-        return group
