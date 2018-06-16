@@ -111,5 +111,7 @@ class ItemDescView(ModelViewSet):
     serializer_class = serializers.ItemDescSerializer
     queryset = models.ItemDesc.objects.all()
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
