@@ -13,5 +13,6 @@ router.register('secondProperty',views.SecondPropertyView,base_name='secondPrope
 router.register('sizeGroup',views.SizeGroupView,base_name='sizeGroup')
 router.register('sizeDesc',views.SizeDescView,base_name='sizeDesc')
 router.register('sizeGroupClass',views.SizeGroupClassView,base_name='sizeGroupClass')
+router.register('itemDesc',views.ItemDescView,base_name='itemDesc')
 
 urlpatterns=router.urls

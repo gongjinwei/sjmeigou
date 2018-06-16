@@ -66,3 +66,8 @@ class FirstPropertySerializer(serializers.ModelSerializer):
         # fields=('id','first_property_name','third_class','third_class_name','second_class_name','secondProperties')
 
 
+class ItemDescSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=models.ItemDesc
+        fields='__all__'

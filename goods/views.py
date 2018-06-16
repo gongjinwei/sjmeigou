@@ -107,4 +107,9 @@ class SizeGroupClassView(ModelViewSet):
     queryset = models.SizeGroupClass.objects.all()
 
 
+class ItemDescView(ModelViewSet):
+    serializer_class = serializers.ItemDescSerializer
+    queryset = models.ItemDesc.objects.all()
+
+
 
