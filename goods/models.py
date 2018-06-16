@@ -77,8 +77,10 @@ class SecondProperty(models.Model):
     class Meta:
         unique_together = ['first_property', 'second_property_name']
 
+
 class ItemsGroupDesc(models.Model):
     owner=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+
 
 class ItemDesc(models.Model):
     items_group=models.ForeignKey(to='ItemsGroupDesc',on_delete=models.CASCADE,related_name='items')
