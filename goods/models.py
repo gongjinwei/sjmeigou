@@ -77,9 +77,11 @@ class SecondProperty(models.Model):
     class Meta:
         unique_together = ['first_property', 'second_property_name']
 
+class ItemsGroupDesc(models.Model):
+    owner=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
 
 class ItemDesc(models.Model):
-    user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, related_name='itemDescriptions', editable=False)
+    items_group=models.ForeignKey(to='ItemsGroupDesc',on_delete=models.CASCADE,related_name='items')
     item_order = models.IntegerField()
     item_type = models.IntegerField()
     item_content = models.CharField(max_length=255)

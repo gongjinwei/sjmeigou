@@ -71,3 +71,20 @@ class ItemDescSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.ItemDesc
         fields='__all__'
+
+
+class ItemsGroupDescSerializer(serializers.ModelSerializer):
+    items=ItemDescSerializer(many=True)
+
+    class Meta:
+        model=models.ItemsGroupDesc
+        fields='__all__'
+
+    def create(self, validated_data):
+        item_list=validated_data.pop('items')
+        group=models.ItemsGroupDesc.objects.create(validated_data)
+
+        for item in item_list:
+            models.ItemDesc.objects.create(item,items_group=group)
+
+        return group
