@@ -5,7 +5,7 @@ from django.db import models
 
 class OrderCallback(models.Model):
     order_original_id=models.CharField(max_length=50)
-    order_status=models.ImageField()
+    order_status=models.IntegerField()
     cancel_reason=models.CharField(max_length=255,blank=True,null=True)
     abnormal_reason=models.CharField(max_length=255,blank=True,null=True)
     finish_reason=models.CharField(max_length=255,blank=True,null=True)
