@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny
 
 # Create your views here.
 from . import models, serializers
-# from utils.dianwoda import DianWoDa
+from dianwoda import DianWoDa
 
 secret = getattr(settings, 'DWD_SECRET')
 
