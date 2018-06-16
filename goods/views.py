@@ -107,9 +107,9 @@ class SizeGroupClassView(ModelViewSet):
     queryset = models.SizeGroupClass.objects.all()
 
 
-class ItemDescView(ModelViewSet):
-    serializer_class = serializers.ItemDescSerializer
-    queryset = models.ItemDesc.objects.all()
+class ItemsDescView(ModelViewSet):
+    serializer_class = serializers.ItemsGroupDescSerializer
+    queryset = models.ItemsGroupDesc.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
