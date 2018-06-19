@@ -105,3 +105,18 @@ class SizeGroupClass(models.Model):
     third_class = models.ForeignKey(to='ThirdClass', on_delete=models.CASCADE,related_name='size_group_classes')
     size_group = models.ForeignKey(to='SizeGroup', on_delete=models.CASCADE, related_name='size_classes')
 
+
+class SKU(models.Model):
+    color_name=models.CharField(max_length=20)
+    color_remark=models.CharField(max_length=30)
+    color_pic=models.CharField(max_length=255)
+    price=models.DecimalField(max_digits=20,decimal_places=2)
+    stock=models.IntegerField(default=0)
+    size=models.ForeignKey(to='SizeDesc',on_delete=models.SET_NULL)
+    merchant_coding=models.CharField(max_length=50,default='')
+    barcode=models.CharField(max_length=100)
+
+
+
+
+
