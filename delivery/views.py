@@ -30,6 +30,8 @@ class OrderCallbackViewSets(ModelViewSet):
         sign_data=serializer.validated_data.copy()
         sign_data.pop('sig')
         my_sig = sign(sign_data)
+        with open('mysign.txt','a') as f:
+            f.write(my_sig)
         if sig == my_sig:
             self.perform_create(serializer)
             return Response({'success': True}, status=status.HTTP_200_OK)
