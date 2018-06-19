@@ -3,6 +3,10 @@ import time,json
 import hashlib
 import requests
 
+DWD_SECRET='3f54cc35de2a77878019e064ae2b361e'
+DWD_APPKEY='10181'
+DWD_TEST_URL='http://docking-normal-qa.dwbops.com'
+DWD_ORIGINAL_URL='http://api.dianwoda.com'
 
 class DianWoDa:
     def __init__(self, pk, secret, url, fmt='json'):
@@ -103,39 +107,39 @@ class DianWoDa:
         print(r)
 
 
-# x = DianWoDa(appKey, secret, test_url)
-# tmp_json = {
-#     'order_original_id': 'JFWL2018061505',
-#     'order_create_time': int(time.time() * 1000),
-#     'order_remark': '',
-#     'order_price': 5000,
-#     'cargo_weight': 1000,
-#     'cargo_num': 1,
-#     'city_code': '330100',
-#     'seller_id': '123456',
-#     'seller_name': '肯德基宅急送（黄龙店）',
-#     'seller_mobile': '13986101111',
-#     'seller_address': '杭州市下城区白石路318号灯塔发展大厦A座',
-#     'seller_lat': 30.315408,
-#     'seller_lng': 120.165993,
-#     'consignee_name': '托尼·史塔克',
-#     'consignee_mobile': '13968041111',
-#     'consignee_address': '杭州市下城区西文街147号中粮方圆府',
-#     'consignee_lat': '30.315272',
-#     'consignee_lng': '120.168513',
-#     'money_rider_needpaid': 1,
-#     'money_rider_prepaid': 5000,
-#     'money_rider_charge': 5000,
-#     'time_waiting_at_seller': 300,
-#     'delivery_fee_from_seller': 500
-# }
+x = DianWoDa(DWD_APPKEY, DWD_SECRET, DWD_TEST_URL)
+tmp_json = {
+    'order_original_id': 'JFWL2018061506',
+    'order_create_time': int(time.time() * 1000),
+    'order_remark': '',
+    'order_price': 5000,
+    'cargo_weight': 1000,
+    'cargo_num': 1,
+    'city_code': '330100',
+    'seller_id': '123456',
+    'seller_name': '肯德基宅急送（黄龙店）',
+    'seller_mobile': '13986101111',
+    'seller_address': '杭州市下城区白石路318号灯塔发展大厦A座',
+    'seller_lat': 30.315408,
+    'seller_lng': 120.165993,
+    'consignee_name': '托尼·史塔克',
+    'consignee_mobile': '13968041111',
+    'consignee_address': '杭州市下城区西文街147号中粮方圆府',
+    'consignee_lat': '30.315272',
+    'consignee_lng': '120.168513',
+    'money_rider_needpaid': 1,
+    'money_rider_prepaid': 5000,
+    'money_rider_charge': 5000,
+    'time_waiting_at_seller': 300,
+    'delivery_fee_from_seller': 500
+}
 # x.order_send(tmp_json)
 # x.order_cancel('JFWL2018061503','不要了')
-# x.order_get('JFWL2018061505')
-# x.order_accept_test('JFWL2018061504')
+# x.order_get('JFWL2018061506')
+# x.order_accept_test('JFWL2018061506')
 # x.order_rider_position('JFWL2018061503','30398')
-# x.order_arrive_test('JFWL2018061503')
-# x.order_fetch_test('JFWL2018061503')
+# x.order_arrive_test('JFWL2018061506')
+x.order_fetch_test('JFWL2018061506')
 # x.order_finish_test('JFWL2018061503')
 # x.order_receivable_price('JFWL2018061503')
 # shops_list = [
