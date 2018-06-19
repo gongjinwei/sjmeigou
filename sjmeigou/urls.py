@@ -28,5 +28,6 @@ urlpatterns = [
     path('goods/',include('goods.urls',namespace='goods')),
     path('shoppingcar/',include('shoppingcar.urls',namespace='shoppingcar')),
     path('delivery/',include('delivery.urls',namespace='delivery')),
+    path('store/',include('store.urls',namespace='store')),
 
 ]
