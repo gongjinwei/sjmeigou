@@ -26,11 +26,12 @@ class OrderCallbackViewSets(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data_copy=serializer.validated_data.copy()
-        sig = serializer.validated_data.pop('sig')
-        my_sig = sign(serializer.validated_data)
+        sig = serializer.validated_data.get('sig')
+        sign_data=serializer.validated_data.copy()
+        sign_data.pop('sig')
+        my_sig = sign(sign_data)
         if sig == my_sig:
-            self.perform_create(data_copy)
+            self.perform_create(serializer)
             return Response({'success': True}, status=status.HTTP_200_OK)
         else:
             return Response({'success': False, 'errmsg': '签名不一致%s' % sig})

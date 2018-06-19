@@ -139,8 +139,8 @@ tmp_json = {
 # x.order_accept_test('JFWL2018061506')
 # x.order_rider_position('JFWL2018061503','30398')
 # x.order_arrive_test('JFWL2018061506')
-x.order_fetch_test('JFWL2018061506')
-# x.order_finish_test('JFWL2018061503')
+# x.order_fetch_test('JFWL2018061506')
+x.order_finish_test('JFWL2018061506')
 # x.order_receivable_price('JFWL2018061503')
 # shops_list = [
 #     {"addr": "长宁区长宁路820号",
