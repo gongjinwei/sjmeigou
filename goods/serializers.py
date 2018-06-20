@@ -97,12 +97,16 @@ class DeliverServicesSerializer(serializers.ModelSerializer):
 
 
 class GoodDetailSerializer(serializers.ModelSerializer):
+    class_name=serializers.SerializerMethodField()
     relate_desc=serializers.ReadOnlyField(source='item_desc.items')
     params=serializers.JSONField()
     master_graphs=serializers.JSONField()
     sku=SKUSerializer(many=True)
     after_sale_services=AfterSaleServicesSerializer(many=True)
     delivers=DeliverServicesSerializer(many=True)
+
+    def get_class_name(self,obj):
+        return "%s>%s" % (obj.third_class.second_class.second_class_name,obj.third_class.third_class_name)
 
     class Meta:
         model = models.GoodDetail
