@@ -111,10 +111,10 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         instance=models.GoodDetail.objects.create(**validated_data)
 
         for service in after_sale_services:
-            models.AfterSaleServices.objects.create(service)
+            models.AfterSaleServices.objects.create(good_detail=instance,**service)
         for deliver in delivers:
-            models.DeliverServices.objects.create(deliver)
+            models.DeliverServices.objects.create(good_detail=instance,**deliver)
         for sku in skus:
-            models.SKU.objects.create(sku)
+            models.SKU.objects.create(good_detail=instance,**sku)
 
         return instance
