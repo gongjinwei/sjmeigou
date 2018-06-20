@@ -93,6 +93,8 @@ class DeliverServicesSerializer(serializers.ModelSerializer):
 
 
 class GoodDetailSerializer(serializers.ModelSerializer):
+    params=serializers.JSONField()
+    master_graphs=serializers.JSONField()
     sku=SKUSerializer(many=True)
     after_sale_services=AfterSaleServicesSerializer(many=True)
     delivers=DeliverServicesSerializer(many=True)
