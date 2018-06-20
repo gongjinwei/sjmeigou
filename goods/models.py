@@ -121,6 +121,7 @@ class SKU(models.Model):
 
 class GoodDetail(models.Model):
     owner=models.ForeignKey(to=User,editable=False,on_delete=models.CASCADE,related_name='goodDetails')
+    third_class=models.ForeignKey(to='ThirdClass',on_delete=models.DO_NOTHING,related_name='goodDetails')
     title=models.CharField(max_length=50)
     params = JSONField()
     master_graphs = JSONField()
