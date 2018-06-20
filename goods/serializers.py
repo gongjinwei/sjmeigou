@@ -81,9 +81,11 @@ class SKUSerializer(serializers.ModelSerializer):
 
 
 class AfterSaleServicesSerializer(serializers.ModelSerializer):
+    server_name = serializers.ReadOnlyField(source='get_server_display')
+
     class Meta:
         model=models.AfterSaleServices
-        exclude=('good_detail',)
+        fields = ('server', 'server_name')
 
 
 class DeliverServicesSerializer(serializers.ModelSerializer):
