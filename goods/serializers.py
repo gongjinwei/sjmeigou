@@ -87,9 +87,11 @@ class AfterSaleServicesSerializer(serializers.ModelSerializer):
 
 
 class DeliverServicesSerializer(serializers.ModelSerializer):
+    server_name=serializers.ReadOnlyField(source='get_server_display')
+
     class Meta:
         model=models.DeliverServices
-        exclude = ('good_detail',)
+        fields=('server','server_name')
 
 
 class GoodDetailSerializer(serializers.ModelSerializer):

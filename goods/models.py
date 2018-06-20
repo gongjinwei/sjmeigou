@@ -140,13 +140,13 @@ class GoodDetail(models.Model):
 
 class AfterSaleServices(models.Model):
     good_detail = models.ForeignKey(to='GoodDetail', on_delete=models.CASCADE,related_name='after_sale_services')
-    server_name= models.IntegerField(
+    server= models.IntegerField(
         choices=((0, '提供发票'), (1, '保修服务'), (2, '退换货承诺，凡使用微信购买本店商品，若存在质量问题或与描述不符，本店将主动退换货服务并承担来回运费'),
                  (3, '服务承诺：该类商品必须支持【七天退货服务】')),default=3)
 
 
 class DeliverServices(models.Model):
     good_detail = models.ForeignKey(to='GoodDetail',on_delete=models.CASCADE,related_name='delivers')
-    server_name=models.IntegerField(choices=(
+    server=models.IntegerField(choices=(
         (0,'上门自取'),(1,'同城配送'),(2,'异地快递')
     ))
