@@ -131,6 +131,9 @@ class GoodDetail(models.Model):
     stock_count_strategy=models.IntegerField(
         choices=((0,'买家拍下减库存'),(1,'买家付款减库存')),default=0
     )
+    to_deliver_hours = models.IntegerField(choices=(
+        (1, '1小时内'), (2, '2小时内'), (24, '24小时内'), (48, '48小时内')
+    ))
     put_on_sale_time=models.DateTimeField()
     create_time=models.DateTimeField(auto_now_add=True,editable=False)
 
@@ -146,7 +149,4 @@ class DeliverServices(models.Model):
     good_detail = models.ForeignKey(to='GoodDetail',on_delete=models.CASCADE,related_name='delivers')
     services_name=models.IntegerField(choices=(
         (0,'上门自取'),(1,'同城配送'),(2,'异地快递')
-    ))
-    to_deliver_hours=models.IntegerField(choices=(
-        (1,'1小时内'),(2,'2小时内'),(24,'24小时内'),(48,'48小时内')
     ))
