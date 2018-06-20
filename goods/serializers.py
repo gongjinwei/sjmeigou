@@ -97,7 +97,7 @@ class DeliverServicesSerializer(serializers.ModelSerializer):
 
 
 class GoodDetailSerializer(serializers.ModelSerializer):
-    relate_items=serializers.ReadOnlyField(source='item_desc.items')
+    relate_desc=serializers.ReadOnlyField(source='item_desc.items')
     params=serializers.JSONField()
     master_graphs=serializers.JSONField()
     sku=SKUSerializer(many=True)
