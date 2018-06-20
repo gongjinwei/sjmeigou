@@ -135,6 +135,7 @@ class GoodDetail(models.Model):
         (1, '1小时内'), (2, '2小时内'), (24, '24小时内'), (48, '48小时内')
     ))
     put_on_sale_time=models.DateTimeField()
+    item_desc=models.OneToOneField(to='ItemsGroupDesc',on_delete=models.CASCADE)
     create_time=models.DateTimeField(auto_now_add=True,editable=False)
 
 
