@@ -115,3 +115,11 @@ class ItemsDescView(ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
+class GoodDetailView(ModelViewSet):
+    serializer_class = serializers.GoodDetailSerializer
+    queryset = models.GoodDetail.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+

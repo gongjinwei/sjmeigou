@@ -80,8 +80,8 @@ class SecondProperty(models.Model):
 
 
 class ItemsGroupDesc(models.Model):
-    owner=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
-    items=JSONField()
+    owner = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
+    items = JSONField()
 
 
 class SizeGroup(models.Model):
@@ -89,7 +89,7 @@ class SizeGroup(models.Model):
     second_class = models.ForeignKey(to='SecondClass', on_delete=models.CASCADE)
 
     def __str__(self):
-        return '%s:%s-%s' % (self.second_class.second_class_name, self.group_name,self.id)
+        return '%s:%s-%s' % (self.second_class.second_class_name, self.group_name, self.id)
 
 
 class SizeDesc(models.Model):
@@ -97,26 +97,55 @@ class SizeDesc(models.Model):
     size_name = models.CharField(max_length=50)
 
     class Meta:
-        unique_together=('size_group','size_name')
-        ordering=('id',)
+        unique_together = ('size_group', 'size_name')
+        ordering = ('id',)
 
 
 class SizeGroupClass(models.Model):
-    third_class = models.ForeignKey(to='ThirdClass', on_delete=models.CASCADE,related_name='size_group_classes')
+    third_class = models.ForeignKey(to='ThirdClass', on_delete=models.CASCADE, related_name='size_group_classes')
     size_group = models.ForeignKey(to='SizeGroup', on_delete=models.CASCADE, related_name='size_classes')
 
 
 class SKU(models.Model):
-    color_name=models.CharField(max_length=20)
-    color_remark=models.CharField(max_length=30)
-    color_pic=models.CharField(max_length=255)
-    price=models.DecimalField(max_digits=20,decimal_places=2)
-    stock=models.IntegerField(default=0)
-    size=models.ForeignKey(to='SizeDesc',on_delete=models.SET_NULL)
-    merchant_coding=models.CharField(max_length=50,default='')
-    barcode=models.CharField(max_length=100)
+    good_detail = models.ForeignKey(to='GoodDetail', on_delete=models.CASCADE,related_name='sku')
+    color_name = models.CharField(max_length=20)
+    color_remark = models.CharField(max_length=30)
+    color_pic = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=20, decimal_places=2)
+    stock = models.IntegerField(default=0)
+    size = models.ForeignKey(to='SizeDesc', on_delete=models.SET_NULL,null=True)
+    merchant_coding = models.CharField(max_length=50,blank=True,null=True)
+    barcode = models.CharField(max_length=100,blank=True,null=True)
 
 
+class GoodDetail(models.Model):
+    owner=models.ForeignKey(to=User,editable=False,on_delete=models.CASCADE,related_name='goodDetails')
+    title=models.CharField(max_length=30)
+    params = JSONField()
+    master_graphs = JSONField()
+    min_price = models.DecimalField(max_digits=20, decimal_places=2)
+    total_stock = models.IntegerField(default=0)
+    merchant_coding=models.CharField(max_length=50,blank=True,null=True)
+    barcode = models.CharField(max_length=100,blank=True,null=True)
+    stock_count_strategy=models.IntegerField(
+        choices=((0,'买家拍下减库存'),(1,'买家付款减库存')),default=0
+    )
+    put_on_sale_time=models.DateTimeField(auto_now_add=True)
+    create_time=models.DateTimeField(auto_now_add=True,editable=False)
 
 
+class AfterSaleServices(models.Model):
+    good_detail = models.ForeignKey(to='GoodDetail', on_delete=models.CASCADE,related_name='after_sale_services')
+    services_name= models.IntegerField(
+        choices=((0, '提供发票'), (1, '保修服务'), (2, '退换货承诺，凡使用微信购买本店商品，若存在质量问题或与描述不符，本店将主动退换货服务并承担来回运费'),
+                 (3, '服务承诺：该类商品必须支持【七天退货服务】')),default=3)
 
+
+class DeliverServices(models.Model):
+    good_detail = models.ForeignKey(to='GoodDetail',on_delete=models.CASCADE,related_name='delivers')
+    services_name=models.IntegerField(choices=(
+        (0,'上门自取'),(1,'同城配送'),(2,'异地快递')
+    ))
+    to_deliver_hours=models.IntegerField(choices=(
+        (1,'1小时内'),(2,'2小时内'),(24,'24小时内'),(48,'48小时内')
+    ))
