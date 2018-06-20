@@ -104,10 +104,17 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        sku=validated_data.pop('sku')
+        skus=validated_data.pop('sku')
         after_sale_services=validated_data.pop('after_sale_services')
         delivers=validated_data.pop('delivers')
 
         instance=models.GoodDetail.objects.create(**validated_data)
+
+        for service in after_sale_services:
+            models.AfterSaleServices.objects.create(service)
+        for deliver in delivers:
+            models.DeliverServices.objects.create(deliver)
+        for sku in skus:
+            models.SKU.objects.create(sku)
 
         return instance
