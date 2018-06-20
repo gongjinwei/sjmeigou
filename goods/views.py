@@ -123,3 +123,6 @@ class GoodDetailView(ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
+
+
+

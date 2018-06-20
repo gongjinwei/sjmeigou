@@ -131,7 +131,7 @@ class GoodDetail(models.Model):
     stock_count_strategy=models.IntegerField(
         choices=((0,'买家拍下减库存'),(1,'买家付款减库存')),default=0
     )
-    put_on_sale_time=models.DateTimeField(auto_now_add=True)
+    put_on_sale_time=models.DateTimeField()
     create_time=models.DateTimeField(auto_now_add=True,editable=False)
 
 
