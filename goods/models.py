@@ -121,7 +121,7 @@ class SKU(models.Model):
 
 class GoodDetail(models.Model):
     owner=models.ForeignKey(to=User,editable=False,on_delete=models.CASCADE,related_name='goodDetails')
-    title=models.CharField(max_length=30)
+    title=models.CharField(max_length=50)
     params = JSONField()
     master_graphs = JSONField()
     min_price = models.DecimalField(max_digits=20, decimal_places=2)
