@@ -34,10 +34,12 @@ class Application(models.Model):
     reference_code = models.CharField(max_length=50, default='', null=True, blank=True)
     social_credit_code = models.CharField(max_length=18)
     store_name = models.CharField(max_length=100)
-    store_phone = models.CharField(max_length=13,null=True,blank=True)
+    store_phone = models.CharField(max_length=13, null=True, blank=True)
     store_licence_pic = models.URLField()
     store_business_scope = models.TextField()
     store_address = models.CharField(max_length=255)
+    license_unit_name = models.CharField(max_length=128)
+    license_legal_representative = models.CharField(max_length=128)
     longitude = models.FloatField()
     latitude = models.FloatField()
     receiver_account_num = models.CharField(max_length=30)
@@ -53,5 +55,5 @@ class Application(models.Model):
 
 class StoreImage(models.Model):
     application = models.ForeignKey(to='Application', on_delete=models.CASCADE, related_name='store_images',
-                                    editable=False,null=True,blank=True)
+                                    editable=False, null=True, blank=True)
     store_image = models.URLField(blank=True, null=True)
