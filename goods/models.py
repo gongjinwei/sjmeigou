@@ -125,6 +125,7 @@ class GoodDetail(models.Model):
     title=models.CharField(max_length=50)
     params = JSONField()
     master_graphs = JSONField()
+    master_video=models.URLField(null=True,blank=True)
     min_price = models.DecimalField(max_digits=20, decimal_places=2)
     total_stock = models.IntegerField(default=0)
     merchant_coding=models.CharField(max_length=50,blank=True,null=True)
