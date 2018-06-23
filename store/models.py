@@ -2,7 +2,6 @@ import string
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils.crypto import get_random_string
 
 # Create your models here.
 
@@ -16,6 +15,7 @@ class CheckApplication(models.Model):
 
 
 class CodeWarehouse(models.Model):
+    application_id=models.CharField(max_length=20)
     code=models.CharField(max_length=16,editable=False)
     use_state=models.SmallIntegerField(choices=((0,'未使用'),(1,'已使用')),editable=False)
     active_user=models.ForeignKey(to=User,editable=False,null=True,blank=True,on_delete=models.SET_NULL)

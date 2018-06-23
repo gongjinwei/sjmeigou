@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import F
+
+import datetime
+
 
 
 # Create your models here.
@@ -28,6 +32,7 @@ class RecruitMerchant(models.Model):
 
 
 class Application(models.Model):
+    application_id=models.CharField(default='0',primary_key=True,editable=False,max_length=20)
     contract_name = models.CharField(max_length=100)
     contract_mobile = models.CharField(max_length=12)
     reference_code = models.CharField(max_length=50, default='', null=True, blank=True)
@@ -50,6 +55,11 @@ class Application(models.Model):
                                                   default=1)
     application_user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
     application_time = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def save(self, *args,**kwargs):
+        if not self.application_id:
+            self.application_id='%s%06d' %("SQ3307822018",int(F('application_id')[-6:-1]+F('application_id')[-1]) if F('application_id') else 1)
+        super().save(*args,**kwargs)
 
 
 class StoreImage(models.Model):
