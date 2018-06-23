@@ -57,7 +57,7 @@ class Application(models.Model):
     application_time = models.DateTimeField(auto_now_add=True, editable=False)
 
     def save(self, *args,**kwargs):
-        if not self.application_id:
+        if self.application_id=='0':
             self.application_id='%s%06d' %("SQ3307822018",int(F('application_id')[-6:-1]+F('application_id')[-1]) if F('application_id') else 1)
         super().save(*args,**kwargs)
 
