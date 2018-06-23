@@ -15,7 +15,7 @@ class CheckCode(serializers.Serializer):
 
 
 class GenerateCodeSerializer(serializers.ModelSerializer):
-    generate=serializers.BooleanField(default=False,required=True)
+    generate=serializers.BooleanField(default=False)
 
     class Meta:
         model = models.CodeWarehouse
