@@ -23,4 +23,5 @@ class GenerateCodeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('generate')
-        super().create(validated_data)
+        instance=super().create(validated_data)
+        return instance
