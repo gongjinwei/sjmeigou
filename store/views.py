@@ -30,7 +30,7 @@ class CheckApplicationViewSets(ModelViewSet):
 class GenerateCodeView(CreateOnlyViewSet):
     queryset = models.CodeWarehouse.objects.all()
     serializer_class = serializers.GenerateCodeSerializer
-    permission_classes = IsAdminUser
+    permission_classes = (IsAdminUser,)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
