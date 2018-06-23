@@ -35,7 +35,7 @@ class GenerateCodeView(CreateOnlyViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        generate=serializer.validated_data['generate',False]
+        generate=serializer.validated_data.get('generate',False)
         if generate:
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
