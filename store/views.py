@@ -7,6 +7,6 @@ from . import serializers,models
 
 
 class CheckApplicationViewSets(ModelViewSet):
-    queryset = models.CheckApplication
+    queryset = models.CheckApplication.objects.all()
     serializer_class = serializers.CheckApplicationSerializer
 
