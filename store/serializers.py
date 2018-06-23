@@ -7,6 +7,7 @@ from index.models import Application
 
 
 class CheckApplicationSerializer(serializers.ModelSerializer):
+    application=serializers.SerializerMethodField()
 
     class Meta:
         model = models.CheckApplication
