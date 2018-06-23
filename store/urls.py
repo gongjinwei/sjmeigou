@@ -6,5 +6,6 @@ router=DefaultRouter()
 app_name='store'
 
 router.register('checkApplication',views.CheckApplicationViewSets,base_name='checkApplication')
+router.register('generateCode',views.GenerateCodeView,base_name='generateCode')
 
 urlpatterns=router.urls

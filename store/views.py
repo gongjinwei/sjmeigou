@@ -1,5 +1,8 @@
 from rest_framework.views import Response,status
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAdminUser
+
+from register.viewset import CreateOnlyViewSet
 
 # Create your views here.
 
@@ -18,7 +21,24 @@ class CheckApplicationViewSets(ModelViewSet):
             application.application_status=serializer.validated_data['apply_status']
             application.save()
         else:
-            return Response('状态无法被更改',status=status.HTTP_400_BAD_REQUEST)
+            return Response('该状态无法被更改',status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class GenerateCodeView(CreateOnlyViewSet):
+    queryset = models.CodeWarehouse.objects.all()
+    serializer_class = serializers.GenerateCodeSerializer
+    permission_classes = IsAdminUser
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        generate=serializer.validated_data['generate',False]
+        if generate:
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response('请设置generate为true',status=status.HTTP_400_BAD_REQUEST)
