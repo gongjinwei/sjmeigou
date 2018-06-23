@@ -14,5 +14,5 @@ class CheckApplicationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_application(self, obj):
-        queryset = Application.objects.filter(application_status=1)
+        queryset = Application.objects.filter(application_status=1).all()
         return ApplicationSerializer(queryset, many=True).data
