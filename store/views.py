@@ -2,6 +2,8 @@ from rest_framework.views import Response,status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 
+from django.utils.crypto import get_random_string
+
 from register.viewset import CreateOnlyViewSet
 
 # Create your views here.
@@ -37,6 +39,12 @@ class GenerateCodeView(CreateOnlyViewSet):
         serializer.is_valid(raise_exception=True)
         generate=serializer.validated_data.get('generate',False)
         if generate:
+            data={
+                "code":get_random_string(),
+                "use_state":0,
+                "active_user":request.user
+            }
+            serializer.validated_data.update(data)
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
