@@ -7,12 +7,11 @@ from index.models import Application
 
 
 class CheckApplicationSerializer(serializers.ModelSerializer):
-    application = serializers.SerializerMethodField()
 
     class Meta:
         model = models.CheckApplication
         fields = '__all__'
 
     def get_application(self, obj):
-        queryset = Application.objects.filter(application_status=1).all()
-        return ApplicationSerializer(queryset, many=True).data
+        queryset =obj.application if obj.application.application_status==1 else Application.objects.none()
+        return ApplicationSerializer(queryset).data

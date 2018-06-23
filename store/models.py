@@ -6,7 +6,8 @@ from django.utils.crypto import get_random_string
 
 
 class CheckApplication(models.Model):
-    checker=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+    application=models.ForeignKey(to='index.Application',on_delete=models.CASCADE)
+    checker=models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
     apply_status=models.SmallIntegerField(choices=((2,'打款验证中'),(4,'审核不通过')))
     opinion=models.CharField(max_length=255,help_text='审核意见')
     check_time=models.DateTimeField(auto_now=True,editable=False)
