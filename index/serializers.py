@@ -36,3 +36,5 @@ class ApplicationSerializer(serializers.ModelSerializer):
             models.StoreImage.objects.create(**store_image,application=application)
 
         return application
+
+

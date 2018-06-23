@@ -5,5 +5,6 @@ from . import views
 router=DefaultRouter()
 app_name='store'
 
+router.register('checkApplication',views.CheckApplicationViewSets,base_name='checkApplication')
 
 urlpatterns=router.urls
