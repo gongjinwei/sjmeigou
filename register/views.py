@@ -118,9 +118,9 @@ class CheckView(viewset.CreateOnlyViewSet):
             if models.UserInfo.objects.filter(id=userId).exists():
                 # 创建或获取用户
                 userInfo = models.UserInfo.objects.get(pk=userId)
-                user, created = User.objects.get_or_create(defaults={'username': mobile}, username=mobile)
+                user, created = User.objects.get_or_create(defaults={'username': userId}, username=userId)
                 userInfo.user = user
-                user.set_password(userId)
+                user.set_password(mobile)
                 user.save()
                 userInfo.save()
 

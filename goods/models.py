@@ -154,3 +154,6 @@ class DeliverServices(models.Model):
     server=models.IntegerField(choices=(
         (0,'上门自取'),(1,'同城配送'),(2,'异地快递')
     ))
+
+
+

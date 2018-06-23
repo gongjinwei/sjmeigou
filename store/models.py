@@ -1,21 +1,17 @@
 from django.db import models
-
+from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
 
 # Create your models here.
 
 
-# class MerchantInfo(models.Model):
-#     logo = models.URLField()
-#     name = models.CharField(max_length=50)
-#     address_name = models.CharField(max_length=255)
-#     address_longitude = models.DecimalField(max_digits=9, decimal_places=6)
-#     address_latitude = models.DecimalField(max_digits=9, decimal_places=6)
-#     phone = models.CharField(max_length=12)
-#     business_hours_from = models.TimeField()
-#     business_hours_to = models.TimeField()
-#
-#
-# class BusinessQualification(models.Model):
-#     org_name = models.CharField(max_length=100)
-#     management_address = models.CharField(max_length=255)
-#     legal_representative = models.CharField(max_length=100)
+class Store(models.Model):
+    application=models.OneToOneField(to='index.models.Application',on_delete=models.CASCADE)
+    business_hours_from=models.TimeField()
+    business_hours_to=models.TimeField()
+    create_time=models.DateTimeField(auto_now_add=True,editable=False)
+    update_time=models.DateTimeField(auto_now=True,editable=False)
+
+
+class Classification(models.Model):
+    shop = models.CharField()
