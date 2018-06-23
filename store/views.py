@@ -9,3 +9,4 @@ from . import serializers,models
 class CheckApplicationViewSets(ModelViewSet):
     queryset = models.CheckApplication
     serializer_class = serializers.CheckApplicationSerializer
+
