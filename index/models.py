@@ -61,8 +61,7 @@ class Application(models.Model):
         if self.application_id=='0':
             self.application_num=F('application_num')+1
             self.application_id='%s%06d' %("SQ3307822018",self.application_num)
-        else:
-            return
+
         super().save(*args,**kwargs)
 
     def __str__(self):
