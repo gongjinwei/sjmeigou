@@ -29,6 +29,10 @@ class Stores(models.Model):
     active_code=models.CharField(max_length=20,default='')
     business_hour_from=models.TimeField()
     business_hour_to=models.TimeField()
+    active_state=models.BooleanField(default=False,editable=False)
+    user=models.ForeignKey(to=User,editable=False,on_delete=models.CASCADE)
+    create_time=models.DateTimeField(auto_created=True,editable=False)
+    update_time=models.DateTimeField(auto_now=True,editable=False)
 
 
 

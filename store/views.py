@@ -67,3 +67,6 @@ class StoresViewSets(ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
             return Response('激活码错误或已经使用过了',status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user,active_state=True)
