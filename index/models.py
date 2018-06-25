@@ -2,9 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.cache import cache
 
-from redis import StrictRedis
+from django_redis import get_redis_connection
 
-client=StrictRedis()
+client=get_redis_connection("default")
 
 
 # Create your models here.
@@ -58,7 +58,6 @@ class Application(models.Model):
     application_time = models.DateTimeField(auto_now_add=True, editable=False)
 
     def save(self, *args,**kwargs):
-        client.lock('application_num')
         application_num=client.incr('application_num',1)
         self.application_id='%s%06d' %("SQ3307822018",application_num)
 

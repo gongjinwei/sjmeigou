@@ -33,3 +33,11 @@ class GenerateCodeView(CreateOnlyViewSet):
     queryset = models.CodeWarehouse.objects.all()
     serializer_class = serializers.GenerateCodeSerializer
     permission_classes = (IsAdminUser,)
+
+    def perform_create(self, serializer):
+        data={
+            'code':get_random_string(),
+            'use_state':0,
+            'active_user':self.request.user
+        }
+        serializer.save(**data)
