@@ -79,7 +79,7 @@ class SKUSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.SKU
-        exclude = ('good_detail',)
+        exclude = ('color',)
 
 
 class AfterSaleServicesSerializer(serializers.ModelSerializer):
@@ -97,13 +97,27 @@ class DeliverServicesSerializer(serializers.ModelSerializer):
         model=models.DeliverServices
         fields=('server','server_name')
 
+class SKUColorSerializer(serializers.ModelSerializer):
+    skus=SKUSerializer(many=True)
+
+    class Meta:
+        model = models.SKUColor
+        exclude=('good_detail',)
+
+    def create(self, validated_data):
+        skus = validated_data.pop('skus')
+        instance=models.SKUColor.objects.create(**validated_data)
+        for sku in skus:
+            models.SKU.objects.create(color=instance, **sku)
+
+
 
 class GoodDetailSerializer(serializers.ModelSerializer):
     class_name=serializers.SerializerMethodField()
     relate_desc=serializers.ReadOnlyField(source='item_desc.items')
     params=serializers.JSONField()
     master_graphs=serializers.JSONField()
-    sku=SKUSerializer(many=True)
+    colors=SKUColorSerializer(many=True)
     after_sale_services=AfterSaleServicesSerializer(many=True)
     delivers=DeliverServicesSerializer(many=True)
 
@@ -126,7 +140,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         for deliver in delivers:
             models.DeliverServices.objects.create(good_detail=instance,**deliver)
         for color_data in colors:
-            skus=color_data.pop('sku')
+            skus=color_data.pop('skus')
             color=models.SKUColor.objects.create(good_detail=instance,**color_data)
             for sku in skus:
                 models.SKU.objects.create(color=color,**sku)
