@@ -33,6 +33,7 @@ class RecruitMerchant(models.Model):
 
 class Application(models.Model):
     application_id=models.CharField(default='0',primary_key=True,editable=False,max_length=20)
+    application_num=models.IntegerField(default=0,editable=False)
     contract_name = models.CharField(max_length=100)
     contract_mobile = models.CharField(max_length=12)
     reference_code = models.CharField(max_length=50, default='', null=True, blank=True)
@@ -58,7 +59,10 @@ class Application(models.Model):
 
     def save(self, *args,**kwargs):
         if self.application_id=='0':
-            self.application_id='%s%06d' %("SQ3307822018",int(F('application_id')[-6:-1]+F('application_id')[-1]) if F('application_id') else 1)
+            self.application_num=F('application_num')+1
+            self.application_id='%s%06d' %("SQ3307822018",self.application_num)
+        else:
+            return
         super().save(*args,**kwargs)
 
     def __str__(self):
