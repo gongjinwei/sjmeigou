@@ -45,9 +45,9 @@ class GenerateCodeView(CreateOnlyViewSet):
         serializer.save(**data)
 
 
-class CreateStoreViewSets(ModelViewSet):
-    queryset = models.CreateStore.objects.all()
-    serializer_class = serializers.CreateStoreSerializer
+class StoresViewSets(ModelViewSet):
+    queryset = models.Stores.objects.all()
+    serializer_class = serializers.StoresSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

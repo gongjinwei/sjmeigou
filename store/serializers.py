@@ -17,8 +17,8 @@ class GenerateCodeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CreateStoreSerializer(serializers.ModelSerializer):
+class StoresSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = models.CreateStore
+        model = models.Stores
         fields='__all__'

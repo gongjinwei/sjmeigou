@@ -7,6 +7,6 @@ app_name='store'
 
 router.register('checkApplication',views.CheckApplicationViewSets,base_name='checkApplication')
 router.register('generateCode',views.GenerateCodeView,base_name='generateCode')
-router.register('createStore',views.CreateStoreViewSets,base_name='createStore')
+router.register('stores',views.StoresViewSets,base_name='stores')
 
 urlpatterns=router.urls

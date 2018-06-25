@@ -24,7 +24,7 @@ class CodeWarehouse(models.Model):
     create_time=models.DateTimeField(auto_now_add=True,editable=False)
 
 
-class CreateStore(models.Model):
+class Stores(models.Model):
     info=models.OneToOneField(to=Application,on_delete=models.CASCADE)
     active_code=models.CharField(max_length=20,default='')
     business_hour_from=models.TimeField()
