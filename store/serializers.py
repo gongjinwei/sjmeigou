@@ -27,3 +27,7 @@ class CreateStoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CreateStore
         fields='__all__'
+
+    def create(self, validated_data):
+        code=validated_data.pop('code')
+        return super().create(validated_data)
