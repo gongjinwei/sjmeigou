@@ -106,12 +106,16 @@ class SizeGroupClass(models.Model):
     size_group = models.ForeignKey(to='SizeGroup', on_delete=models.CASCADE, related_name='size_classes')
 
 
-class SKU(models.Model):
-    good_detail = models.ForeignKey(to='GoodDetail', on_delete=models.CASCADE,related_name='sku')
+class SKUColor(models.Model):
+    good_detail = models.ForeignKey(to='GoodDetail', on_delete=models.CASCADE, related_name='colors')
     color_name = models.CharField(max_length=20)
-    color_remark = models.CharField(max_length=30,blank=True,null=True)
+    color_remark = models.CharField(max_length=30, blank=True, null=True)
     color_pic = models.CharField(max_length=255)
     color_code = models.CharField(max_length=7)
+
+
+class SKU(models.Model):
+    color = models.ForeignKey(to='SKUColor',related_name='skus',on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=20, decimal_places=2)
     stock = models.IntegerField(default=0)
     size = models.ForeignKey(to='SizeDesc', on_delete=models.SET_NULL,null=True)

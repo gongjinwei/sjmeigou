@@ -115,7 +115,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        skus=validated_data.pop('sku')
+        colors=validated_data.pop('colors')
         after_sale_services=validated_data.pop('after_sale_services')
         delivers=validated_data.pop('delivers')
 
@@ -125,7 +125,10 @@ class GoodDetailSerializer(serializers.ModelSerializer):
             models.AfterSaleServices.objects.create(good_detail=instance,**service)
         for deliver in delivers:
             models.DeliverServices.objects.create(good_detail=instance,**deliver)
-        for sku in skus:
-            models.SKU.objects.create(good_detail=instance,**sku)
+        for color_data in colors:
+            skus=color_data.pop('sku')
+            color=models.SKUColor.objects.create(good_detail=instance,**color_data)
+            for sku in skus:
+                models.SKU.objects.create(color=color,**sku)
 
         return instance

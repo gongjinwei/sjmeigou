@@ -25,7 +25,7 @@ class CodeWarehouse(models.Model):
 
 
 class CreateStore(models.Model):
-    application=models.OneToOneField(to=Application,on_delete=models.CASCADE)
+    info=models.OneToOneField(to=Application,on_delete=models.CASCADE)
 
 
 
