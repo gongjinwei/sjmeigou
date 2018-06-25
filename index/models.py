@@ -61,6 +61,9 @@ class Application(models.Model):
             self.application_id='%s%06d' %("SQ3307822018",int(F('application_id')[-6:-1]+F('application_id')[-1]) if F('application_id') else 1)
         super().save(*args,**kwargs)
 
+    def __str__(self):
+        return self.application_id
+
 
 class StoreImage(models.Model):
     application = models.ForeignKey(to='Application', on_delete=models.CASCADE, related_name='store_images',
