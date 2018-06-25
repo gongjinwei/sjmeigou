@@ -18,7 +18,7 @@ class GenerateCodeSerializer(serializers.ModelSerializer):
 
 
 class CreateStoreSerializer(serializers.ModelSerializer):
-    code=serializers.SlugField(source='info.CodeWarehouse.code',write_only=True)
+    code=serializers.SlugField(source='info.CodeWarehouse.code')
 
     class Meta:
         model = models.CreateStore

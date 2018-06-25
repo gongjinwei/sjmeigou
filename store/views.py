@@ -50,3 +50,18 @@ class CreateStoreViewSets(ModelViewSet):
     queryset = models.CreateStore.objects.all()
     serializer_class = serializers.CreateStoreSerializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        code=serializer.validated_data['code']
+        application=serializer.validated_data['application']
+        if application.application_status!=3:
+            return Response('你的申请未通过,请通过再验证',status=status.HTTP_400_BAD_REQUEST)
+
+        if models.CodeWarehouse.objects.filter(code=code,use_state=0).exists():
+
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response('激活码错误或已经使用过了',status=status.HTTP_400_BAD_REQUEST)
