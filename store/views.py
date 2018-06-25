@@ -41,7 +41,6 @@ class GenerateCodeView(CreateOnlyViewSet):
         data = {
             'code': code,
             'use_state': 0,
-            'active_user': self.request.user
         }
         serializer.save(**data)
 
@@ -61,7 +60,9 @@ class CreateStoreViewSets(ModelViewSet):
         if models.CodeWarehouse.objects.filter(code=code,use_state=0).exists():
 
             self.perform_create(serializer)
-            application.codewarehouse.save(use_state=1,active_user=request.user)
+            application.codewarehouse.use_state=1
+            application.codewarehouse.active_user=request.user
+            application.codewarehouse.save()
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
