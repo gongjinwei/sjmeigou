@@ -44,3 +44,9 @@ class GenerateCodeView(CreateOnlyViewSet):
             'active_user': self.request.user
         }
         serializer.save(**data)
+
+
+class CreateStoreViewSets(ModelViewSet):
+    queryset = models.CreateStore.objects.all()
+    serializer_class = serializers.CreateStoreSerializer
+

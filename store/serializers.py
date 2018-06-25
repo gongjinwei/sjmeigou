@@ -20,3 +20,10 @@ class GenerateCodeSerializer(serializers.ModelSerializer):
         model = models.CodeWarehouse
         fields = '__all__'
 
+
+class CreateStoreSerializer(serializers.ModelSerializer):
+    code=serializers.CharField(max_length=12)
+
+    class Meta:
+        model = models.CreateStore
+        fields='__all__'
