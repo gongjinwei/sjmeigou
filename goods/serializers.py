@@ -75,6 +75,8 @@ class ItemsGroupDescSerializer(serializers.ModelSerializer):
 
 
 class SKUSerializer(serializers.ModelSerializer):
+    size_name = serializers.ReadOnlyField(source='size.size_name')
+
     class Meta:
         model=models.SKU
         exclude = ('good_detail',)
@@ -104,7 +106,6 @@ class GoodDetailSerializer(serializers.ModelSerializer):
     sku=SKUSerializer(many=True)
     after_sale_services=AfterSaleServicesSerializer(many=True)
     delivers=DeliverServicesSerializer(many=True)
-    size_name=serializers.ReadOnlyField(source='size.size_name')
 
     def get_class_name(self,obj):
         return "%s>%s" % (obj.third_class.second_class.second_class_name,obj.third_class.third_class_name)
