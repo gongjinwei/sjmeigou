@@ -56,7 +56,7 @@ class CreateStoreViewSets(ModelViewSet):
         code=serializer.validated_data['active_code']
         application=serializer.validated_data['info']
         if application.application_status!=3:
-            return Response('你的申请未通过,请通过后再验证',status=status.HTTP_400_BAD_REQUEST)
+            return Response('你的申请未通过,请通过后进行再验证',status=status.HTTP_400_BAD_REQUEST)
 
         if models.CodeWarehouse.objects.filter(code=code,use_state=0).exists():
 
