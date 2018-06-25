@@ -53,7 +53,7 @@ class CreateStoreViewSets(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        code=serializer.validated_data['code']
+        code=serializer.validated_data['active_code']
         application=serializer.validated_data['application']
         if application.application_status!=3:
             return Response('你的申请未通过,请通过再验证',status=status.HTTP_400_BAD_REQUEST)
