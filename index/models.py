@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import F
+from django.db.models import F,Count
 
 import datetime
 
@@ -58,9 +58,8 @@ class Application(models.Model):
     application_time = models.DateTimeField(auto_now_add=True, editable=False)
 
     def save(self, *args,**kwargs):
-        if self.application_id=='0':
-            self.application_num=F('application_num')+1
-            self.application_id='%s%06d' %("SQ3307822018",self.application_num)
+        self.application_num=Count(F('application_num'))+1
+        self.application_id='%s%06d' %("SQ3307822018",self.application_num)
 
         super().save(*args,**kwargs)
 
