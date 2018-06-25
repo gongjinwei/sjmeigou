@@ -15,13 +15,8 @@ class CheckCode(serializers.Serializer):
 
 
 class GenerateCodeSerializer(serializers.ModelSerializer):
-    generate=serializers.BooleanField(default=False)
 
     class Meta:
         model = models.CodeWarehouse
         fields = '__all__'
 
-    def create(self, validated_data):
-        validated_data.pop('generate')
-        instance=super().create(validated_data)
-        return instance
