@@ -6,6 +6,8 @@ from django.utils.crypto import get_random_string
 
 from register.viewset import CreateOnlyViewSet
 
+from django.contrib.auth.models import AnonymousUser
+
 # Create your views here.
 
 from . import serializers, models
@@ -78,6 +80,9 @@ class StoreStatusView(ListOnlyViewSet):
     serializer_class = serializers.StoreStatusSerializer
 
     def get_queryset(self):
+
+        if self.request.user==AnonymousUser:
+            return Application.objects.none()
 
         queryset=Application.objects.filter(application_user=self.request.user)
 
