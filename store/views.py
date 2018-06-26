@@ -40,7 +40,7 @@ class GenerateCodeView(CreateOnlyViewSet):
             code = get_random_string()
         data = {
             'code': code,
-            'use_state': 0,
+            'use_state': 0
         }
         serializer.save(**data)
 
