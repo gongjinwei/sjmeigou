@@ -23,7 +23,8 @@ from qcloudsms_py.httpclient import HTTPError
 
 from . import serializers, viewset, models
 
-# Create your views here.
+from django.contrib.auth import authenticate
+
 # Create your views here.
 
 sms_appid = getattr(settings, 'QCLOUD_SMS_APPID')
@@ -73,7 +74,8 @@ class SendView(viewset.CreateOnlyViewSet):
             user_info_filter = models.UserInfo.objects.filter(id=userId)
 
             if user_info_filter.exists():
-                if not user_info_filter[0].user or op == 'update' or op == 'recruit' or user_info_filter[0].user.username == mobile:
+                user=authenticate(username=userId,password=mobile)
+                if not user_info_filter[0].user or op == 'update' or op == 'recruit' or user is not None:
                     tts = cache.get(userId + '_send_nums', 0)
                     if tts == 0:
                         cache.set(userId + '_send_nums', 0, timeout=60 * 60)
