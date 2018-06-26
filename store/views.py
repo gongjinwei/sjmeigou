@@ -81,9 +81,7 @@ class StoreStatusView(ListOnlyViewSet):
 
     def get_queryset(self):
 
-        if isinstance(self.request.user,AnonymousUser):
-            return Application.objects.none()
+        if self.request.user.is_authenticated:
+            return Application.objects.filter(application_user=self.request.user)
 
-        queryset=Application.objects.filter(application_user=self.request.user)
-
-        return queryset
+        return Application.objects.none()
