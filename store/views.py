@@ -9,6 +9,8 @@ from register.viewset import CreateOnlyViewSet
 # Create your views here.
 
 from . import serializers, models
+from index.models import Application
+from register.viewset import ListOnlyViewSet
 
 
 class CheckApplicationViewSets(ModelViewSet):
@@ -70,3 +72,13 @@ class StoresViewSets(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user,active_state=True)
+
+
+class StoreStatusView(ListOnlyViewSet):
+    serializer_class = serializers.StoreStatusSerializer
+
+    def get_queryset(self):
+
+        queryset=Application.objects.filter(application_user=self.request.user)
+
+        return queryset

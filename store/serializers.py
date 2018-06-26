@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from . import models
 
+from index.models import Application
 
 class CheckApplicationSerializer(serializers.ModelSerializer):
 
@@ -22,3 +23,10 @@ class StoresSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Stores
         fields='__all__'
+
+
+class StoreStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=Application
+        fields=('application_id',"store_name",'update_time','application_status')
