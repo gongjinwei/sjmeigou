@@ -100,7 +100,7 @@ class StatusChangeView(CreateOnlyViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj=Application.objects.filter(**serializer.validated_data)
+        obj=Application.objects.filter(application_id=serializer.validated_data['application_id'])
         if obj.exists():
             application=obj[0]
             application.application_status=serializer.validated_data['application_status']
