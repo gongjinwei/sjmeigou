@@ -92,3 +92,7 @@ class StoreStatusView(ListOnlyViewSet):
             return Application.objects.filter(application_user=self.request.user)
 
         return Application.objects.none()
+
+class StatusChangeView(ModelViewSet):
+    serializer_class = serializers.StatusChangeSerializer
+    queryset = Application.objects.all()

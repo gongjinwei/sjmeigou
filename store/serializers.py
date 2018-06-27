@@ -31,3 +31,11 @@ class StoreStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model=Application
         fields=('application_id',"store_name",'update_time','application_status','status_name')
+
+
+class StatusChangeSerializer(serializers.ModelSerializer):
+    status_name = serializers.ReadOnlyField(source='get_application_status_display')
+
+    class Meta:
+        model=Application
+        fields=('application_id',"store_name",'update_time','application_status','status_name')
