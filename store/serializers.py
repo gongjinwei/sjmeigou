@@ -33,9 +33,7 @@ class StoreStatusSerializer(serializers.ModelSerializer):
         fields=('application_id',"store_name",'update_time','application_status','status_name')
 
 
-class StatusChangeSerializer(serializers.ModelSerializer):
-    status_name = serializers.ReadOnlyField(source='get_application_status_display')
-
-    class Meta:
-        model=Application
-        fields=('application_id',"store_name",'update_time','application_status','status_name')
+class StatusChangeSerializer(serializers.Serializer):
+    application_status=serializers.IntegerField(choices=((1, '审核中'), (2, '打款验证中'), (3, '审核通过'),(4,'审核不通过'),(5,'待激活'),(6,'正常')), editable=False,
+                                                  default=1)
+    application_id=serializers.CharField(max_length=20)

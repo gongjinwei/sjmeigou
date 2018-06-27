@@ -93,6 +93,19 @@ class StoreStatusView(ListOnlyViewSet):
 
         return Application.objects.none()
 
-class StatusChangeView(ModelViewSet):
+
+class StatusChangeView(CreateOnlyViewSet):
     serializer_class = serializers.StatusChangeSerializer
-    queryset = Application.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj=Application.objects.filter(**serializer.validated_data)
+        if obj.exists():
+            application=obj[0]
+            application.application_status=serializer.validated_data['application_status']
+            application.save()
+
+            return Response('success')
+        else:
+            return Response('Not exists',status=status.HTTP_400_BAD_REQUEST)
