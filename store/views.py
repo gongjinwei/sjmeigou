@@ -6,7 +6,8 @@ from django.utils.crypto import get_random_string
 
 from register.viewset import CreateOnlyViewSet
 
-from django.contrib.auth.models import AnonymousUser
+from guardian.models import UserObjectPermission
+from django.contrib.auth.models import Group
 
 # Create your views here.
 
@@ -67,6 +68,12 @@ class StoresViewSets(ModelViewSet):
             application.codewarehouse.use_state=1
             application.codewarehouse.active_user=request.user
             application.codewarehouse.save()
+
+            # 将申请用户加入权限组
+
+            group=Group.objects.get_or_create(defaults={"name":'merchant'},name='merchant')
+            UserObjectPermission.objects.assign('change_merchant0',request.user,group)
+
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
