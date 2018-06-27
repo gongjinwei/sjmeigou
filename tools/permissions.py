@@ -8,7 +8,7 @@ class MerchantPermission(BasePermission):
 
         group=Group.objects.get_or_create(defaults={"name":'merchant'},name='merchant')
 
-        return request.user and request.user.is_authenticated and request.user.has_perm('change_group',group)
+        return request.user and request.user.is_authenticated and request.user.has_perm('change_merchant0',group)
 
 
 class MerchantOrReadOnlyPermission(BasePermission):
@@ -19,5 +19,5 @@ class MerchantOrReadOnlyPermission(BasePermission):
                 request.method in SAFE_METHODS or
                 request.user and
                 request.user.is_authenticated and
-                request.user.has_perm('change_group', group)
+                request.user.has_perm('change_merchant0', group)
         )
