@@ -23,7 +23,6 @@ from qcloudsms_py.httpclient import HTTPError
 
 from . import serializers, viewset, models
 
-from django.contrib.auth import authenticate
 
 # Create your views here.
 
