@@ -5,7 +5,7 @@ from rest_framework.views import Response,status
 
 
 from . import models,serializers
-from tools.permissions import MerchantPermission
+from tools.permissions import MerchantOrReadOnlyPermission
 # Create your views here.
 
 
@@ -117,7 +117,7 @@ class ItemsDescView(ModelViewSet):
 class GoodDetailView(ModelViewSet):
     serializer_class = serializers.GoodDetailSerializer
     queryset = models.GoodDetail.objects.all()
-    permission_classes = (MerchantPermission,)
+    permission_classes = (MerchantOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
