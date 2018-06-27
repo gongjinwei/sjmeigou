@@ -30,7 +30,7 @@ class StoreStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Application
-        fields=('application_id',"store_name",'update_time','application_status','status_name')
+        fields="__all__"
 
 
 class StatusChangeSerializer(serializers.Serializer):
