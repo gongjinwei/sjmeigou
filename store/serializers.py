@@ -4,6 +4,7 @@ from . import models
 
 from index.models import Application
 
+
 class CheckApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
