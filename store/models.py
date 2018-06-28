@@ -7,6 +7,8 @@ from index.models import Application
 # Create your models here.
 
 
+store_deposit=1000
+
 class CheckApplication(models.Model):
     application=models.ForeignKey(to=Application,on_delete=models.CASCADE)
     checker=models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
@@ -33,6 +35,16 @@ class Stores(models.Model):
     user=models.ForeignKey(to=User,editable=False,on_delete=models.CASCADE)
     create_time=models.DateTimeField(auto_created=True,editable=False)
     update_time=models.DateTimeField(auto_now=True,editable=False)
+
+
+class Deposit(models.Model):
+    user = models.OneToOneField(to=User,on_delete=models.DO_NOTHING)
+    application_id=models.OneToOneField(to=Application,on_delete=models.DO_NOTHING)
+    put_in_time=models.DateTimeField(auto_now_add=True,editable=False)
+    deposit=models.IntegerField(default=store_deposit,editable=False)
+    deposit_desc=models.CharField(default='保证金')
+    has_paid=models.BooleanField(default=False,editable=False)
+    success_paid_time=models.DateTimeField(editable=False)
 
 
 
