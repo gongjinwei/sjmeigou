@@ -2,15 +2,6 @@
 from rest_framework import serializers
 from . import models
 
-from index.models import Application
-
-
-class CheckApplicationSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.CheckApplication
-        fields = '__all__'
-
 
 class GenerateCodeSerializer(serializers.ModelSerializer):
 

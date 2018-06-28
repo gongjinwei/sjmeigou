@@ -13,25 +13,6 @@ from django.contrib.auth.models import Group
 
 from . import serializers, models
 from index.models import Application
-from register.viewset import ListOnlyViewSet
-
-
-class CheckApplicationViewSets(ModelViewSet):
-    queryset = models.CheckApplication.objects.all()
-    serializer_class = serializers.CheckApplicationSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        application = serializer.validated_data['application']
-        if application.application_status == 1:
-            application.application_status = serializer.validated_data['apply_status']
-            application.save()
-        else:
-            return Response('该状态无法被更改', status=status.HTTP_400_BAD_REQUEST)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class GenerateCodeView(CreateOnlyViewSet):
@@ -59,7 +40,7 @@ class StoresViewSets(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         code=serializer.validated_data['active_code']
         application=serializer.validated_data['info']
-        if application.application_status!=3:
+        if application.application_status!=5:
             return Response('你的申请未通过,请通过后进行再验证',status=status.HTTP_400_BAD_REQUEST)
 
         if models.CodeWarehouse.objects.filter(code=code,use_state=0).exists():
