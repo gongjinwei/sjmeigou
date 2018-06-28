@@ -102,7 +102,7 @@ class StatusChangeView(CreateOnlyViewSet):
         serializer.is_valid(raise_exception=True)
         obj=Application.objects.filter(application_id=serializer.validated_data['application_id'])
         if obj.exists():
-            obj.update({'application_status':serializer.validated_data['application_status']})
+            obj.update(application_status=serializer.validated_data['application_status'])
 
             return Response('success')
         else:
