@@ -16,6 +16,7 @@ class RecruitSerializer(serializers.ModelSerializer):
 
 
 class StoreImageSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = models.StoreImage
         fields = ('store_image',)
@@ -23,6 +24,7 @@ class StoreImageSerializer(serializers.ModelSerializer):
 
 class ApplicationSerializer(serializers.ModelSerializer):
     store_images=StoreImageSerializer(many=True)
+    status_name = serializers.ReadOnlyField(source='get_application_status_display')
 
     class Meta:
         model = models.Application

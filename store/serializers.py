@@ -26,14 +26,6 @@ class StoresSerializer(serializers.ModelSerializer):
         fields='__all__'
 
 
-class StoreStatusSerializer(serializers.ModelSerializer):
-    status_name=serializers.ReadOnlyField(source='get_application_status_display')
-
-    class Meta:
-        model=Application
-        fields="__all__"
-
-
 class StatusChangeSerializer(serializers.Serializer):
     application_status=serializers.ChoiceField(choices=[1,2,3,4,5,6])
     application_id=serializers.CharField(max_length=20)

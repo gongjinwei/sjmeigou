@@ -83,17 +83,6 @@ class StoresViewSets(ModelViewSet):
         serializer.save(user=self.request.user,active_state=True)
 
 
-class StoreStatusView(ListOnlyViewSet):
-    serializer_class = serializers.StoreStatusSerializer
-
-    def get_queryset(self):
-
-        if self.request.user.is_authenticated:
-            return Application.objects.filter(application_user=self.request.user)
-
-        return Application.objects.none()
-
-
 class StatusChangeView(CreateOnlyViewSet):
     serializer_class = serializers.StatusChangeSerializer
 
