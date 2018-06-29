@@ -49,8 +49,7 @@ class StoresViewSets(ModelViewSet):
             application.codewarehouse.use_state=1
             application.codewarehouse.active_user=request.user
             application.codewarehouse.save()
-            application.application_status=6
-            application.save(update_fields=None)
+            Application.objects.filter(pk=application.pk).update(application_status=6)
 
             # 将申请用户加入权限组
 
