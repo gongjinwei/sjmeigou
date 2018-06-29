@@ -52,7 +52,7 @@ class StoresViewSets(ModelViewSet):
 
             # 将申请用户加入权限组
 
-            group=Group.objects.get_or_create(defaults={"name":'merchant'},name='merchant')
+            group=Group.objects.get_or_create(defaults={"name":'merchant0'},name='merchant0')
             UserObjectPermission.objects.assign('change_merchant0',request.user,group)
 
             headers = self.get_success_headers(serializer.data)
