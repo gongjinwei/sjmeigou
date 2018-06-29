@@ -6,7 +6,7 @@ from django.utils.crypto import get_random_string
 
 from register.viewset import CreateOnlyViewSet
 
-from guardian.models import UserObjectPermission
+from guardian.shortcuts import assign_perm
 from django.contrib.auth.models import Group
 
 # Create your views here.
@@ -52,8 +52,8 @@ class StoresViewSets(ModelViewSet):
 
             # 将申请用户加入权限组
 
-            group,created=Group.objects.get_or_create(defaults={"name":'merchant0'},name='merchant0')
-            UserObjectPermission.objects.assign_perm('change_merchant0',request.user,obj=group)
+            group,created=Group.objects.get_or_create(defaults={"name":'merchant %s'%request.user.username},name='merchant %s' % request.user.username)
+            assign_perm('change_stores',request.user,obj=group)
 
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
