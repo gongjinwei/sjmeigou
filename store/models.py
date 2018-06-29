@@ -25,7 +25,7 @@ class Stores(models.Model):
     business_hour_to=models.TimeField()
     active_state=models.BooleanField(default=False,editable=False)
     user=models.ForeignKey(to=User,editable=False,on_delete=models.CASCADE)
-    create_time=models.DateTimeField(auto_created=True,editable=False)
+    create_time=models.DateTimeField(auto_now_add=True,editable=False)
     update_time=models.DateTimeField(auto_now=True,editable=False)
 
 
