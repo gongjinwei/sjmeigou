@@ -50,7 +50,9 @@ class ApplicationViewSets(ModelViewSet):
 
     def get_queryset(self):
 
-        if self.request.user.is_authenticated or self.request.user.is_staff:
+        if self.request.user.is_authenticated:
             return models.Application.objects.filter(application_user=self.request.user)
+        elif self.request.user.is_staff:
+            return models.Application.objects.all()
 
         return models.Application.objects.none()
