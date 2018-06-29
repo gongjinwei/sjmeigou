@@ -65,7 +65,7 @@ class StoresViewSets(ModelViewSet):
     def get_queryset(self):
 
         if self.request.user.is_authenticated or self.request.user.is_staff:
-            return models.Stores.objects.filter(application_user=self.request.user)
+            return models.Stores.objects.filter(user=self.request.user)
 
         return models.Stores.objects.none()
 
