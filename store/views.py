@@ -50,7 +50,7 @@ class StoresViewSets(ModelViewSet):
             application.codewarehouse.active_user=request.user
             application.codewarehouse.save()
             application.application_status=6
-            application.save(update_fields=['application_status'])
+            application.save(update_fields=None)
 
             # 将申请用户加入权限组
 
