@@ -32,7 +32,6 @@ class GenerateCodeView(CreateOnlyViewSet):
 
 
 class StoresViewSets(ModelViewSet):
-    queryset = models.Stores.objects.all()
     serializer_class = serializers.StoresSerializer
 
     def create(self, request, *args, **kwargs):
@@ -62,6 +61,13 @@ class StoresViewSets(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user,active_state=True)
+
+    def get_queryset(self):
+
+        if self.request.user.is_authenticated or self.request.user.is_staff:
+            return models.Stores.objects.filter(application_user=self.request.user)
+
+        return models.Stores.objects.none()
 
 
 class StatusChangeView(CreateOnlyViewSet):
