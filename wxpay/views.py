@@ -1,16 +1,16 @@
-import time, json
-from django.shortcuts import render
+import time, copy
 from django.conf import settings
 from django.http import HttpResponse
 from rest_framework.views import Response, status
 from rest_framework.permissions import AllowAny
+from rest_framework.viewsets import ModelViewSet
 from register.models import UserInfo
 
 from register import viewset
 
 from weixin.pay import WeixinPay
 
-from . import serializers
+from . import serializers,models
 from register.views import CustomerXMLRender,CustomerXMLParser
 
 # Create your views here.
@@ -55,8 +55,10 @@ class UnifiedOrderView(viewset.CreateOnlyViewSet):
             return Response('用户不存在')
 
 
-class NotifyOrderView(viewset.CreateOnlyViewSet):
+# class NotifyOrderView(viewset.CreateOnlyViewSet):
+class NotifyOrderView(ModelViewSet):
     serializer_class = serializers.NotifyOrderSerializer
+    queryset = models.NotifyOrderModel.objects.all()
     permission_classes = (AllowAny,)
     renderer_classes = (CustomerXMLRender,)
     parser_classes = (CustomerXMLParser,)
@@ -64,7 +66,14 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response({"return_code":"SUCCESS","return_msg":"OK"})
+        return Response({"return_code": "SUCCESS", "return_msg": "OK"})
+        # data=copy.copy(serializer.validated_data)
+        # received_sign=data.pop('sign','')
+        # sign=weixinpay.sign(data)
+        # if received_sign==sign:
+        #     self.perform_create(serializer)
+        #     return Response({"return_code":"SUCCESS","return_msg":"OK"})
+        # else:
+        #     return Response({"return_code":"False","return_msg":"sign error"})
 
 
