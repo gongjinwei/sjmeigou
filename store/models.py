@@ -34,7 +34,7 @@ class Deposit(models.Model):
     application=models.OneToOneField(to=Application,on_delete=models.DO_NOTHING)
     put_in_time=models.DateTimeField(auto_now_add=True,editable=False)
     deposit=models.IntegerField(default=store_deposit,editable=False)
-    deposit_desc=models.CharField(default='保证金',max_length=255)
+    deposit_desc=models.CharField(default='保证金',max_length=255,editable=False)
     has_paid=models.BooleanField(default=False,editable=False)
     has_paid_money=models.IntegerField(default=0,editable=False)
     success_paid_time=models.DateTimeField(editable=False)
