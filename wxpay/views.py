@@ -66,8 +66,8 @@ class NotifyOrderView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         with open('pay.txt','wb') as f:
             f.write(request.body)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        # serializer = self.get_serializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
         return Response({"return_code": "SUCCESS", "return_msg": "OK"})
         # data=copy.copy(serializer.validated_data)
         # received_sign=data.pop('sign','')
