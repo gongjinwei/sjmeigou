@@ -37,7 +37,7 @@ class Deposit(models.Model):
     deposit_desc=models.CharField(default='保证金',max_length=255,editable=False)
     has_paid=models.BooleanField(default=False,editable=False)
     has_paid_money=models.IntegerField(default=0,editable=False)
-    success_paid_time=models.DateTimeField(editable=False)
+    success_paid_time=models.DateTimeField(editable=False,blank=True,null=True)
 
 
 
