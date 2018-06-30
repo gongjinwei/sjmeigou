@@ -103,6 +103,6 @@ class DepositView(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        models.Deposit.objects.get_or_create(defaults={**serializer.validated_data},application=serializer.validated_data['application'])
+        models.Deposit.objects.get_or_create(defaults=serializer.validated_data,application=serializer.validated_data['application'])
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
