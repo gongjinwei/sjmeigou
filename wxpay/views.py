@@ -1,4 +1,4 @@
-import time, copy
+import time, copy,json
 from django.conf import settings
 from django.http import HttpResponse
 from rest_framework.views import Response, status
@@ -61,9 +61,11 @@ class NotifyOrderView(ModelViewSet):
     queryset = models.NotifyOrderModel.objects.all()
     permission_classes = (AllowAny,)
     renderer_classes = (CustomerXMLRender,)
-    parser_classes = (CustomerXMLParser,)
+    # parser_classes = (CustomerXMLParser,)
 
     def create(self, request, *args, **kwargs):
+        with open('pay.txt','wb') as f:
+            f.write(request.body)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({"return_code": "SUCCESS", "return_msg": "OK"})
