@@ -107,6 +107,6 @@ class DepositView(ModelViewSet):
 
             obj,created=models.Deposit.objects.get_or_create(defaults={'application':request.user.application},application=request.user.application)
 
-            return Response(serializers.DepositSerializer(instance=obj), status=status.HTTP_201_CREATED)
+            return Response(serializers.DepositSerializer(instance=obj).data, status=status.HTTP_201_CREATED)
         else:
             return Response('您无此申请号',status=status.HTTP_400_BAD_REQUEST)
