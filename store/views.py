@@ -109,4 +109,4 @@ class DepositView(ModelViewSet):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response('无此application',status=status.HTTP_400_BAD_REQUEST)
+            return Response('您无此申请号',status=status.HTTP_400_BAD_REQUEST)
