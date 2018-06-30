@@ -55,27 +55,24 @@ class UnifiedOrderView(viewset.CreateOnlyViewSet):
             return Response('用户不存在')
 
 
-# class NotifyOrderView(viewset.CreateOnlyViewSet):
-class NotifyOrderView(ModelViewSet):
+class NotifyOrderView(viewset.CreateOnlyViewSet):
     serializer_class = serializers.NotifyOrderSerializer
     queryset = models.NotifyOrderModel.objects.all()
     permission_classes = (AllowAny,)
     renderer_classes = (CustomerXMLRender,)
-    # parser_classes = (CustomerXMLParser,)
+    parser_classes = (CustomerXMLParser,)
 
     def create(self, request, *args, **kwargs):
-        with open('pay.txt','wb') as f:
-            f.write(request.body)
-        # serializer = self.get_serializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
-        return Response({"return_code": "SUCCESS", "return_msg": "OK"})
-        # data=copy.copy(serializer.validated_data)
-        # received_sign=data.pop('sign','')
-        # sign=weixinpay.sign(data)
-        # if received_sign==sign:
-        #     self.perform_create(serializer)
-        #     return Response({"return_code":"SUCCESS","return_msg":"OK"})
-        # else:
-        #     return Response({"return_code":"False","return_msg":"sign error"})
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data=copy.copy(serializer.validated_data)
+        received_sign=data.pop('sign','')
+        sign=weixinpay.sign(data)
+        if received_sign==sign:
+            self.perform_create(serializer)
+            return Response({"return_code":"SUCCESS","return_msg":"OK"})
+        else:
+            return Response({"return_code":"False","return_msg":"sign error"})
 
 
