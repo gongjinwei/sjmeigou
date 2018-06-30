@@ -98,3 +98,11 @@ class DepositView(ModelViewSet):
             return models.Deposit.objects.filter(application=self.request.user.application)
 
         return models.Deposit.objects.none()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        models.Deposit.objects.get_or_create(defaults={**serializer.validated_data},application=serializer.validated_data['application'])
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
