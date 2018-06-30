@@ -20,3 +20,10 @@ class StoresSerializer(serializers.ModelSerializer):
 class StatusChangeSerializer(serializers.Serializer):
     application_status=serializers.ChoiceField(choices=[1,2,3,4,5,6])
     application_id=serializers.CharField(max_length=20)
+
+
+class DepositSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Deposit
+        fields='__all__'

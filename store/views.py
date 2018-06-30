@@ -85,3 +85,16 @@ class StatusChangeView(CreateOnlyViewSet):
             return Response('success')
         else:
             return Response('Not exists',status=status.HTTP_400_BAD_REQUEST)
+
+
+class DepositView(ModelViewSet):
+    serializer_class = serializers.DepositSerializer
+
+    def get_queryset(self):
+
+        if self.request.user.is_staff:
+            return models.Deposit.objects.all()
+        elif self.request.user.is_authenticated:
+            return models.Deposit.objects.filter(application=self.request.user.application)
+
+        return models.Deposit.objects.none()

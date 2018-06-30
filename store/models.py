@@ -9,6 +9,7 @@ from index.models import Application
 
 store_deposit=1000
 
+
 class CodeWarehouse(models.Model):
     application=models.OneToOneField(to=Application,on_delete=models.DO_NOTHING)
     code=models.CharField(max_length=16,editable=False,unique=True)
@@ -30,13 +31,16 @@ class Stores(models.Model):
 
 
 class Deposit(models.Model):
-    user = models.OneToOneField(to=User,on_delete=models.DO_NOTHING)
-    application_id=models.OneToOneField(to=Application,on_delete=models.DO_NOTHING)
+    application=models.OneToOneField(to=Application,on_delete=models.DO_NOTHING)
     put_in_time=models.DateTimeField(auto_now_add=True,editable=False)
     deposit=models.IntegerField(default=store_deposit,editable=False)
     deposit_desc=models.CharField(default='保证金',max_length=255)
     has_paid=models.BooleanField(default=False,editable=False)
+    has_paid_money=models.IntegerField(default=0,editable=False)
     success_paid_time=models.DateTimeField(editable=False)
+
+
+
 
 
 
