@@ -23,6 +23,7 @@ class StatusChangeSerializer(serializers.Serializer):
 
 
 class DepositSerializer(serializers.ModelSerializer):
+    application=serializers.CharField(max_length=20,required=True)
 
     class Meta:
         model = models.Deposit
