@@ -103,7 +103,7 @@ class DepositView(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         application_id=serializer.validated_data['application']
-        if request.user.application_id==application_id:
+        if request.user.application.application_id==application_id:
 
             models.Deposit.objects.get_or_create(defaults={'application':request.user.application},application=request.user.application)
 
