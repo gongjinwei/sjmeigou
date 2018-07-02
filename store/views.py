@@ -162,3 +162,7 @@ class StoreQRCodeViewSets(CreateOnlyViewSet):
 class StoreInfoView(RetrieveOnlyViewSet):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.StoreInfoSerializer
+
+class EnterpriseQualificationView(RetrieveOnlyViewSet):
+    queryset = models.Stores.objects.all()
+    serializer_class = serializers.EnterpriseQualificationSerializer

@@ -57,3 +57,13 @@ class StoreInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Stores
         fields=('id','business_hours','active_state','create_time','store_name','address_name','longitude','latitude','store_phone','store_images')
+
+
+class EnterpriseQualificationSerializer(serializers.ModelSerializer):
+    license_unit_name=serializers.ReadOnlyField(source='info.license_unit_name')
+    license_legal_representative=serializers.ReadOnlyField(source='info.license_legal_representative')
+    store_licence_pic=serializers.ReadOnlyField(source='info.store_licence_pic')
+
+    class Meta:
+        model = models.Stores
+        fields=('license_unit_name','license_legal_representative','store_licence_pic')
