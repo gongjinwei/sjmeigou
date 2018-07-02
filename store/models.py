@@ -40,6 +40,16 @@ class Deposit(models.Model):
     success_paid_time=models.DateTimeField(editable=False,blank=True,null=True)
 
 
+class StoreQRCode(models.Model):
+    store=models.ForeignKey(to='Stores',on_delete=models.CASCADE)
+    path=models.CharField(max_length=255)
+    width=models.IntegerField(default=430)
+    QRCodeImage=models.ImageField(upload_to='sjmeigou/stores/QRcode',null=True,blank=True,editable=False)
+    create_time=models.DateTimeField(auto_now_add=True)
+
+
+
+
 
 
 

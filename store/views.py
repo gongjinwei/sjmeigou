@@ -3,17 +3,25 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 
 from django.utils.crypto import get_random_string
+from django.conf import settings
+from django.core.files.base import ContentFile
 
 from register.viewset import CreateOnlyViewSet
 
 from guardian.shortcuts import assign_perm
-from django.contrib.auth.models import Group
+
+import requests,uuid
+
 
 # Create your views here.
 
 from . import serializers, models
 from index.models import Application
+from tools.permissions import MerchantPermission
 
+
+appid=getattr(settings,'APPID')
+secret=getattr(settings,'APPSECRET')
 
 class GenerateCodeView(CreateOnlyViewSet):
     queryset = models.CodeWarehouse.objects.all()
@@ -110,3 +118,40 @@ class DepositView(ModelViewSet):
             return Response(serializers.DepositSerializer(instance=obj).data, status=status.HTTP_201_CREATED)
         else:
             return Response('您无此申请号',status=status.HTTP_400_BAD_REQUEST)
+
+
+class StoreQRCodeViewSets(CreateOnlyViewSet):
+    serializer_class = serializers.StoreQRCodeSerializer
+    permission_classes = (MerchantPermission,)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if models.StoreQRCode.objects.filter(**serializer.validated_data).exists():
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        else:
+            r = requests.get(
+                'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s' % (
+                    appid, secret)).json()
+            access_token = r.get("access_token", "")
+            if access_token:
+                store = serializer.validated_data['store']
+                # 指定上传参数
+                data = {
+                    "path": serializer.validated_data['path'] + "?store=%s" % store.id,
+                    "width": serializer.validated_data['width']
+                }
+
+                # 发送请求，错误则返回所有信息
+                res = requests.post("https://api.weixin.qq.com/wxa/getwxacode?access_token=%s" % access_token,
+                                    json=data, headers={'Content-Type': "application/json"})
+                if res.status_code == 200:
+                    # 生成内容文件
+                    content = ContentFile(res.content)
+                    storeqrcode=models.StoreQRCode.save(**serializer.validated_data)
+                    storeqrcode.QRCodeImage.save('%s.jpg' % str(uuid.uuid4()).replace('-',''),content)
+                    return Response(serializers.StoreQRCodeSerializer(storeqrcode).data,status=status.HTTP_201_CREATED)
+
+            else:
+                return Response(r, status=status.HTTP_400_BAD_REQUEST)

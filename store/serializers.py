@@ -28,3 +28,10 @@ class DepositSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Deposit
         fields='__all__'
+
+
+class StoreQRCodeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.StoreQRCode
+        fields='__all__'
