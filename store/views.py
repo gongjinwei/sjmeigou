@@ -122,14 +122,14 @@ class DepositView(ModelViewSet):
 
 class StoreQRCodeViewSets(CreateOnlyViewSet):
     serializer_class = serializers.StoreQRCodeSerializer
-    # permission_classes = (MerchantOrReadOnlyPermission,)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         if models.StoreQRCode.objects.filter(**serializer.validated_data).exists():
-            return Response(serializer.data,status=status.HTTP_200_OK)
+            storeqrcode=models.StoreQRCode.objects.filter(**serializer.validated_data)[0]
+            return Response(self.serializer_class(storeqrcode).data,status=status.HTTP_200_OK)
         else:
             r = requests.get(
                 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s' % (
@@ -149,8 +149,10 @@ class StoreQRCodeViewSets(CreateOnlyViewSet):
                 if res.status_code == 200:
                     # 生成内容文件
                     content = ContentFile(res.content)
-                    storeqrcode=models.StoreQRCode.save(**serializer.validated_data)
+                    storeqrcode=models.StoreQRCode(**serializer.validated_data)
+                    storeqrcode.save()
                     storeqrcode.QRCodeImage.save('%s.jpg' % str(uuid.uuid4()).replace('-',''),content)
+
                     return Response(serializers.StoreQRCodeSerializer(storeqrcode).data,status=status.HTTP_201_CREATED)
 
             else:
