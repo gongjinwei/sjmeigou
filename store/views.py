@@ -6,7 +6,7 @@ from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.core.files.base import ContentFile
 
-from register.viewset import CreateOnlyViewSet
+from tools.viewset import CreateOnlyViewSet,ListOnlyViewSet,RetrieveOnlyViewSet
 
 from guardian.shortcuts import assign_perm
 
@@ -17,8 +17,6 @@ import requests,uuid
 
 from . import serializers, models
 from index.models import Application
-from tools.permissions import MerchantOrReadOnlyPermission
-
 
 appid=getattr(settings,'APPID')
 secret=getattr(settings,'APPSECRET')
@@ -68,7 +66,7 @@ class StoresViewSets(ModelViewSet):
             return Response('激活码错误或已经使用过了',status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user,active_state=True)
+        serializer.save(user=self.request.user,active_state=1)
 
     def get_queryset(self):
 
@@ -154,6 +152,12 @@ class StoreQRCodeViewSets(CreateOnlyViewSet):
                     storeqrcode.QRCodeImage.save('%s.jpg' % str(uuid.uuid4()).replace('-',''),content)
 
                     return Response(serializers.StoreQRCodeSerializer(storeqrcode).data,status=status.HTTP_201_CREATED)
+                else:
+                    return Response(res.json(),status=status.HTTP_400_BAD_REQUEST)
 
             else:
                 return Response(r, status=status.HTTP_400_BAD_REQUEST)
+
+class StoreInfoView(RetrieveOnlyViewSet):
+    queryset = models.Stores.objects.all()
+    serializer_class = serializers.StoreInfoSerializer

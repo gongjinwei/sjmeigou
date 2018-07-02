@@ -1,9 +1,7 @@
-from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import AllowAny
-from rest_framework.views import Response,status
+from rest_framework.views import Response
 
-from register.viewset import ListOnlyViewSet
+from tools.viewset import ListOnlyViewSet
 
 from . import models,serializers
 from goods.serializers import FirstClassSerializer

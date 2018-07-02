@@ -1,12 +1,10 @@
-import time, copy,json
+import time, copy
 from django.conf import settings
-from django.http import HttpResponse
-from rest_framework.views import Response, status
+from rest_framework.views import Response
 from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import ModelViewSet
 from register.models import UserInfo
 
-from register import viewset
+from tools import viewset
 
 from weixin.pay import WeixinPay
 

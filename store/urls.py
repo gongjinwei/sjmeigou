@@ -10,5 +10,6 @@ router.register('stores',views.StoresViewSets,base_name='stores')
 router.register('statusChange',views.StatusChangeView,base_name='statusChange')
 router.register('deposit',views.DepositView,base_name='deposit')
 router.register('storeQRCode',views.StoreQRCodeViewSets,base_name='storeQRCode')
+router.register('storeInfo',views.StoreInfoView,base_name='storeInfo')
 
 urlpatterns=router.urls

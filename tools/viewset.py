@@ -22,3 +22,7 @@ class ListOnlyViewSet(mixins.ListModelMixin,GenericViewSet):
 
 class CreateListViewSet(mixins.CreateModelMixin,mixins.ListModelMixin,GenericViewSet):
     pass
+
+
+class RetrieveOnlyViewSet(mixins.RetrieveModelMixin,GenericViewSet):
+    pass
