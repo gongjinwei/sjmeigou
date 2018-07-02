@@ -2,6 +2,8 @@
 from rest_framework import serializers
 from . import models
 
+import time
+
 
 class GenerateCodeSerializer(serializers.ModelSerializer):
 
@@ -47,7 +49,7 @@ class StoreInfoSerializer(serializers.ModelSerializer):
     store_images=serializers.SerializerMethodField()
 
     def get_business_hours(self,obj):
-        return "%s/%s" % (obj.business_hour_from,obj.business_hour_to)
+        return "{0.hour}:{0.minute}/{1.hour}:{1.minute}".format(obj.business_hour_from,obj.business_hour_to)
 
     def get_store_images(self,obj):
         return obj.info.store_images.values('store_image')

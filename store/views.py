@@ -158,6 +158,7 @@ class StoreQRCodeViewSets(CreateOnlyViewSet):
             else:
                 return Response(r, status=status.HTTP_400_BAD_REQUEST)
 
+
 class StoreInfoView(RetrieveOnlyViewSet):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.StoreInfoSerializer
