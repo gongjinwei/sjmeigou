@@ -17,7 +17,7 @@ import requests,uuid
 
 from . import serializers, models
 from index.models import Application
-from tools.permissions import MerchantPermission
+from tools.permissions import MerchantOrReadOnlyPermission
 
 
 appid=getattr(settings,'APPID')
@@ -122,7 +122,7 @@ class DepositView(ModelViewSet):
 
 class StoreQRCodeViewSets(CreateOnlyViewSet):
     serializer_class = serializers.StoreQRCodeSerializer
-    permission_classes = (MerchantPermission,)
+    # permission_classes = (MerchantOrReadOnlyPermission,)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -140,7 +140,7 @@ class StoreQRCodeViewSets(CreateOnlyViewSet):
                 # 指定上传参数
                 data = {
                     "path": serializer.validated_data['path'] + "?store=%s" % store.id,
-                    "width": serializer.validated_data['width']
+                    "width": serializer.validated_data.get('width',430)
                 }
 
                 # 发送请求，错误则返回所有信息

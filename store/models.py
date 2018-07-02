@@ -29,6 +29,9 @@ class Stores(models.Model):
     create_time=models.DateTimeField(auto_now_add=True,editable=False)
     update_time=models.DateTimeField(auto_now=True,editable=False)
 
+    def __str__(self):
+        return self.info.store_name
+
 
 class Deposit(models.Model):
     application=models.OneToOneField(to=Application,on_delete=models.DO_NOTHING)
