@@ -169,6 +169,9 @@ class EnterpriseQualificationView(RetrieveOnlyViewSet):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.EnterpriseQualificationSerializer
 
-class GoodsTypeView(ModelViewSet):
-    queryset = models.GoodsType.objects.all()
-    serializer_class = serializers.GoodsTypeSerializer
+
+class StoreGoodsTypeView(ModelViewSet):
+    queryset = models.StoreGoodsType.objects.all()
+    serializer_class = serializers.StoreGoodsTypeSerializer
+
+

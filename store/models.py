@@ -52,10 +52,17 @@ class StoreQRCode(models.Model):
 
 
 class GoodsType(models.Model):
-    store = models.ForeignKey(to="Stores",on_delete=models.CASCADE)
+    store_goods_type=models.ForeignKey(to='StoreGoodsType',on_delete=models.CASCADE,related_name='good_types')
     name = models.CharField(max_length=10)
     order_num=models.SmallIntegerField()
-    update_date=models.DateField(auto_now=True)
+    update_date=models.DateField()
+
+    class Meta:
+        unique_together=('store_goods_type','name')
+
+
+class StoreGoodsType(models.Model):
+    store=models.ForeignKey(to="Stores",on_delete=models.CASCADE)
 
 
 

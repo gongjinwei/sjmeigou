@@ -2,8 +2,7 @@
 from rest_framework import serializers
 from . import models
 
-import time
-
+from goods.models import GoodDetail
 
 class GenerateCodeSerializer(serializers.ModelSerializer):
 
@@ -69,7 +68,31 @@ class EnterpriseQualificationSerializer(serializers.ModelSerializer):
         fields=('license_unit_name','license_legal_representative','store_licence_pic')
 
 
+class GoodDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GoodDetail
+        fields=('id','good_type')
+
+
 class GoodsTypeSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = models.GoodsType
-        fields="__all__"
+        exclude=('store_goods_type',)
+
+
+class StoreGoodsTypeSerializer(serializers.ModelSerializer):
+    good_types=GoodsTypeSerializer(many=True)
+
+    def create(self, validated_data):
+        type_data=validated_data.pop('goodsType')
+        store_good_type=models.StoreGoodsType.objects.update_or_create(defaults=validated_data,**validated_data)
+
+        for data in type_data:
+            data.update(store_good_type=store_good_type)
+
+            models.GoodsType.objects.update_or_create(defaults=data,**data)
+
+
+
