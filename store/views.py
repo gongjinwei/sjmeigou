@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveOnlyViewSet
+from tools.permissions import MerchantOrReadOnlyPermission
 
 from guardian.shortcuts import assign_perm
 
@@ -172,6 +173,7 @@ class EnterpriseQualificationView(RetrieveOnlyViewSet):
 
 class StoreGoodsTypeView(CreateOnlyViewSet):
     serializer_class = serializers.StoreGoodsTypeSerializer
+    permission_classes = (MerchantOrReadOnlyPermission,)
 
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -184,6 +186,7 @@ class StoreGoodsTypeView(CreateOnlyViewSet):
 
 class GoodsTypeView(ListDeleteViewSet):
     serializer_class = serializers.GoodsTypeSerializer
+    permission_classes = (MerchantOrReadOnlyPermission,)
 
     def get_queryset(self):
         if self.request.user.is_staff:
