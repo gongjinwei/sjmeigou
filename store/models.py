@@ -58,7 +58,7 @@ class GoodsType(models.Model):
     update_date=models.DateField()
 
     class Meta:
-        unique_together=('store_goods_type','name')
+        unique_together=('store_goods_type','order_num')
 
 
 class StoreGoodsType(models.Model):

@@ -94,7 +94,7 @@ class StoreGoodsTypeSerializer(serializers.ModelSerializer):
         store_good_type,created=models.StoreGoodsType.objects.update_or_create(defaults=validated_data,**validated_data)
 
         for data in type_data:
-            data.update(store_good_type=store_good_type)
+            data.update(store_goods_type=store_good_type)
 
             models.GoodsType.objects.update_or_create(defaults=data,**data)
         return store_good_type
