@@ -72,7 +72,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GoodDetail
-        fields=('id','good_type')
+        fields=('id','good_type','create_time','min_price','state')
 
 
 class GoodsTypeSerializer(serializers.ModelSerializer):
@@ -98,5 +98,7 @@ class StoreGoodsTypeSerializer(serializers.ModelSerializer):
 
             models.GoodsType.objects.update_or_create(defaults=data,order_num=data.get('order_num'),store_goods_type=store_good_type)
         return store_good_type
+
+
 
 

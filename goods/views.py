@@ -120,7 +120,7 @@ class GoodDetailView(ModelViewSet):
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user,store=self.request.user.stores)
 
 
 

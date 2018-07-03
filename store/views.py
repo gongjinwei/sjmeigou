@@ -1,6 +1,7 @@
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import action
 
 from django.utils.crypto import get_random_string
 from django.conf import settings
@@ -17,6 +18,7 @@ import requests, uuid
 
 from . import serializers, models
 from index.models import Application
+from goods.models import GoodDetail
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
@@ -186,7 +188,7 @@ class StoreGoodsTypeView(CreateOnlyViewSet):
 
 class GoodsTypeView(ListDeleteViewSet):
     serializer_class = serializers.GoodsTypeSerializer
-    permission_classes = (MerchantOrReadOnlyPermission,)
+    # permission_classes = (MerchantOrReadOnlyPermission,)
 
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -195,4 +197,21 @@ class GoodsTypeView(ListDeleteViewSet):
             return models.GoodsType.objects.filter(store_goods_type__store=getattr(self.request.user,'stores',0))
 
         return models.GoodsType.objects.none()
+
+    @action(methods=['get'],detail=True,serializer_class=serializers.GoodDetailSerializer)
+    def goods(self,request,pk=None):
+
+        queryset = GoodDetail.objects.filter(good_type_id=pk)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+
+
 
