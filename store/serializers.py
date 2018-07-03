@@ -91,7 +91,7 @@ class StoreGoodsTypeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         type_data=validated_data.pop('good_types')
-        store_good_type=models.StoreGoodsType.objects.update_or_create(defaults=validated_data,**validated_data)
+        store_good_type,created=models.StoreGoodsType.objects.update_or_create(defaults=validated_data,**validated_data)
 
         for data in type_data:
             data.update(store_good_type=store_good_type)
