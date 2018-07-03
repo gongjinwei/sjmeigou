@@ -51,6 +51,13 @@ class StoreQRCode(models.Model):
     create_time=models.DateTimeField(auto_now_add=True)
 
 
+class GoodsType(models.Model):
+    store = models.ForeignKey(to="Stores",on_delete=models.CASCADE)
+    name = models.CharField(max_length=10)
+    order_num=models.SmallIntegerField()
+    update_date=models.DateField(auto_now=True)
+
+
 
 
 

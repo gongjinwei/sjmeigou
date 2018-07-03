@@ -67,3 +67,9 @@ class EnterpriseQualificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Stores
         fields=('license_unit_name','license_legal_representative','store_licence_pic')
+
+
+class GoodsTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.GoodsType
+        fields="__all__"

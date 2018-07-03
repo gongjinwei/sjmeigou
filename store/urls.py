@@ -12,5 +12,6 @@ router.register('deposit',views.DepositView,base_name='deposit')
 router.register('storeQRCode',views.StoreQRCodeViewSets,base_name='storeQRCode')
 router.register('storeInfo',views.StoreInfoView,base_name='storeInfo')
 router.register('enterpriseQualification',views.EnterpriseQualificationView,base_name='enterpriseQualification')
+router.register('goodsType',views.GoodsTypeView,base_name='goodsType')
 
 urlpatterns=router.urls
