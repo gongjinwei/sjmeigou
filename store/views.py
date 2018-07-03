@@ -171,7 +171,6 @@ class EnterpriseQualificationView(RetrieveOnlyViewSet):
 
 
 class StoreGoodsTypeView(ModelViewSet):
-    queryset = models.StoreGoodsType.objects.all()
     serializer_class = serializers.StoreGoodsTypeSerializer
 
     def get_queryset(self):
@@ -181,4 +180,16 @@ class StoreGoodsTypeView(ModelViewSet):
             return models.StoreGoodsType.objects.filter(store=getattr(self.request.user,'stores',0))
 
         return models.StoreGoodsType.objects.none()
+
+
+class GoodsTypeView(ModelViewSet):
+    serializer_class = serializers.GoodsTypeSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return models.GoodsType.objects.all()
+        elif self.request.user.is_authenticated:
+            return models.GoodsType.objects.filter(store=getattr(self.request.user,'stores',0))
+
+        return models.GoodsType.objects.none()
 
