@@ -174,4 +174,11 @@ class StoreGoodsTypeView(ModelViewSet):
     queryset = models.StoreGoodsType.objects.all()
     serializer_class = serializers.StoreGoodsTypeSerializer
 
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return models.StoreGoodsType.objects.all()
+        elif self.request.user.is_authenticated:
+            return models.StoreGoodsType.objects.filter(store=getattr(self.request.user,'stores',0))
+
+        return models.StoreGoodsType.objects.none()
 
