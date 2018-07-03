@@ -81,9 +81,21 @@ class StoresViewSets(ModelViewSet):
         return models.Stores.objects.none()
 
     @action(methods=['get'],detail=True,serializer_class=serializers.GoodDetailSerializer)
-    def goods(self,request,pk=None):
+    def all_goods(self,request,pk=None):
 
         queryset = GoodDetail.objects.filter(store_id=pk)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'],detail=True,serializer_class=serializers.GoodDetailSerializer)
+    def un_type_goods(self,request,pk=None):
+        queryset = GoodDetail.objects.filter(store_id=pk,good_type=None)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
