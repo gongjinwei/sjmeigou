@@ -6,7 +6,7 @@ from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.core.files.base import ContentFile
 
-from tools.viewset import CreateOnlyViewSet, ListOnlyViewSet, RetrieveOnlyViewSet
+from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveOnlyViewSet
 
 from guardian.shortcuts import assign_perm
 
@@ -182,7 +182,7 @@ class StoreGoodsTypeView(CreateOnlyViewSet):
         return models.StoreGoodsType.objects.none()
 
 
-class GoodsTypeView(ModelViewSet):
+class GoodsTypeView(ListDeleteViewSet):
     serializer_class = serializers.GoodsTypeSerializer
 
     def get_queryset(self):
