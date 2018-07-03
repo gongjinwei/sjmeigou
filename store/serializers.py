@@ -96,7 +96,7 @@ class StoreGoodsTypeSerializer(serializers.ModelSerializer):
         for data in type_data:
             data.update(store_goods_type=store_good_type)
 
-            models.GoodsType.objects.get_or_create(defaults=data,name=data.get('order_num'),store_goods_type=store_good_type)
+            models.GoodsType.objects.get_or_create(defaults=data,order_num=data.get('order_num'),store_goods_type=store_good_type)
         return store_good_type
 
 
