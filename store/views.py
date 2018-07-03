@@ -189,7 +189,7 @@ class GoodsTypeView(ListDeleteViewSet):
         if self.request.user.is_staff:
             return models.GoodsType.objects.all()
         elif self.request.user.is_authenticated:
-            return models.GoodsType.objects.filter(store=getattr(self.request.user,'stores',0))
+            return models.GoodsType.objects.filter(store_goods_type__store=getattr(self.request.user,'stores',0))
 
         return models.GoodsType.objects.none()
 
