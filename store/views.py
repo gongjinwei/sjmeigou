@@ -80,6 +80,19 @@ class StoresViewSets(ModelViewSet):
 
         return models.Stores.objects.none()
 
+    @action(methods=['get'],detail=True,serializer_class=serializers.GoodDetailSerializer)
+    def goods(self,request,pk=None):
+
+        queryset = GoodDetail.objects.filter(store_id=pk)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class StatusChangeView(CreateOnlyViewSet):
     serializer_class = serializers.StatusChangeSerializer
@@ -198,18 +211,7 @@ class GoodsTypeView(ListDeleteViewSet):
 
         return models.GoodsType.objects.none()
 
-    @action(methods=['get'],detail=True,serializer_class=serializers.GoodDetailSerializer)
-    def goods(self,request,pk=None):
 
-        queryset = GoodDetail.objects.filter(good_type_id=pk)
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
 
 
