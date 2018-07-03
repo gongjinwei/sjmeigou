@@ -59,6 +59,7 @@ class GoodsType(models.Model):
 
     class Meta:
         unique_together=('store_goods_type','order_num')
+        ordering=('order_num',)
 
 
 class StoreGoodsType(models.Model):
