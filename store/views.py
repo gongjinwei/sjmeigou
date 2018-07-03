@@ -170,7 +170,7 @@ class EnterpriseQualificationView(RetrieveOnlyViewSet):
     serializer_class = serializers.EnterpriseQualificationSerializer
 
 
-class StoreGoodsTypeView(ModelViewSet):
+class StoreGoodsTypeView(CreateOnlyViewSet):
     serializer_class = serializers.StoreGoodsTypeSerializer
 
     def get_queryset(self):
