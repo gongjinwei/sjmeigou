@@ -247,7 +247,7 @@ class GoodsTypeView(ListDeleteViewSet):
             owner_good_ids = GoodDetail.objects.filter(owner=request.user)
             if good_ids and good_ids in owner_good_ids and good_type.store_goods_type.store == request.user.stores:
                 GoodDetail.objects.filter(id__in=good_ids).update(good_type=good_type)
-            if put_on_sale_ids and put_on_sale_ids in owner_good_ids and good_type.store_goods_type.store == request.user.stores:
+            if put_on_sale_ids and put_on_sale_ids in owner_good_ids:
                 GoodDetail.objects.filter(id__in=put_on_sale_ids).update(state=0)
             return Response('ok')
         else:
