@@ -7,7 +7,9 @@ from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import FilterSet
 from rest_framework.filters import SearchFilter
+
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveOnlyViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
@@ -188,12 +190,23 @@ class StoreGoodsTypeView(CreateOnlyViewSet):
         return models.StoreGoodsType.objects.none()
 
 
+class PriceFilter(FilterSet):
+    class Meta:
+        model = GoodDetail
+        fields={
+            'min_price':['lte','gte'],
+            'state':['exact'],
+            'title':['exact','contains']
+        }
+
+
 class GoodsTypeView(ListDeleteViewSet):
     serializer_class = serializers.GoodDetailSerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
     queryset = GoodDetail.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields=('title','min_price','state')
+    filter_class=PriceFilter
+    search_fields=('title__contains','min_price__lte','min_price__gte','state')
 
     def list(self, request, *args, **kwargs):
         store_id = self.request.query_params.get('store', '0')
