@@ -100,5 +100,8 @@ class StoreGoodsTypeSerializer(serializers.ModelSerializer):
         return store_good_type
 
 
+class AddGoodsSerializer(serializers.Serializer):
+    good_list=serializers.ListField()
+
 
 
