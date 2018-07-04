@@ -6,6 +6,8 @@ from rest_framework.decorators import action
 from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveOnlyViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
@@ -79,31 +81,6 @@ class StoresViewSets(ModelViewSet):
             return models.Stores.objects.filter(user=self.request.user)
 
         return models.Stores.objects.none()
-
-    @action(methods=['get'],detail=True,serializer_class=serializers.GoodDetailSerializer)
-    def all_goods(self,request,pk=None):
-
-        queryset = GoodDetail.objects.filter(store_id=pk)
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @action(methods=['get'],detail=True,serializer_class=serializers.GoodDetailSerializer)
-    def un_type_goods(self,request,pk=None):
-        queryset = GoodDetail.objects.filter(store_id=pk,good_type=None)
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
 
 class StatusChangeView(CreateOnlyViewSet):
@@ -206,26 +183,44 @@ class StoreGoodsTypeView(CreateOnlyViewSet):
         if self.request.user.is_staff:
             return models.StoreGoodsType.objects.all()
         elif self.request.user.is_authenticated:
-            return models.StoreGoodsType.objects.filter(store=getattr(self.request.user,'stores',0))
+            return models.StoreGoodsType.objects.filter(store=getattr(self.request.user, 'stores', 0))
 
         return models.StoreGoodsType.objects.none()
 
 
 class GoodsTypeView(ListDeleteViewSet):
-    serializer_class = serializers.GoodsTypeSerializer
-    # permission_classes = (MerchantOrReadOnlyPermission,)
+    serializer_class = serializers.GoodDetailSerializer
+    permission_classes = (MerchantOrReadOnlyPermission,)
+    queryset = GoodDetail.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields=('title','min_price','state')
 
-    def get_queryset(self):
-        if self.request.user.is_staff:
-            return models.GoodsType.objects.all()
-        elif self.request.user.is_authenticated:
-            return models.GoodsType.objects.filter(store_goods_type__store=getattr(self.request.user,'stores',0))
+    def list(self, request, *args, **kwargs):
+        store_id = self.request.query_params.get('store', '0')
+        good_type = self.request.query_params.get('good_type', '')
+        serializer_class = serializers.GoodDetailSerializer
+        try:
+            store_id = int(store_id)
 
-        return models.GoodsType.objects.none()
+            # 不加good_type返回类型，good_type=0返回所有，good_type=null返回未分类，其他返回筛选结果
+            if good_type == '':
+                queryset = models.GoodsType.objects.filter(store_goods_type__store_id=store_id)
+                serializer_class = serializers.GoodsTypeSerializer
+            elif good_type == '0':
+                queryset = self.filter_queryset(GoodDetail.objects.filter(store_id=store_id))
+            elif good_type == 'null':
+                queryset = self.filter_queryset(GoodDetail.objects.filter(store_id=store_id, good_type_id=None))
+            else:
+                good_type_id = int(good_type)
+                queryset = self.filter_queryset(GoodDetail.objects.filter(store_id=store_id, good_type_id=good_type_id))
 
+        except ValueError:
+            queryset = GoodDetail.objects.none()
 
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = serializer_class(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-
-
-
-
+        serializer = serializer_class(queryset, many=True)
+        return Response(serializer.data)

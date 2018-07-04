@@ -72,7 +72,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GoodDetail
-        fields=('id','good_type','create_time','min_price','state')
+        fields=('id','title','good_type','create_time','min_price','state')
 
 
 class GoodsTypeSerializer(serializers.ModelSerializer):
