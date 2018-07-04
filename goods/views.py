@@ -1,11 +1,12 @@
 from django.shortcuts import render
 
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.views import Response,status
+from rest_framework.views import Response, status
 
-
-from . import models,serializers
+from . import models, serializers
 from tools.permissions import MerchantOrReadOnlyPermission
+
+
 # Create your views here.
 
 
@@ -31,7 +32,7 @@ class FirstPropertyView(ModelViewSet):
 
     def get_queryset(self):
         try:
-            third_class=int(self.request.query_params.get('third_class','0'))
+            third_class = int(self.request.query_params.get('third_class', '0'))
         except ValueError:
             return models.FirstProperty.objects.none()
 
@@ -43,19 +44,19 @@ class FirstPropertyView(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
 
         try:
-            third_class_id=int(self.request.query_params.get('third_class','0'))
+            third_class_id = int(self.request.query_params.get('third_class', '0'))
         except ValueError:
-            return Response('类目不存在',status=status.HTTP_400_BAD_REQUEST)
+            return Response('类目不存在', status=status.HTTP_400_BAD_REQUEST)
 
         if models.ThirdClass.objects.filter(pk=third_class_id).exists():
-            third_class=models.ThirdClass.objects.get(pk=third_class_id)
+            third_class = models.ThirdClass.objects.get(pk=third_class_id)
             third_class_data = serializers.ThirdClassSerializer(instance=third_class).data
         else:
-            third_class_data=[]
+            third_class_data = []
 
         return Response({
-            'properties':serializer.data,
-            'third_class_sizes':third_class_data
+            'properties': serializer.data,
+            'third_class_sizes': third_class_data
         })
 
     def perform_create(self, serializer):
@@ -82,7 +83,7 @@ class ThirdClassView(ModelViewSet):
 
     def get_queryset(self):
         try:
-            second_class=int(self.request.query_params.get('second_class','0'))
+            second_class = int(self.request.query_params.get('second_class', '0'))
         except ValueError:
             return models.ThirdClass.objects.none()
         return models.ThirdClass.objects.filter(second_class_id=second_class)
@@ -120,9 +121,9 @@ class GoodDetailView(ModelViewSet):
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user,store=self.request.user.stores)
-
-
-
-
-
+        put_on_strategy = serializer.validated_data.get('put_on_strategy', 0)
+        if put_on_strategy == 0:
+            state = 0
+        else:
+            state = 1
+        serializer.save(owner=self.request.user, store=self.request.user.stores, state=state)
