@@ -9,7 +9,6 @@ from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
 
-
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveOnlyViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
 
@@ -192,10 +191,10 @@ class StoreGoodsTypeView(CreateOnlyViewSet):
 class PriceFilterClass(FilterSet):
     class Meta:
         model = GoodDetail
-        fields={
-            'min_price':['lte','gte'],
-            'state':['exact'],
-            'title':['exact','contains']
+        fields = {
+            'min_price': ['lte', 'gte'],
+            'state': ['exact'],
+            'title': ['exact', 'contains']
         }
 
 
@@ -204,8 +203,8 @@ class GoodsTypeView(ListDeleteViewSet):
     permission_classes = (MerchantOrReadOnlyPermission,)
     queryset = GoodDetail.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_class=PriceFilterClass
-    filter_fields=('title__contains','min_price__lte','min_price__gte','state')
+    filter_class = PriceFilterClass
+    filter_fields = ('title__contains', 'min_price__lte', 'min_price__gte', 'state')
 
     def list(self, request, *args, **kwargs):
         store_id = self.request.query_params.get('store', '0')
@@ -237,18 +236,18 @@ class GoodsTypeView(ListDeleteViewSet):
         serializer = serializer_class(queryset, many=True)
         return Response(serializer.data)
 
-    @action(methods=['post'],detail=True,serializer_class=serializers.AddGoodsSerializer)
-    def add_goods(self,request,pk=None):
+    @action(methods=['post'], detail=True, serializer_class=serializers.AddGoodsSerializer)
+    def add_goods(self, request, pk=None):
         if models.GoodsType.objects.filter(pk=pk).exists():
-            good_type=models.GoodsType.objects.get(pk=pk)
-            serializer=self.get_serializer(data=request.data)
+            good_type = models.GoodsType.objects.get(pk=pk)
+            serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            ids=serializer.validated_data.get('good_list','')
-            owner_good_ids=GoodDetail.objects.filter(owner=request.user)
-            if ids in owner_good_ids:
+            ids = serializer.validated_data.get('good_list', '')
+            owner_good_ids = GoodDetail.objects.filter(owner=request.user)
+            if ids in owner_good_ids and good_type.store_goods_type.store == request.user.stores:
                 GoodDetail.objects.filter(id__in=ids).update(good_type=good_type)
                 return Response('ok')
             else:
-                return Response('你无权修改改id')
+                return Response('你无权修改此id')
         else:
             return Response('不存在此type')
