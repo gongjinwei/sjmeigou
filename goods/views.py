@@ -5,6 +5,7 @@ from rest_framework.views import Response, status
 
 from . import models, serializers
 from tools.permissions import MerchantOrReadOnlyPermission
+from store.models import GoodsType
 
 
 # Create your views here.
@@ -121,6 +122,11 @@ class GoodDetailView(ModelViewSet):
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
+        good_type=serializer.validated_data.get('good_type',None)
+        if good_type:
+            owner_good_type=GoodsType.objects.filter(store_goods_type__store=self.request.user.stores)
+            if good_type not in owner_good_type:
+                return Response('你没有此操作权限',status=status.HTTP_400_BAD_REQUEST)
         put_on_strategy = serializer.validated_data.get('put_on_strategy', 0)
         if put_on_strategy == 0:
             state = 0

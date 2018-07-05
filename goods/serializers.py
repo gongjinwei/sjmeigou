@@ -111,7 +111,6 @@ class SKUColorSerializer(serializers.ModelSerializer):
             models.SKU.objects.create(color=instance, **sku)
 
 
-
 class GoodDetailSerializer(serializers.ModelSerializer):
     class_name=serializers.SerializerMethodField()
     relate_desc=serializers.ReadOnlyField(source='item_desc.items')
