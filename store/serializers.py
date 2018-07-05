@@ -69,7 +69,13 @@ class EnterpriseQualificationSerializer(serializers.ModelSerializer):
 
 
 class GoodDetailSerializer(serializers.ModelSerializer):
-    good_type_name=serializers.ReadOnlyField(source='good_type.name')
+    good_type_name=serializers.SerializerMethodField()
+
+    def get_good_type_name(self,obj):
+        if obj:
+            return obj.good_type.name
+        else:
+            return ''
 
     class Meta:
         model = GoodDetail
