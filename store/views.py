@@ -241,8 +241,8 @@ class GoodsTypeView(ListDeleteViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         good_ids = set(serializer.validated_data.get('good_list', []))
-        put_on_sale_ids=set(serializer.validated_data.get('put_on_sale_list',[]))
-        owner_good_ids = list(GoodDetail.objects.filter(owner=request.user).values_list('id',flat=True))
+        put_on_sale_ids = set(serializer.validated_data.get('put_on_sale_list', []))
+        owner_good_ids = list(GoodDetail.objects.filter(owner=request.user).values_list('id', flat=True))
         if good_ids and good_ids.issubset(owner_good_ids):
             if models.GoodsType.objects.filter(pk=pk).exists():
                 good_type = models.GoodsType.objects.get(pk=pk)
@@ -251,6 +251,9 @@ class GoodsTypeView(ListDeleteViewSet):
             else:
                 return Response('不存在此type')
         if put_on_sale_ids and put_on_sale_ids.issubset(owner_good_ids):
-            GoodDetail.objects.filter(id__in=put_on_sale_ids).update(state=0)
+            op = request.query_params.get('op', 'upper')
+            if op == 'upper':
+                GoodDetail.objects.filter(id__in=put_on_sale_ids).update(state=1)
+            elif op == 'lower':
+                GoodDetail.objects.filter(id__in=put_on_sale_ids).update(state=0)
         return Response('ok')
-
