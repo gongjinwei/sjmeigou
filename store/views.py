@@ -239,14 +239,15 @@ class GoodsTypeView(ListDeleteViewSet):
     @action(methods=['post'], detail=True, serializer_class=serializers.AddGoodsSerializer)
     def add_goods(self, request, pk=None):
         if models.GoodsType.objects.filter(pk=pk).exists():
-            good_type = models.GoodsType.objects.get(pk=pk)
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             good_ids = set(serializer.validated_data.get('good_list', []))
             put_on_sale_ids=set(serializer.validated_data.get('put_on_sale_list',[]))
             owner_good_ids = list(GoodDetail.objects.filter(owner=request.user).values_list('id',flat=True))
-            if good_ids and good_ids.issubset(owner_good_ids) and good_type.store_goods_type.store == request.user.stores:
-                GoodDetail.objects.filter(id__in=good_ids).update(good_type=good_type)
+            if good_ids and good_ids.issubset(owner_good_ids):
+                good_type = models.GoodsType.objects.get(pk=pk)
+                if good_type.store_goods_type.store == request.user.stores:
+                    GoodDetail.objects.filter(id__in=good_ids).update(good_type=good_type)
             if put_on_sale_ids and put_on_sale_ids.issubset(owner_good_ids):
                 GoodDetail.objects.filter(id__in=put_on_sale_ids).update(state=0)
             return Response('ok')
