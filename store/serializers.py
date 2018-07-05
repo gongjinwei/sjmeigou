@@ -69,17 +69,11 @@ class EnterpriseQualificationSerializer(serializers.ModelSerializer):
 
 
 class GoodDetailSerializer(serializers.ModelSerializer):
-    good_type_name=serializers.SerializerMethodField()
-
-    def get_good_type_name(self,obj):
-        if obj:
-            return obj.good_type.name
-        else:
-            return ''
+    good_type_name=serializers.ReadOnlyField(source='good_type.name')
 
     class Meta:
         model = GoodDetail
-        fields=('id','title','good_type','create_time','min_price','state')
+        fields=('id','title','good_type','create_time','min_price','state','good_type_name')
 
 
 class GoodsTypeSerializer(serializers.ModelSerializer):
