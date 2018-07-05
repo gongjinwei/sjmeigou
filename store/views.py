@@ -253,7 +253,7 @@ class GoodsTypeView(ListDeleteViewSet):
         if put_on_sale_ids and put_on_sale_ids.issubset(owner_good_ids):
             op = request.query_params.get('op', 'upper')
             if op == 'upper':
-                GoodDetail.objects.filter(id__in=put_on_sale_ids).update(state=1)
-            elif op == 'lower':
                 GoodDetail.objects.filter(id__in=put_on_sale_ids).update(state=0)
+            elif op == 'lower':
+                GoodDetail.objects.filter(id__in=put_on_sale_ids).update(state=1)
         return Response('ok')
