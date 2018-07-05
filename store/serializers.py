@@ -102,8 +102,8 @@ class StoreGoodsTypeSerializer(serializers.ModelSerializer):
 
 
 class AddGoodsSerializer(serializers.Serializer):
-    good_list=serializers.ListField()
-    put_on_sale_list=serializers.ListField()
+    good_list=serializers.ListField(required=False)
+    put_on_sale_list=serializers.ListField(required=False)
 
 
 
