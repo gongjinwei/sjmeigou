@@ -19,5 +19,8 @@ class ShoppingCarView(ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        price_added=serializer.validated_data['sku'].price
+        serializer.save(user=self.request.user,price_of_added=price_added)
+
+# class
 
