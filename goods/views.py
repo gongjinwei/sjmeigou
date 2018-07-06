@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import Response, status
+from rest_framework.decorators import action
 
 from . import models, serializers
 from tools.permissions import MerchantOrReadOnlyPermission
@@ -133,3 +134,15 @@ class GoodDetailView(ModelViewSet):
         else:
             state = 1
         serializer.save(owner=self.request.user, store=self.request.user.stores, state=state)
+
+    @action(methods=['get'],detail=True,serializer_class=serializers.SKUColorSerializer)
+    def get_sku(self,request,pk=None):
+        queryset=models.SKUColor.objects.filter(good_detail_id=pk)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)

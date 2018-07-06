@@ -80,6 +80,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         if obj.master_graphs:
             return obj.master_graphs[0]
 
+
 class GoodsTypeSerializer(serializers.ModelSerializer):
 
     class Meta:

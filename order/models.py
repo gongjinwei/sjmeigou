@@ -12,3 +12,6 @@ class ShoppingCarItem(models.Model):
     state=models.SmallIntegerField(choices=((0,'正常'),(1,'失效')),default=0,editable=False)
     create_time=models.DateTimeField(auto_now_add=True)
 
+
+class Coupon(models.Model):
+    pass
