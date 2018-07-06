@@ -62,3 +62,8 @@ class GetCouponView(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        queryset=models.GetCoupon.objects.filter(user=self.request.user)
+
+        return queryset
