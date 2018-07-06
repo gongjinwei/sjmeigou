@@ -80,7 +80,8 @@ class GetCouponView(CreateListViewSet):
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            queryset=models.GetCoupon.objects.filter(user=self.request.user)
+            today=datetime.date.today()
+            queryset=models.GetCoupon.objects.filter(user=self.request.user,coupon__date_from__lte=today,coupon__date_to__gte=today)
         else:
             queryset=models.GetCoupon.objects.none()
         return queryset
