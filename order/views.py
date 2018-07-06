@@ -6,11 +6,15 @@ from rest_framework.viewsets import ModelViewSet
 
 from . import serializers,models
 
+
 class ShoppingCarView(ModelViewSet):
     serializer_class = serializers.ShoppingCarItemSerializer
 
     def get_queryset(self):
-        queryset=models.ShoppingCarItem.objects.filter(user=self.request.user)
+        if self.request.user.is_authencated:
+            queryset=models.ShoppingCarItem.objects.filter(user=self.request.user)
+        else:
+            return models.ShoppingCarItem.objects.none()
 
         return queryset
 
