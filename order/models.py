@@ -26,7 +26,7 @@ class Coupon(models.Model):
 
 
 class GetCoupon(models.Model):
-    user=models.ForeignKey(to=User,on_delete=models.CASCADE)
+    user=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
     coupon=models.ForeignKey(to=Coupon,on_delete=models.SET_NULL,null=True)
     has_used=models.BooleanField(default=False)
     get_time=models.DateTimeField(auto_now_add=True)
