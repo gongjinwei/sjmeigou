@@ -70,11 +70,15 @@ class EnterpriseQualificationSerializer(serializers.ModelSerializer):
 
 class GoodDetailSerializer(serializers.ModelSerializer):
     good_type_name=serializers.ReadOnlyField(source='good_type.name')
+    master_graph=serializers.SerializerMethodField()
 
     class Meta:
         model = GoodDetail
-        fields=('id','title','good_type','create_time','min_price','state','good_type_name','master_graphs')
+        fields=('id','title','good_type','create_time','min_price','state','good_type_name','master_graph')
 
+    def get_master_graph(self,obj):
+        if obj.master_graphs:
+            return obj.master_graphs[0]
 
 class GoodsTypeSerializer(serializers.ModelSerializer):
 
