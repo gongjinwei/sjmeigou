@@ -25,8 +25,12 @@ class Coupon(models.Model):
     create_date=models.DateField(auto_now_add=True)
 
 
-
-
+class GetCoupon(models.Model):
+    user=models.ForeignKey(to=User,on_delete=models.CASCADE)
+    coupon=models.ForeignKey(to=Coupon,on_delete=models.SET_NULL,null=True)
+    has_used=models.BooleanField(default=False)
+    get_time=models.DateTimeField(auto_now_add=True)
+    use_time=models.DateTimeField(blank=True,null=True,editable=False)
 
 class Reduction(models.Model):
     pass
