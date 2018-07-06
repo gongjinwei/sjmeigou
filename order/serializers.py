@@ -23,7 +23,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
         ModelClass = self.Meta.model
         num=validated_data.get('num')
 
-        instance,created = ModelClass.objects.get_or_create(default=validated_data,sku=validated_data['sku'],user=validated_data['user'])
+        instance,created = ModelClass.objects.get_or_create(defaults=validated_data,sku=validated_data['sku'],user=validated_data['user'])
         if not created:
             instance.num=F('num')+num
             instance.save()
