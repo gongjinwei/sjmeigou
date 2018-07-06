@@ -31,7 +31,7 @@ class CouponView(ModelViewSet):
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def get_queryset(self):
-        store_id = self.request.query_params.get('store','0')
+        store_id = self.request.query_params.get('store','')
         today=datetime.date.today()
         try:
             store_id=int(store_id)
