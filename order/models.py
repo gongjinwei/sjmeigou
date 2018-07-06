@@ -24,6 +24,9 @@ class Coupon(models.Model):
     limit_per_user=models.SmallIntegerField()
     create_date=models.DateField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
 
 class GetCoupon(models.Model):
     user=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
