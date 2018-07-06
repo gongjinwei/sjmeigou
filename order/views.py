@@ -38,7 +38,7 @@ class CouponView(ModelViewSet):
         except ValueError:
             return models.Coupon.objects.none()
 
-        return models.Coupon.objects.filter(store_id=store_id,date_from_lte=today,date_to__gte=today,available_num__gt=0)
+        return models.Coupon.objects.filter(store_id=store_id,date_from__lte=today,date_to__gte=today,available_num__gt=0)
 
     def perform_create(self, serializer):
         serializer.save(store=self.request.user.stores)
