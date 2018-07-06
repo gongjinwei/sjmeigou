@@ -44,6 +44,10 @@ class CouponSerializer(serializers.ModelSerializer):
 
 
 class GetCouponSerializer(serializers.ModelSerializer):
+    date_from=serializers.ReadOnlyField(source='coupon.date_from')
+    date_to=serializers.ReadOnlyField(source='coupon.date_to')
+    store_name=serializers.ReadOnlyField(source='coupon.store.info.store_name')
+
     class Meta:
         model = models.GetCoupon
         fields = '__all__'
