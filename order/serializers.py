@@ -1,6 +1,8 @@
 # -*- coding:UTF-8 -*-
 from rest_framework import serializers
 
+from django.db.models import F
+
 from . import models
 
 
@@ -15,3 +17,14 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.ShoppingCarItem
         fields='__all__'
+
+    def create(self, validated_data):
+
+        ModelClass = self.Meta.model
+        num=validated_data.get('num')
+
+        instance,created = ModelClass.objects.get_or_create(default=validated_data,sku=validated_data['sku'],user=validated_data['user'])
+        if not created:
+            instance.num=F('num')+num
+            instance.save()
+        return instance
