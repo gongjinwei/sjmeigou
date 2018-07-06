@@ -1,5 +1,7 @@
 import datetime
 
+from django.db.models import F
+
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
 
@@ -54,7 +56,13 @@ class GetCouponView(ModelViewSet):
         today = datetime.date.today()
 
         if coupon.date_from <= today and coupon.date_to >= today and coupon.available_num > 0:
+            if models.GetCoupon.objects.filter(user=self.request.user,coupon=coupon).exists():
+                user_coupon=models.GetCoupon.objects.filter(user=self.request.user,coupon=coupon)[0]
+                if user_coupon.has_num>=coupon.limit_per_user:
+                    return Response('你可领的券超限',status=status.HTTP_400_BAD_REQUEST)
             self.perform_create(serializer)
+            coupon.available_num=F('available_num')-1
+            coupon.save()
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
@@ -64,6 +72,8 @@ class GetCouponView(ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        queryset=models.GetCoupon.objects.filter(user=self.request.user)
-
+        if self.request.user.is_authenticated:
+            queryset=models.GetCoupon.objects.filter(user=self.request.user)
+        else:
+            queryset=models.GetCoupon.objects.none()
         return queryset

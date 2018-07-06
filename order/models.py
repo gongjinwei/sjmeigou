@@ -31,7 +31,7 @@ class Coupon(models.Model):
 class GetCoupon(models.Model):
     user=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
     coupon=models.ForeignKey(to=Coupon,on_delete=models.SET_NULL,null=True)
-    has_used=models.BooleanField(default=False,editable=False)
+    has_num=models.SmallIntegerField(default=0)
     get_time=models.DateTimeField(auto_now_add=True)
     use_time=models.DateTimeField(blank=True,null=True,editable=False)
 

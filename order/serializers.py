@@ -46,4 +46,12 @@ class CouponSerializer(serializers.ModelSerializer):
 class GetCouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.GetCoupon
-        fields='__all__'
+        fields = '__all__'
+
+    def create(self, validated_data):
+        ModelClass = self.Meta.model
+        instance, created = ModelClass.objects.get_or_create(defaults=validated_data, user=validated_data['user'],
+                                                             coupon=validated_data['coupon'])
+        instance.has_num=F('has_num')+1
+        instance.save()
+        return instance
