@@ -14,7 +14,7 @@ class ShoppingCarItem(models.Model):
 
 
 class Coupon(models.Model):
-    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE,related_name='coupons')
+    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE,related_name='coupons',editable=False)
     name=models.CharField(max_length=10)
     date_from=models.DateField()
     date_to=models.DateField()

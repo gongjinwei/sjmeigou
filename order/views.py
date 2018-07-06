@@ -37,4 +37,7 @@ class CouponView(ModelViewSet):
 
         return models.Coupon.objects.filter(store_id=store_id)
 
+    def perform_create(self, serializer):
+        serializer.save(store=self.request.user.stores)
+
 
