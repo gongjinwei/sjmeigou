@@ -28,3 +28,9 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
         if not created:
             ModelClass.objects.filter(pk=instance.id).update(num=F('num')+num)
         return instance
+
+
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Coupon
+        fields = '__all__'

@@ -7,5 +7,6 @@ router=DefaultRouter()
 app_name='order'
 
 router.register('shoppingCar',views.ShoppingCarView,base_name='shoppingCar')
+router.register('coupon',views.CouponView,base_name='coupon')
 
 urlpatterns=router.urls

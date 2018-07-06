@@ -14,7 +14,7 @@ class ShoppingCarItem(models.Model):
 
 
 class Coupon(models.Model):
-    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE)
+    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE,related_name='coupons')
     name=models.CharField(max_length=10)
     date_from=models.DateField()
     date_to=models.DateField()
@@ -32,5 +32,5 @@ class GetCoupon(models.Model):
     get_time=models.DateTimeField(auto_now_add=True)
     use_time=models.DateTimeField(blank=True,null=True,editable=False)
 
-class Reduction(models.Model):
-    pass
+# class Reduction(models.Model):
+#     pass
