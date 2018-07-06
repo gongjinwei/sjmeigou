@@ -14,4 +14,19 @@ class ShoppingCarItem(models.Model):
 
 
 class Coupon(models.Model):
+    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE)
+    name=models.CharField(max_length=10)
+    date_from=models.DateField()
+    date_to=models.DateField()
+    discount=models.IntegerField()
+    threshold_count=models.IntegerField()
+    available_num=models.IntegerField()
+    limit_per_user=models.SmallIntegerField()
+    create_date=models.DateField(auto_now_add=True)
+
+
+
+
+
+class Reduction(models.Model):
     pass
