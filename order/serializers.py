@@ -41,3 +41,9 @@ class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Coupon
         fields = '__all__'
+
+
+class GetCouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.GetCoupon
+        fields='__all__'
