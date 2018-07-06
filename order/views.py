@@ -9,7 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from . import serializers, models
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.viewset import CreateListDeleteViewSet
+from tools.viewset import CreateListDeleteViewSet,CreateListViewSet
 
 
 class ShoppingCarView(ModelViewSet):
@@ -53,7 +53,7 @@ class CouponView(CreateListDeleteViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class GetCouponView(ModelViewSet):
+class GetCouponView(CreateListViewSet):
     serializer_class = serializers.GetCouponSerializer
 
     def create(self, request, *args, **kwargs):
