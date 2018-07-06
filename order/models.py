@@ -31,9 +31,11 @@ class Coupon(models.Model):
 class GetCoupon(models.Model):
     user=models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
     coupon=models.ForeignKey(to=Coupon,on_delete=models.SET_NULL,null=True)
-    has_num=models.SmallIntegerField(default=0)
-    get_time=models.DateTimeField(auto_now_add=True)
-    use_time=models.DateTimeField(blank=True,null=True,editable=False)
+    has_num=models.SmallIntegerField(default=0,editable=False)
 
+class CouponRecords(models.Model):
+    get_coupon=models.ForeignKey(to='GetCoupon',on_delete=models.DO_NOTHING)
+    action=models.IntegerField(choices=((0,'领取了'),(1,'使用了')),default=0)
+    action_time=models.DateTimeField(auto_now=True)
 # class Reduction(models.Model):
 #     pass

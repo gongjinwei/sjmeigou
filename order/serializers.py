@@ -49,9 +49,12 @@ class GetCouponSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        ModelClass = self.Meta.model
-        instance, created = ModelClass.objects.get_or_create(defaults=validated_data, user=validated_data['user'],
+        instance, created = models.GetCoupon.objects.get_or_create(defaults=validated_data, user=validated_data['user'],
                                                              coupon=validated_data['coupon'])
-        instance.has_num=F('has_num')+1
-        instance.save()
+        models.GetCoupon.objects.filter(pk=instance.id).update(has_num=F('has_num')+1)
+        # 记录领取的行为
+        record=models.CouponRecords()
+        record.get_coupon=instance
+        record.action=0
+        record.save()
         return instance

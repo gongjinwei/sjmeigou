@@ -59,7 +59,7 @@ class GetCouponView(ModelViewSet):
             if models.GetCoupon.objects.filter(user=self.request.user,coupon=coupon).exists():
                 user_coupon=models.GetCoupon.objects.filter(user=self.request.user,coupon=coupon)[0]
                 if user_coupon.has_num>=coupon.limit_per_user:
-                    return Response('你可领的券超限',status=status.HTTP_400_BAD_REQUEST)
+                    return Response('你可领的券数超限',status=status.HTTP_400_BAD_REQUEST)
             self.perform_create(serializer)
             coupon.available_num=F('available_num')-1
             coupon.save()
