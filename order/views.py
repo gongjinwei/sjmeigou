@@ -9,6 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from . import serializers, models
 from tools.permissions import MerchantOrReadOnlyPermission
+from tools.viewset import CreateListDeleteViewSet
 
 
 class ShoppingCarView(ModelViewSet):
@@ -27,7 +28,7 @@ class ShoppingCarView(ModelViewSet):
         serializer.save(user=self.request.user, price_of_added=price_added)
 
 
-class CouponView(ModelViewSet):
+class CouponView(CreateListDeleteViewSet):
     serializer_class = serializers.CouponSerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
 
@@ -44,6 +45,12 @@ class CouponView(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(store=self.request.user.stores)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.available_num=0
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class GetCouponView(ModelViewSet):
@@ -77,3 +84,4 @@ class GetCouponView(ModelViewSet):
         else:
             queryset=models.GetCoupon.objects.none()
         return queryset
+
