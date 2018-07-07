@@ -12,6 +12,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     title = serializers.ReadOnlyField(source='sku.color.good_detail.title')
     price = serializers.ReadOnlyField(source='sku.price')
     color = serializers.ReadOnlyField(source='sku.color.color_name')
+    color_pic=serializers.ReadOnlyField(source='sku.color.color_pic')
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
     store = serializers.IntegerField(write_only=True)
