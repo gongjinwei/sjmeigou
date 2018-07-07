@@ -9,11 +9,19 @@ from rest_framework.viewsets import ModelViewSet
 
 from . import serializers, models
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.viewset import CreateListDeleteViewSet, CreateListViewSet
+from tools.viewset import CreateListDeleteViewSet, CreateListViewSet,CreateOnlyViewSet,ListOnlyViewSet
 
 
-class ShoppingCarView(ModelViewSet):
+class ShoppingCarItemView(CreateOnlyViewSet):
     serializer_class = serializers.ShoppingCarItemSerializer
+
+    def perform_create(self, serializer):
+        price_added = serializer.validated_data['sku'].price
+        serializer.save(user=self.request.user, price_of_added=price_added)
+
+
+class ShoppingCarView(ListOnlyViewSet):
+    serializer_class = serializers.ShoppingCarSerializer
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -22,10 +30,6 @@ class ShoppingCarView(ModelViewSet):
             return models.ShoppingCar.objects.none()
 
         return queryset
-
-    def perform_create(self, serializer):
-        price_added = serializer.validated_data['sku'].price
-        serializer.save(user=self.request.user, price_of_added=price_added)
 
 
 class CouponView(CreateListDeleteViewSet):

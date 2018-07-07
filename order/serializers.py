@@ -18,7 +18,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ShoppingCarItem
-        fields = '__all__'
+        exclude=('shopping_car',)
 
     def create(self, validated_data):
         ModelClass = self.Meta.model
@@ -38,7 +38,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCarSerializer(serializers.ModelSerializer):
-    items = ShoppingCarItemSerializer()
+    items = ShoppingCarItemSerializer(many=True,read_only=True)
     store_name = serializers.ReadOnlyField(source='store.info.store_name')
 
     class Meta:
