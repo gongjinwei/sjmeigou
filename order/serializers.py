@@ -4,7 +4,7 @@ from rest_framework import serializers
 from django.db.models import F
 
 from . import models
-
+from store.models import Stores
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
     sku_id = serializers.ReadOnlyField(source='sku.id')
@@ -13,7 +13,8 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     color = serializers.ReadOnlyField(source='sku.color.color_name')
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
-    store_id = serializers.ReadOnlyField(source='sku.color.good_detail.store.id')
+    store = serializers.IntegerField()
+    user = serializers.IntegerField()
 
     class Meta:
         model = models.ShoppingCarItem
@@ -22,12 +23,25 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ModelClass = self.Meta.model
         num = validated_data.get('num')
+        store_id=validated_data.pop('store')
+        store=Stores.objects.get(pk=store_id)
+        user = validated_data.pop('user')
+        shopping_car,creating=models.ShoppingCar.objects.get_or_create(defaults={'user':user,'store':store},user=user,store=store)
 
+        validated_data.update({"shopping_car":shopping_car})
         instance, created = ModelClass.objects.get_or_create(defaults=validated_data, sku=validated_data['sku'],
-                                                             user=validated_data['user'])
+                                                             user=validated_data['shopping_car'])
         if not created:
             ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num)
         return instance
+
+
+class ShoppingCarSerializer(serializers.ModelSerializer):
+    items=ShoppingCarItemSerializer
+
+    class Meta:
+        model=models.ShoppingCar
+        fields='__all__'
 
 
 def check_discount(value):

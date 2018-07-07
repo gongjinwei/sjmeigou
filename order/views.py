@@ -17,9 +17,9 @@ class ShoppingCarView(ModelViewSet):
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            queryset = models.ShoppingCarItem.objects.filter(user=self.request.user)
+            queryset = models.ShoppingCar.objects.filter(user=self.request.user)
         else:
-            return models.ShoppingCarItem.objects.none()
+            return models.ShoppingCar.objects.none()
 
         return queryset
 
