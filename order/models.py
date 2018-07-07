@@ -59,6 +59,7 @@ class ReductionActivity(models.Model):
     select_all=models.BooleanField(default=True)
     threshold_num=models.IntegerField()
     discount=models.DecimalField(max_digits=3,decimal_places=1,default=Decimal(10.0))
+    state=models.SmallIntegerField(choices=((0,'正常'),(1,'用户终止'),(2,'时间到期')),default=0)
     create_time=models.DateTimeField(auto_now_add=True)
 
 
