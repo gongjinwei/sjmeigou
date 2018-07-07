@@ -112,3 +112,20 @@ class ReductionActivityView(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(store=self.request.user.stores)
+
+    def get_queryset(self):
+        store_id = self.request.query_params.get('store', '')
+        now = datetime.datetime.now()
+        try:
+            store_id = int(store_id)
+        except ValueError:
+            return models.ReductionActivity.objects.none()
+        if hasattr(self.request.user, 'stores'):
+            own_store = getattr(self.request.user, 'stores')
+            op = self.request.query_params.get('op')
+            if op == 'backend' and own_store.id == store_id:
+                return models.ReductionActivity.objects.filter(store_id=store_id)
+
+        return models.Coupon.objects.filter(store_id=store_id, datetime_from__lte=now, datetime_to__gte=now,
+                                            state=0)
+
