@@ -66,7 +66,7 @@ class ReductionActivity(models.Model):
         return self.activity_name
 
     class Meta:
-        ordering=('-create_time')
+        ordering=('-create_time',)
 
 
 class ReductionSelected(models.Model):
