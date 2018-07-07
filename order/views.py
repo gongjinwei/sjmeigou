@@ -101,11 +101,7 @@ class ReductionActivityView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        select_goods_data=serializer.validated_data.pop('selected_goods',[])
 
-        if select_goods_data:
-            select_serializer=serializers.ReductionSelectedSerializer(select_goods_data,many=True)
-            serializer.validated_data.update(selected_goods=select_serializer.data)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
