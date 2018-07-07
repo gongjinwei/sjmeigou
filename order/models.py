@@ -29,7 +29,7 @@ class Coupon(models.Model):
         return self.name
 
     class Meta:
-        ordering=('-create_date')
+        ordering=('-create_date',)
 
 
 class GetCoupon(models.Model):
