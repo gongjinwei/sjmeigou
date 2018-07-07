@@ -58,7 +58,7 @@ class ReductionActivity(models.Model):
 
 
 class ReductionSelected(models.Model):
-    activity=models.ForeignKey(to='ReductionActivity',on_delete=models.CASCADE,related_name='selected_goods')
+    activity=models.ForeignKey(to='ReductionActivity',on_delete=models.CASCADE,related_name='selected_goods',null=True)
     good=models.ForeignKey(to='goods.GoodDetail',on_delete=models.CASCADE)
     select_type=models.SmallIntegerField(choices=((0,'参与活动的商品'),(1,'赠品')),default=0,editable=False)
 
