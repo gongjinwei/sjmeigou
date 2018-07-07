@@ -15,7 +15,6 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
     store = serializers.IntegerField(write_only=True)
-    user = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = models.ShoppingCarItem
