@@ -6,6 +6,7 @@ from django.db.models import F
 from . import models
 from store.models import Stores
 
+
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
     sku_id = serializers.ReadOnlyField(source='sku.id')
     title = serializers.ReadOnlyField(source='sku.color.good_detail.title')
@@ -13,8 +14,8 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     color = serializers.ReadOnlyField(source='sku.color.color_name')
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
-    store = serializers.IntegerField()
-    user = serializers.IntegerField()
+    store = serializers.IntegerField(write_only=True)
+    user = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = models.ShoppingCarItem
@@ -23,12 +24,13 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ModelClass = self.Meta.model
         num = validated_data.get('num')
-        store_id=validated_data.pop('store')
-        store=Stores.objects.get(pk=store_id)
+        store_id = validated_data.pop('store')
+        store = Stores.objects.get(pk=store_id)
         user = validated_data.pop('user')
-        shopping_car,creating=models.ShoppingCar.objects.get_or_create(defaults={'user':user,'store':store},user=user,store=store)
+        shopping_car, creating = models.ShoppingCar.objects.get_or_create(defaults={'user': user, 'store': store},
+                                                                          user=user, store=store)
 
-        validated_data.update({"shopping_car":shopping_car})
+        validated_data.update({"shopping_car": shopping_car})
         instance, created = ModelClass.objects.get_or_create(defaults=validated_data, sku=validated_data['sku'],
                                                              user=validated_data['shopping_car'])
         if not created:
@@ -37,11 +39,12 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCarSerializer(serializers.ModelSerializer):
-    items=ShoppingCarItemSerializer
+    items = ShoppingCarItemSerializer()
+    store_name = serializers.ReadOnlyField(source='store.info.store_name')
 
     class Meta:
-        model=models.ShoppingCar
-        fields='__all__'
+        model = models.ShoppingCar
+        fields = '__all__'
 
 
 def check_discount(value):
@@ -58,9 +61,9 @@ class CouponSerializer(serializers.ModelSerializer):
 
 
 class GetCouponSerializer(serializers.ModelSerializer):
-    date_from=serializers.ReadOnlyField(source='coupon.date_from')
-    date_to=serializers.ReadOnlyField(source='coupon.date_to')
-    store_name=serializers.ReadOnlyField(source='coupon.store.info.store_name')
+    date_from = serializers.ReadOnlyField(source='coupon.date_from')
+    date_to = serializers.ReadOnlyField(source='coupon.date_to')
+    store_name = serializers.ReadOnlyField(source='coupon.store.info.store_name')
 
     class Meta:
         model = models.GetCoupon
@@ -68,33 +71,32 @@ class GetCouponSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         instance, created = models.GetCoupon.objects.get_or_create(defaults=validated_data, user=validated_data['user'],
-                                                             coupon=validated_data['coupon'])
-        models.GetCoupon.objects.filter(pk=instance.id).update(has_num=F('has_num')+1)
+                                                                   coupon=validated_data['coupon'])
+        models.GetCoupon.objects.filter(pk=instance.id).update(has_num=F('has_num') + 1)
         # 记录领取的行为
-        record=models.CouponRecords()
-        record.get_coupon=instance
-        record.action=0
+        record = models.CouponRecords()
+        record.get_coupon = instance
+        record.action = 0
         record.save()
         return instance
 
 
 class ReductionSelectedSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.ReductionSelected
-        fields='__all__'
+        fields = '__all__'
 
 
 class ReductionActivitySerializer(serializers.ModelSerializer):
-    selected_goods=ReductionSelectedSerializer(many=True,required=False)
+    selected_goods = ReductionSelectedSerializer(many=True, required=False)
 
     class Meta:
-        model=models.ReductionActivity
-        fields='__all__'
+        model = models.ReductionActivity
+        fields = '__all__'
 
     def create(self, validated_data):
-        selected_data=validated_data.pop('selected_goods',[])
-        activity=self.Meta.model.objects.create(**validated_data)
+        selected_data = validated_data.pop('selected_goods', [])
+        activity = self.Meta.model.objects.create(**validated_data)
         for data in selected_data:
-            models.ReductionSelected.objects.create(activity=activity,**data)
+            models.ReductionSelected.objects.create(activity=activity, **data)
         return activity
