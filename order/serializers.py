@@ -8,7 +8,6 @@ from store.models import Stores
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
-    sku_id = serializers.ReadOnlyField(source='sku.id')
     title = serializers.ReadOnlyField(source='sku.color.good_detail.title')
     price = serializers.ReadOnlyField(source='sku.price')
     color = serializers.ReadOnlyField(source='sku.color.color_name')
@@ -41,6 +40,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
 class ShoppingCarSerializer(serializers.ModelSerializer):
     items = ShoppingCarItemSerializer(many=True,read_only=True)
     store_name = serializers.ReadOnlyField(source='store.info.store_name')
+    store_logo=serializers.ReadOnlyField(source='store.logo')
 
     class Meta:
         model = models.ShoppingCar
