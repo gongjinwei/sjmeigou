@@ -14,6 +14,7 @@ from tools.viewset import CreateListDeleteViewSet, CreateListViewSet,CreateDetai
 
 class ShoppingCarItemView(CreateDetailDeleteViewSet):
     serializer_class = serializers.ShoppingCarItemSerializer
+    queryset = models.ShoppingCarItem.objects.all()
 
     def perform_create(self, serializer):
         price_added = serializer.validated_data['sku'].price
