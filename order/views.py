@@ -9,7 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from . import serializers, models
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.viewset import CreateListDeleteViewSet,CreateListViewSet
+from tools.viewset import CreateListDeleteViewSet, CreateListViewSet
 
 
 class ShoppingCarView(ModelViewSet):
@@ -39,10 +39,10 @@ class CouponView(CreateListDeleteViewSet):
             store_id = int(store_id)
         except ValueError:
             return models.Coupon.objects.none()
-        if hasattr(self.request.user,'stores'):
-            own_store=getattr(self.request.user,'stores')
-            op=self.request.query_params.get('op')
-            if op=='backend' and own_store.id==store_id:
+        if hasattr(self.request.user, 'stores'):
+            own_store = getattr(self.request.user, 'stores')
+            op = self.request.query_params.get('op')
+            if op == 'backend' and own_store.id == store_id:
                 return models.Coupon.objects.filter(store_id=store_id)
 
         return models.Coupon.objects.filter(store_id=store_id, date_from__lte=today, date_to__gte=today,
@@ -53,7 +53,7 @@ class CouponView(CreateListDeleteViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.available_num=0
+        instance.available_num = 0
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -68,26 +68,30 @@ class GetCouponView(CreateListViewSet):
         today = datetime.date.today()
 
         if coupon.date_from <= today and coupon.date_to >= today and coupon.available_num > 0:
-            if models.GetCoupon.objects.filter(user=self.request.user,coupon=coupon).exists():
-                user_coupon=models.GetCoupon.objects.filter(user=self.request.user,coupon=coupon)[0]
-                if user_coupon.has_num>=coupon.limit_per_user:
-                    return Response({'code':4003,"msg":'你可领的券数超限'},status=status.HTTP_400_BAD_REQUEST)
+            if models.GetCoupon.objects.filter(user=self.request.user, coupon=coupon).exists():
+                user_coupon = models.GetCoupon.objects.filter(user=self.request.user, coupon=coupon)[0]
+                if user_coupon.has_num >= coupon.limit_per_user:
+                    return Response({'code': 4003, "msg": '你可领的券数超限'}, status=status.HTTP_400_BAD_REQUEST)
             self.perform_create(serializer)
-            coupon.available_num=F('available_num')-1
+            coupon.available_num = F('available_num') - 1
             coupon.save()
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
-            return Response({"msg":'该券不可领取或可领取数量为0',"code":4004})
+            return Response({"msg": '该券不可领取或可领取数量为0', "code": 4004})
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            today=datetime.date.today()
-            queryset=models.GetCoupon.objects.filter(user=self.request.user,coupon__date_from__lte=today,coupon__date_to__gte=today)
+            today = datetime.date.today()
+            queryset = models.GetCoupon.objects.filter(user=self.request.user, coupon__date_from__lte=today,
+                                                       coupon__date_to__gte=today)
         else:
-            queryset=models.GetCoupon.objects.none()
+            queryset = models.GetCoupon.objects.none()
         return queryset
 
+class ReductionActivityView(ModelViewSet):
+    serializer_class = serializers.ReductionActivitySerializer
+    queryset = models.ReductionActivity.objects.all()

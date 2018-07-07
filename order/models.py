@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from decimal import Decimal
+
 
 # Create your models here.
 
@@ -50,13 +52,14 @@ class ReductionActivity(models.Model):
     datetime_to=models.DateTimeField()
     select_all=models.BooleanField(default=True)
     threshold_num=models.IntegerField()
-    discount=models.DecimalField(max_digits=2,decimal_places=1)
+    discount=models.DecimalField(max_digits=3,decimal_places=1,default=Decimal(10.0))
     create_time=models.DateTimeField(auto_now_add=True)
 
 
 class ReductionSelected(models.Model):
     activity=models.ForeignKey(to='ReductionActivity',on_delete=models.CASCADE,related_name='selected_goods')
     good=models.ForeignKey(to='goods.GoodDetail',on_delete=models.SET_NULL)
+    select_type=models.SmallIntegerField(choices=((0,'参与活动的商品'),(1,'赠品')),default=0,editable=False)
 
 
 

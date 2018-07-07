@@ -62,3 +62,26 @@ class GetCouponSerializer(serializers.ModelSerializer):
         record.action=0
         record.save()
         return instance
+
+
+class ReductionSelectedSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ReductionSelected
+        fields='__all__'
+
+
+class ReductionActivitySerializer(serializers.ModelSerializer):
+    selected_goods=ReductionSelectedSerializer(many=True)
+
+    class Meta:
+        model=models.ReductionActivity
+        fields='__all__'
+
+    def create(self, validated_data):
+        selected_data=validated_data.pop('selected_goods')
+        activity=self.Meta.model.objects.create(**validated_data)
+        for data in selected_data:
+            data.update(activity=activity)
+            models.ReductionActivity.objects.create(**data)
+        return activity
