@@ -39,6 +39,11 @@ class CouponView(CreateListDeleteViewSet):
             store_id = int(store_id)
         except ValueError:
             return models.Coupon.objects.none()
+        if hasattr(self.request.user,'stores'):
+            own_store=getattr(self.request.user,'stores')
+            op=self.request.query_params.get('op')
+            if op=='backend' and own_store.id==store_id:
+                return models.Coupon.objects.filter(store_id=store_id)
 
         return models.Coupon.objects.filter(store_id=store_id, date_from__lte=today, date_to__gte=today,
                                             available_num__gt=0)
@@ -66,14 +71,14 @@ class GetCouponView(CreateListViewSet):
             if models.GetCoupon.objects.filter(user=self.request.user,coupon=coupon).exists():
                 user_coupon=models.GetCoupon.objects.filter(user=self.request.user,coupon=coupon)[0]
                 if user_coupon.has_num>=coupon.limit_per_user:
-                    return Response('你可领的券数超限',status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'code':4003,"msg":'你可领的券数超限'},status=status.HTTP_400_BAD_REQUEST)
             self.perform_create(serializer)
             coupon.available_num=F('available_num')-1
             coupon.save()
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
-            return Response('该券不可领取或可领取数量为0')
+            return Response({"msg":'该券不可领取或可领取数量为0',"code":4004})
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

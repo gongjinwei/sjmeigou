@@ -28,6 +28,9 @@ class Coupon(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering=('-create_date')
+
 
 class GetCoupon(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
@@ -37,7 +40,23 @@ class GetCoupon(models.Model):
 
 class CouponRecords(models.Model):
     get_coupon = models.ForeignKey(to='GetCoupon', on_delete=models.DO_NOTHING)
-    action = models.IntegerField(choices=((0, '领取了'), (1, '使用了')), default=0)
+    action = models.IntegerField(choices=((0, '领取'), (1, '使用')), default=0)
     action_time = models.DateTimeField(auto_now=True)
-# class Reduction(models.Model):
-#     pass
+
+
+class ReductionActivity(models.Model):
+    activity_name=models.CharField(max_length=20)
+    datetime_from=models.DateTimeField()
+    datetime_to=models.DateTimeField()
+    select_all=models.BooleanField(default=True)
+    threshold_num=models.IntegerField()
+    discount=models.DecimalField(max_digits=2,decimal_places=1)
+    create_time=models.DateTimeField(auto_now_add=True)
+
+
+class ReductionSelected(models.Model):
+    activity=models.ForeignKey(to='ReductionActivity',on_delete=models.CASCADE,related_name='selected_goods')
+    good=models.ForeignKey(to='goods.GoodDetail',on_delete=models.SET_NULL)
+
+
+
