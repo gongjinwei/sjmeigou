@@ -92,6 +92,11 @@ class GetCouponView(CreateListViewSet):
             queryset = models.GetCoupon.objects.none()
         return queryset
 
+
 class ReductionActivityView(ModelViewSet):
     serializer_class = serializers.ReductionActivitySerializer
     queryset = models.ReductionActivity.objects.all()
+    permission_classes = (MerchantOrReadOnlyPermission,)
+
+    def perform_create(self, serializer):
+        serializer.save(store=self.request.user.stores)
