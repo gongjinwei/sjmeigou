@@ -23,6 +23,13 @@ class ShoppingCarItemView(ModelViewSet):
     def list(self, request, *args, **kwargs):
         return Response(status=status.HTTP_200_OK)
 
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            queryset=models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user,num__gt=0)
+        else:
+            queryset = models.ShoppingCarItem.objects.none()
+        return queryset
+
 
 class ShoppingCarView(ListOnlyViewSet):
     serializer_class = serializers.ShoppingCarSerializer
