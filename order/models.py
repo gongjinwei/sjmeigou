@@ -47,6 +47,7 @@ class CouponRecords(models.Model):
 
 
 class ReductionActivity(models.Model):
+    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE,editable=False)
     activity_name=models.CharField(max_length=20)
     datetime_from=models.DateTimeField()
     datetime_to=models.DateTimeField()
