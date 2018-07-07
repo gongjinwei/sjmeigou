@@ -72,14 +72,14 @@ class ReductionSelectedSerializer(serializers.ModelSerializer):
 
 
 class ReductionActivitySerializer(serializers.ModelSerializer):
-    selected_goods=ReductionSelectedSerializer(many=True)
+    selected_goods=ReductionSelectedSerializer(many=True,required=False)
 
     class Meta:
         model=models.ReductionActivity
         fields='__all__'
 
     def create(self, validated_data):
-        selected_data=validated_data.pop('selected_goods')
+        selected_data=validated_data.pop('selected_goods',[])
         activity=self.Meta.model.objects.create(**validated_data)
         for data in selected_data:
             data.update(activity=activity)
