@@ -62,6 +62,12 @@ class ReductionActivity(models.Model):
     state=models.SmallIntegerField(choices=((0,'正常'),(1,'用户终止'),(2,'时间到期')),default=0)
     create_time=models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.activity_name
+
+    class Meta:
+        ordering=('-create_time')
+
 
 class ReductionSelected(models.Model):
     activity=models.ForeignKey(to='ReductionActivity',on_delete=models.CASCADE,related_name='selected_goods',null=True,editable=False)
