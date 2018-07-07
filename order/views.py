@@ -126,7 +126,7 @@ class ReductionActivityView(CreateListDeleteViewSet):
             if op == 'backend' and own_store.id == store_id:
                 return models.ReductionActivity.objects.filter(store_id=store_id)
 
-        return models.Coupon.objects.filter(store_id=store_id, datetime_from__lte=now, datetime_to__gte=now,
+        return models.ReductionActivity.objects.filter(store_id=store_id, datetime_from__lte=now, datetime_to__gte=now,
                                             state=0)
 
     def destroy(self, request, *args, **kwargs):
