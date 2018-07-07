@@ -97,7 +97,7 @@ class GetCouponView(CreateListViewSet):
         return queryset
 
 
-class ReductionActivityView(ModelViewSet):
+class ReductionActivityView(CreateListDeleteViewSet):
     serializer_class = serializers.ReductionActivitySerializer
     queryset = models.ReductionActivity.objects.all()
     permission_classes = (MerchantOrReadOnlyPermission,)
@@ -128,4 +128,10 @@ class ReductionActivityView(ModelViewSet):
 
         return models.Coupon.objects.filter(store_id=store_id, datetime_from__lte=now, datetime_to__gte=now,
                                             state=0)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.state = 1
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
