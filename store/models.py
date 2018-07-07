@@ -24,6 +24,7 @@ class Stores(models.Model):
     active_code=models.CharField(max_length=20,default='')
     business_hour_from=models.TimeField()
     business_hour_to=models.TimeField()
+    logo=models.URLField(default='http://image.sjmeigou.com/store/store.jpg')
     active_state=models.SmallIntegerField(default=0,editable=False)
     user=models.OneToOneField(to=User,editable=False,on_delete=models.CASCADE)
     create_time=models.DateTimeField(auto_now_add=True,editable=False)
