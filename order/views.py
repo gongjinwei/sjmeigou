@@ -9,10 +9,10 @@ from rest_framework.viewsets import ModelViewSet
 
 from . import serializers, models
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.viewset import CreateListDeleteViewSet, CreateListViewSet,CreateOnlyViewSet,ListOnlyViewSet
+from tools.viewset import CreateListDeleteViewSet, CreateListViewSet,CreateDetailDeleteViewSet,ListOnlyViewSet
 
 
-class ShoppingCarItemView(CreateOnlyViewSet):
+class ShoppingCarItemView(CreateDetailDeleteViewSet):
     serializer_class = serializers.ShoppingCarItemSerializer
 
     def perform_create(self, serializer):

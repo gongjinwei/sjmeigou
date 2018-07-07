@@ -30,3 +30,6 @@ class RetrieveOnlyViewSet(mixins.RetrieveModelMixin,GenericViewSet):
 
 class ListDeleteViewSet(mixins.ListModelMixin,mixins.DestroyModelMixin,GenericViewSet):
     pass
+
+class CreateDetailDeleteViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.DestroyModelMixin,GenericViewSet):
+    pass
