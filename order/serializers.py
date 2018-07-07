@@ -82,5 +82,5 @@ class ReductionActivitySerializer(serializers.ModelSerializer):
         selected_data=validated_data.pop('selected_goods',[])
         activity=self.Meta.model.objects.create(**validated_data)
         for data in selected_data:
-            models.ReductionActivity.objects.create(activity_id=activity.id,**data)
+            models.ReductionSelected.objects.create(activity=activity,**data)
         return activity
