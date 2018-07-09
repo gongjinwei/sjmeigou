@@ -9,7 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from . import serializers, models
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.viewset import CreateListDeleteViewSet, CreateListViewSet,ListOnlyViewSet
+from tools.viewset import CreateListDeleteViewSet, CreateListViewSet,ListOnlyViewSet,CreateOnlyViewSet
 
 
 class ShoppingCarItemView(ModelViewSet):
@@ -170,3 +170,9 @@ class StoreActivityView(CreateListDeleteViewSet):
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class BalanceReferenceView(CreateOnlyViewSet):
+    serializer_class = serializers.BalanceReferenceSerializer
+
+    def create(self, request, *args, **kwargs):
+        return Response('ok')

@@ -102,3 +102,7 @@ class StoreActivitySerializer(serializers.ModelSerializer):
         for data in selected_data:
             models.StoreActivitySelected.objects.create(activity=activity, **data)
         return activity
+
+
+class BalanceReferenceSerializer(serializers.Serializer):
+    skus=serializers.ListField()
