@@ -33,7 +33,13 @@ class ShoppingCarItemView(ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        if instance.sku.id != int(request.data.get('sku')):
+        sku_id=request.data.get('sku')
+        try:
+            sku_id=int(sku_id)
+        except 	ValueError:
+            return Response("必须填写SKU",status=status.HTTP_400_BAD_REQUEST)
+
+        if instance.sku.id != sku_id:
             instance.delete()
             return Response({'code':4005,'msg':'对象重复删除'})
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
