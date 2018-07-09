@@ -1,18 +1,18 @@
 # -*- coding:UTF-8 -*-
 from rest_framework import serializers
-from rest_framework.utils import model_meta
 
 from django.db.models import F
 
 from . import models
 from store.models import Stores
+from goods.models import SKU
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
     title = serializers.ReadOnlyField(source='sku.color.good_detail.title')
     price = serializers.ReadOnlyField(source='sku.price')
     color = serializers.ReadOnlyField(source='sku.color.color_name')
-    color_pic=serializers.ReadOnlyField(source='sku.color.color_pic')
+    color_pic = serializers.ReadOnlyField(source='sku.color.color_pic')
     stock = serializers.ReadOnlyField(source='sku.stock')
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
@@ -20,7 +20,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ShoppingCarItem
-        exclude=('shopping_car',)
+        exclude = ('shopping_car',)
 
     def create(self, validated_data):
         ModelClass = self.Meta.model
@@ -40,9 +40,9 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCarSerializer(serializers.ModelSerializer):
-    items = ShoppingCarItemSerializer(many=True,read_only=True)
+    items = ShoppingCarItemSerializer(many=True, read_only=True)
     store_name = serializers.ReadOnlyField(source='store.info.store_name')
-    store_logo=serializers.ReadOnlyField(source='store.logo')
+    store_logo = serializers.ReadOnlyField(source='store.logo')
 
     class Meta:
         model = models.ShoppingCar
@@ -104,5 +104,17 @@ class StoreActivitySerializer(serializers.ModelSerializer):
         return activity
 
 
+# class SKUSerializer(serializers.ModelSerializer):
+#     title = serializers.ReadOnlyField(source='color.good_detail.title')
+#     color = serializers.ReadOnlyField(source='color.color_name')
+#     color_pic = serializers.ReadOnlyField(source='color.color_pic')
+#     size = serializers.ReadOnlyField(source='size.size_name')
+#     good_id = serializers.ReadOnlyField(source='color.good_detail.id')
+#
+#     class Meta:
+#         fields = ('price','stock','title','color','color_pic','size','good_id')
+#         model = SKU
+
+
 class BalanceReferenceSerializer(serializers.Serializer):
-    skus=serializers.ListField()
+    stores = serializers.ListField()
