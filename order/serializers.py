@@ -31,7 +31,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
                                                                           user=user, store=store)
 
         validated_data.update({"shopping_car": shopping_car})
-        instance, created = ModelClass.objects.get_or_create(defaults=validated_data, sku=validated_data['sku'],
+        instance, created = ModelClass.objects.update_or_create(defaults=validated_data, sku=validated_data['sku'],
                                                              shopping_car=validated_data['shopping_car'])
         if not created:
             ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num)
@@ -82,22 +82,22 @@ class GetCouponSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ReductionSelectedSerializer(serializers.ModelSerializer):
+class StoreActivitySelectedSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.ReductionSelected
+        model = models.StoreActivitySelected
         fields = '__all__'
 
 
-class ReductionActivitySerializer(serializers.ModelSerializer):
-    selected_goods = ReductionSelectedSerializer(many=True, required=False)
+class StoreActivitySerializer(serializers.ModelSerializer):
+    selected_goods = StoreActivitySelectedSerializer(many=True, required=False)
 
     class Meta:
-        model = models.ReductionActivity
+        model = models.StoreActivity
         fields = '__all__'
 
     def create(self, validated_data):
         selected_data = validated_data.pop('selected_goods', [])
         activity = self.Meta.model.objects.create(**validated_data)
         for data in selected_data:
-            models.ReductionSelected.objects.create(activity=activity, **data)
+            models.StoreActivitySelected.objects.create(activity=activity, **data)
         return activity

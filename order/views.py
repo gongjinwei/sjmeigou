@@ -30,6 +30,9 @@ class ShoppingCarItemView(ModelViewSet):
             queryset = models.ShoppingCarItem.objects.none()
         return queryset
 
+    def update(self, request, *args, **kwargs):
+        pass
+
 
 class ShoppingCarView(ListOnlyViewSet):
     serializer_class = serializers.ShoppingCarSerializer
@@ -108,9 +111,9 @@ class GetCouponView(CreateListViewSet):
         return queryset
 
 
-class ReductionActivityView(CreateListDeleteViewSet):
-    serializer_class = serializers.ReductionActivitySerializer
-    queryset = models.ReductionActivity.objects.all()
+class StoreActivityView(CreateListDeleteViewSet):
+    serializer_class = serializers.StoreActivitySerializer
+    queryset = models.StoreActivity.objects.all()
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def create(self, request, *args, **kwargs):
@@ -130,14 +133,14 @@ class ReductionActivityView(CreateListDeleteViewSet):
         try:
             store_id = int(store_id)
         except ValueError:
-            return models.ReductionActivity.objects.none()
+            return models.StoreActivity.objects.none()
         if hasattr(self.request.user, 'stores'):
             own_store = getattr(self.request.user, 'stores')
             op = self.request.query_params.get('op')
             if op == 'backend' and own_store.id == store_id:
-                return models.ReductionActivity.objects.filter(store_id=store_id)
+                return models.StoreActivity.objects.filter(store_id=store_id)
 
-        return models.ReductionActivity.objects.filter(store_id=store_id, datetime_from__lte=now, datetime_to__gte=now,
+        return models.StoreActivity.objects.filter(store_id=store_id, datetime_from__lte=now, datetime_to__gte=now,
                                             state=0)
 
     def destroy(self, request, *args, **kwargs):

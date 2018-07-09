@@ -51,14 +51,18 @@ class CouponRecords(models.Model):
     action_time = models.DateTimeField(auto_now=True)
 
 
-class ReductionActivity(models.Model):
-    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE,editable=False)
+class StoreActivity(models.Model):
+    store = models.ForeignKey(to='store.Stores', on_delete=models.CASCADE, editable=False)
+    store_activity_type=models.ForeignKey(to='StoreActivityType',on_delete=models.CASCADE)
     activity_name=models.CharField(max_length=20)
     datetime_from=models.DateTimeField()
     datetime_to=models.DateTimeField()
     select_all=models.BooleanField(default=True)
-    threshold_num=models.IntegerField()
-    discount=models.DecimalField(max_digits=3,decimal_places=1,default=Decimal(10.0))
+    threshold_num=models.IntegerField(default=0)
+    threshold_money=models.DecimalField(default=Decimal(0.00),max_digits=30,decimal_places=2)
+    bargain_price=models.DecimalField(max_digits=20,decimal_places=2,null=True)
+    limitation_per_user=models.IntegerField(default=0)
+    discount=models.DecimalField(max_digits=2,decimal_places=1,null=True)
     state=models.SmallIntegerField(choices=((0,'正常'),(1,'用户终止'),(2,'时间到期')),default=0)
     create_time=models.DateTimeField(auto_now_add=True)
 
@@ -69,8 +73,13 @@ class ReductionActivity(models.Model):
         ordering=('-create_time',)
 
 
-class ReductionSelected(models.Model):
-    activity=models.ForeignKey(to='ReductionActivity',on_delete=models.CASCADE,related_name='selected_goods',null=True,editable=False)
+class StoreActivityType(models.Model):
+    type_name=models.CharField(max_length=10)
+    type_pic=models.URLField(null=True)
+
+
+class StoreActivitySelected(models.Model):
+    activity=models.ForeignKey(to='StoreActivity',on_delete=models.CASCADE,related_name='selected_goods',null=True,editable=False)
     good=models.ForeignKey(to='goods.GoodDetail',on_delete=models.CASCADE)
     select_type=models.SmallIntegerField(choices=((0,'参与活动的商品'),(1,'赠品')),default=0,editable=False)
 
