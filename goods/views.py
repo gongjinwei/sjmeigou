@@ -166,3 +166,5 @@ class GoodDetailView(ModelViewSet):
 
 
 
+
+
