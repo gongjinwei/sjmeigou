@@ -30,9 +30,6 @@ class ShoppingCarItemView(ModelViewSet):
             queryset = models.ShoppingCarItem.objects.none()
         return queryset
 
-    def update(self, request, *args, **kwargs):
-        pass
-
 
 class ShoppingCarView(ListOnlyViewSet):
     serializer_class = serializers.ShoppingCarSerializer
