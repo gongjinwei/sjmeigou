@@ -63,7 +63,7 @@ class StoreActivity(models.Model):
     bargain_price=models.DecimalField(max_digits=20,decimal_places=2,null=True)
     limitation_per_user=models.IntegerField(default=0)
     discount=models.DecimalField(max_digits=2,decimal_places=1,null=True)
-    state=models.SmallIntegerField(choices=((0,'正常'),(1,'用户终止'),(2,'时间到期')),default=0)
+    state=models.SmallIntegerField(choices=((0,'正常'),(1,'用户终止'),(2,'时间到期')),default=0,editable=False)
     create_time=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
