@@ -29,5 +29,6 @@ urlpatterns = [
     path('delivery/',include('delivery.urls',namespace='delivery')),
     path('store/',include('store.urls',namespace='store')),
     path('order/',include('order.urls',namespace='order')),
+    path('platforms/',include('platforms.urls',namespace='platforms')),
 
 ]
