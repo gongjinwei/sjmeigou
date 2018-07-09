@@ -38,24 +38,6 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
             ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num)
         return instance
 
-    def update(self, instance, validated_data):
-        instance= models.ShoppingCarItem.objects.get(shopping_car=instance.shopping_car,sku=instance.sku)
-        info = model_meta.get_field_info(instance)
-
-        # Simply set each attribute on the instance, and then save it.
-        # Note that unlike `.create()` we don't need to treat many-to-many
-        # relationships as being a special case. During updates we already
-        # have an instance pk for the relationships to be associated with.
-        for attr, value in validated_data.items():
-            if attr in info.relations and info.relations[attr].to_many:
-                field = getattr(instance, attr)
-                field.set(value)
-            else:
-                setattr(instance, attr, value)
-        instance.save()
-
-        return instance
-
 
 class ShoppingCarSerializer(serializers.ModelSerializer):
     items = ShoppingCarItemSerializer(many=True,read_only=True)
