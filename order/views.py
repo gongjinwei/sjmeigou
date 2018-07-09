@@ -179,7 +179,8 @@ class BalanceReferenceView(CreateOnlyViewSet):
         serializer=self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         stores=serializer.validated_data['stores']
-        activities=models.StoreActivity.objects.filter(store__in=stores,state=0,)
+        now=datetime.datetime.now()
+        activities=models.StoreActivity.objects.filter(store__in=stores,state=0,datetime_from__lte=now,datetime_to__gte=now)
         ser=serializers.StoreActivitySerializer(activities,many=True)
 
         return Response(ser.data)
