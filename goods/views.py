@@ -124,18 +124,17 @@ class PriceFilterClass(FilterSet):
         model = models.GoodDetail
         fields = {
             'min_price': ['lte', 'gte'],
-            'state': ['exact'],
-            'title': ['exact', 'contains'],
+            'title': ['contains'],
             'store':['exact']
         }
 
 
 class GoodDetailView(ModelViewSet):
     serializer_class = serializers.GoodDetailSerializer
-    queryset = models.GoodDetail.objects.all()
+    queryset = models.GoodDetail.objects.filter(state=0)
     filter_backends = (DjangoFilterBackend,)
     filter_class = PriceFilterClass
-    filter_fields = ('title__contains', 'min_price__lte', 'min_price__gte', 'state','store')
+    filter_fields = ('title__contains', 'min_price__lte', 'min_price__gte','store')
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
