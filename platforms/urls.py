@@ -6,5 +6,6 @@ router=DefaultRouter()
 app_name='platforms'
 
 router.register('checkApplication',views.CheckApplicationViewSets,base_name='checkApplication')
+router.register('storeActivityType',views.StoreActivityViewSets,base_name='storeActivityType')
 
 urlpatterns=router.urls

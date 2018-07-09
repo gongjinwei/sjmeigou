@@ -75,7 +75,7 @@ class StoreActivity(models.Model):
 
 class StoreActivityType(models.Model):
     type_name=models.CharField(max_length=10)
-    type_pic=models.URLField(null=True)
+    type_pic=models.ImageField(upload_to='sjmeigou/activity')
 
 
 class StoreActivitySelected(models.Model):
