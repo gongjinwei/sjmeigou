@@ -173,6 +173,7 @@ class StoreActivityView(CreateListDeleteViewSet):
 
 class BalanceReferenceView(CreateOnlyViewSet):
     serializer_class = serializers.BalanceReferenceSerializer
+    queryset = models.StoreActivity.objects.all()
 
     def create(self, request, *args, **kwargs):
         serializer=self.get_serializer(data=request.data)
