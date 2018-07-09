@@ -50,8 +50,6 @@ class ShoppingCarItemView(ModelViewSet):
         return Response(serializer.data)
 
 
-
-
 class ShoppingCarView(ListOnlyViewSet):
     serializer_class = serializers.ShoppingCarSerializer
 
