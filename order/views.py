@@ -33,10 +33,9 @@ class ShoppingCarItemView(ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        try:
-            instance = models.ShoppingCarItem.objects.filter(shopping_car=instance.shopping_car,sku=request.data.get('sku'))[0]
-        except:
-            pass
+        if instance.sku.id != request.data.get('sku'):
+            instance.delete()
+            return Response({'code':'404','msg':'对象重复删除'})
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
 
