@@ -3,6 +3,8 @@ from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import Response, status
 from rest_framework.decorators import action
+from django_filters import FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 
 from . import models, serializers
 from tools.permissions import MerchantOrReadOnlyPermission
@@ -117,9 +119,22 @@ class ItemsDescView(ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
+class PriceFilterClass(FilterSet):
+    class Meta:
+        model = models.GoodDetail
+        fields = {
+            'min_price': ['lte', 'gte'],
+            'state': ['exact'],
+            'title': ['exact', 'contains']
+        }
+
+
 class GoodDetailView(ModelViewSet):
     serializer_class = serializers.GoodDetailSerializer
     queryset = models.GoodDetail.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = PriceFilterClass
+    filter_fields = ('title__contains', 'min_price__lte', 'min_price__gte', 'state')
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
@@ -146,3 +161,7 @@ class GoodDetailView(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)
+
+
+
+
