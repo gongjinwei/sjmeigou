@@ -199,7 +199,7 @@ class PriceFilterClass(FilterSet):
 
 
 class GoodsTypeView(ListDeleteViewSet):
-    serializer_class = serializers.GoodDetailSerializer
+    serializer_class = serializers.GoodsTypeSerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
     queryset = GoodDetail.objects.all()
     filter_backends = (DjangoFilterBackend,)
