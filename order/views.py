@@ -35,7 +35,7 @@ class ShoppingCarItemView(ModelViewSet):
         instance = self.get_object()
         if instance.sku.id != request.data.get('sku'):
             instance.delete()
-            return Response({'code':'404','msg':'对象重复删除'})
+            return Response({'code':4005,'msg':'对象重复删除'})
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
 
