@@ -73,6 +73,13 @@ class StoreActivity(models.Model):
         ordering=('-create_time',)
 
 
+class JoinActivity(models.Model):
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+    activity=models.ForeignKey(to='StoreActivity',on_delete=models.CASCADE)
+    nums_join=models.PositiveIntegerField(default=0,editable=False)
+    update_time=models.DateTimeField(auto_now=True)
+
+
 class StoreActivityType(models.Model):
     type_name=models.CharField(max_length=10)
     type_pic=models.ImageField(upload_to='sjmeigou/activity')

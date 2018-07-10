@@ -193,7 +193,7 @@ class GetUserInfoView(viewset.CreateOnlyViewSet):
         # 注册小程序id
         obj, created = models.UserInfo.objects.get_or_create(defaults=decrypted_data, id=m_id)
 
-        res = {'userId': m_id, 'created': created, 'nickName': obj.nickName, 'gender': obj.gender}
+        res = {'userId': m_id, 'created': created, 'nickName': obj.nickName, 'gender': obj.gender,"avatarUrl":obj.avatarUrl}
 
         return Response(res, status=status.HTTP_200_OK)
 

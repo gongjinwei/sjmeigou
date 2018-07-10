@@ -118,3 +118,9 @@ class StoreActivitySerializer(serializers.ModelSerializer):
 
 class BalanceReferenceSerializer(serializers.Serializer):
     stores = serializers.ListField()
+
+
+class JoinActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=models.JoinActivity
+        fields='__all__'
