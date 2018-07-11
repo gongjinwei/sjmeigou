@@ -37,7 +37,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
             relate_activities = activities_filter.filter(
                 Q(select_all=True) | Q(select_all=False, selected_goods__good=good))
             if relate_activities.exists() and good.store == store:
-                return relate_activities.values_list('id')
+                return relate_activities.values('id')
 
     def create(self, validated_data):
         ModelClass = self.Meta.model
