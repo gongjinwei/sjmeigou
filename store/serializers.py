@@ -12,6 +12,7 @@ class GenerateCodeSerializer(serializers.ModelSerializer):
 
 
 class StoresSerializer(serializers.ModelSerializer):
+    active_code=serializers.CharField(write_only=True)
 
     class Meta:
         model = models.Stores
@@ -39,23 +40,14 @@ class StoreQRCodeSerializer(serializers.ModelSerializer):
 
 
 class StoreInfoSerializer(serializers.ModelSerializer):
-    business_hours=serializers.SerializerMethodField()
-    store_name=serializers.ReadOnlyField(source='info.store_name')
-    address_name=serializers.ReadOnlyField(source='info.store_address')
-    longitude=serializers.ReadOnlyField(source='info.longitude')
-    latitude=serializers.ReadOnlyField(source='info.latitude')
-    store_phone=serializers.ReadOnlyField(source='info.store_phone')
     store_images=serializers.SerializerMethodField()
-
-    def get_business_hours(self,obj):
-        return "{0.hour:0>2}:{0.minute:0>2}/{1.hour:0>2}:{1.minute:0>2}".format(obj.business_hour_from,obj.business_hour_to)
 
     def get_store_images(self,obj):
         return obj.info.store_images.values('store_image')
 
     class Meta:
         model = models.Stores
-        fields=('id','business_hours','active_state','create_time','store_name','address_name','longitude','latitude','store_phone','store_images')
+        fields=('id','business_hour_from','business_hour_to','active_state','create_time','name','receive_address','longitude','latitude','store_phone','store_images')
 
 
 class EnterpriseQualificationSerializer(serializers.ModelSerializer):

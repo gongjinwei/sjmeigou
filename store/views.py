@@ -10,7 +10,7 @@ from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
 
-from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveOnlyViewSet
+from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets
 from tools.permissions import MerchantOrReadOnlyPermission
 
 from guardian.shortcuts import assign_perm
@@ -56,6 +56,13 @@ class StoresViewSets(ModelViewSet):
 
         if models.CodeWarehouse.objects.filter(code=code, use_state=0).exists():
 
+            # 默认填写店铺名，收获地址
+            serializer.validated_data.update({
+                "name":application.store_name,
+                "receive_address":application.store_address,
+                "longitude":application.longitude,
+                "latitude":application.latitude
+            })
             self.perform_create(serializer)
             application.codewarehouse.use_state = 1
             application.codewarehouse.active_user = request.user
@@ -166,12 +173,12 @@ class StoreQRCodeViewSets(CreateOnlyViewSet):
                 return Response(r, status=status.HTTP_400_BAD_REQUEST)
 
 
-class StoreInfoView(RetrieveOnlyViewSet):
+class StoreInfoView(RetrieveUpdateViewSets):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.StoreInfoSerializer
 
 
-class EnterpriseQualificationView(RetrieveOnlyViewSet):
+class EnterpriseQualificationView(RetrieveOnlyViewSets):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.EnterpriseQualificationSerializer
 
