@@ -3,7 +3,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework import mixins
 
 
-class CreateOnlyViewSet(mixins.CreateModelMixin,GenericViewSet):
+class CreateOnlyViewSet(mixins.CreateModelMixin, GenericViewSet):
     """
     A viewset that provides default `create()` actions.
     """
@@ -16,23 +16,27 @@ class CreateListDeleteViewSet(mixins.CreateModelMixin,
                               GenericViewSet):
     pass
 
-class ListOnlyViewSet(mixins.ListModelMixin,GenericViewSet):
+
+class ListOnlyViewSet(mixins.ListModelMixin, GenericViewSet):
     pass
 
 
-class CreateListViewSet(mixins.CreateModelMixin,mixins.ListModelMixin,GenericViewSet):
+class CreateListViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
     pass
 
 
-class RetrieveUpdateViewSets(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,GenericViewSet):
-    pass
-
-class RetrieveOnlyViewSets(mixins.RetrieveModelMixin,GenericViewSet):
+class RetrieveUpdateViewSets(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericViewSet):
     pass
 
 
-class ListDeleteViewSet(mixins.ListModelMixin,mixins.DestroyModelMixin,GenericViewSet):
+class RetrieveOnlyViewSets(mixins.RetrieveModelMixin, GenericViewSet):
     pass
 
-class CreateDetailDeleteViewSet(mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.DestroyModelMixin,GenericViewSet):
+
+class ListDeleteViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericViewSet):
+    pass
+
+
+class CreateDetailDeleteViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin,
+                                GenericViewSet):
     pass

@@ -1,6 +1,8 @@
 # -*- coding:UTF-8 -*-
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+# 不能限制具体访问页的权限
+
 
 class MerchantPermission(BasePermission):
     def has_permission(self, request, view):

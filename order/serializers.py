@@ -1,7 +1,8 @@
 # -*- coding:UTF-8 -*-
+import datetime
 from rest_framework import serializers
 
-from django.db.models import F
+from django.db.models import F, Q
 
 from . import models
 from store.models import Stores
@@ -16,11 +17,28 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     stock = serializers.ReadOnlyField(source='sku.stock')
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
+    activities = serializers.SerializerMethodField()
     store = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = models.ShoppingCarItem
         exclude = ('shopping_car',)
+
+    def get_activities(self, obj):
+        store = obj.shopping_car.store
+        good = obj.sku.color.good_detail
+        now = datetime.datetime.now()
+
+        # 获取所有在进行中的活动
+        if good.store == store:
+            activities_filter = models.StoreActivity.objects.filter(store=store, state=0, datetime_to__gte=now,
+                                                                datetime_from__lte=now)
+
+            # 在正常的活动中过滤或者选中了所有商品的或者有参与的活动
+            relate_activities = activities_filter.filter(
+                Q(select_all=True) | Q(select_all=False, selected_goods__good=good))
+            if relate_activities.exists() and good.store == store:
+                return relate_activities.values()
 
     def create(self, validated_data):
         ModelClass = self.Meta.model
@@ -104,23 +122,11 @@ class StoreActivitySerializer(serializers.ModelSerializer):
         return activity
 
 
-# class SKUSerializer(serializers.ModelSerializer):
-#     title = serializers.ReadOnlyField(source='color.good_detail.title')
-#     color = serializers.ReadOnlyField(source='color.color_name')
-#     color_pic = serializers.ReadOnlyField(source='color.color_pic')
-#     size = serializers.ReadOnlyField(source='size.size_name')
-#     good_id = serializers.ReadOnlyField(source='color.good_detail.id')
-#
-#     class Meta:
-#         fields = ('price','stock','title','color','color_pic','size','good_id')
-#         model = SKU
-
-
 class BalanceReferenceSerializer(serializers.Serializer):
     stores = serializers.ListField()
 
 
 class JoinActivitySerializer(serializers.ModelSerializer):
     class Meta:
-        model=models.JoinActivity
-        fields='__all__'
+        model = models.JoinActivity
+        fields = '__all__'

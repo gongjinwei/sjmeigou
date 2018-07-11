@@ -28,6 +28,9 @@ secret = getattr(settings, 'APPSECRET')
 
 
 class GenerateCodeView(CreateOnlyViewSet):
+    """
+        人工生成验证码
+    """
     queryset = models.CodeWarehouse.objects.all()
     serializer_class = serializers.GenerateCodeSerializer
     permission_classes = (IsAdminUser,)
@@ -44,6 +47,9 @@ class GenerateCodeView(CreateOnlyViewSet):
 
 
 class StoresViewSets(ModelViewSet):
+    """
+        用于查看自己的店铺，验证店铺激活码并创建一个店铺
+    """
     serializer_class = serializers.StoresSerializer
 
     def create(self, request, *args, **kwargs):
@@ -92,6 +98,9 @@ class StoresViewSets(ModelViewSet):
 
 
 class StatusChangeView(CreateOnlyViewSet):
+    """
+        临时修改申请状态
+    """
     serializer_class = serializers.StatusChangeSerializer
 
     def create(self, request, *args, **kwargs):
@@ -107,6 +116,9 @@ class StatusChangeView(CreateOnlyViewSet):
 
 
 class DepositView(ModelViewSet):
+    """
+        记录与发放保证金申请
+    """
     serializer_class = serializers.DepositSerializer
 
     def get_queryset(self):
@@ -133,6 +145,9 @@ class DepositView(ModelViewSet):
 
 
 class StoreQRCodeViewSets(CreateOnlyViewSet):
+    """
+        用于店铺二维码图片的生成
+    """
     serializer_class = serializers.StoreQRCodeSerializer
 
     def create(self, request, *args, **kwargs):
@@ -174,17 +189,26 @@ class StoreQRCodeViewSets(CreateOnlyViewSet):
 
 
 class StoreInfoView(RetrieveUpdateViewSets):
+    """
+       用于店铺信息查看与修改,此接口不在主接口显示
+    """
     queryset = models.Stores.objects.all()
     serializer_class = serializers.StoreInfoSerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
 
 
 class EnterpriseQualificationView(RetrieveOnlyViewSets):
+    """
+        用于对应店铺资质的查看，此接口不在主接口显示
+    """
     queryset = models.Stores.objects.all()
     serializer_class = serializers.EnterpriseQualificationSerializer
 
 
 class StoreGoodsTypeView(CreateOnlyViewSet):
+    """
+        用于创建与修改店铺分类（名称，序号，日期）
+    """
     serializer_class = serializers.StoreGoodsTypeSerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
 
@@ -208,6 +232,9 @@ class PriceFilterClass(FilterSet):
 
 
 class GoodsTypeView(ListDeleteViewSet):
+    """
+        用于将商品添加到店铺分类及删除对应店铺分类
+    """
     serializer_class = serializers.GoodsTypeSerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
     queryset = GoodDetail.objects.all()
