@@ -6,7 +6,6 @@ from django.db.models import F, Q
 
 from . import models
 from store.models import Stores
-from goods.models import SKU
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -32,13 +31,13 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
         # 获取所有在进行中的活动
         if good.store == store:
             activities_filter = models.StoreActivity.objects.filter(store=store, state=0, datetime_to__gte=now,
-                                                                datetime_from__lte=now)
+                                                                    datetime_from__lte=now)
 
             # 在正常的活动中过滤或者选中了所有商品的或者有参与的活动
             relate_activities = activities_filter.filter(
                 Q(select_all=True) | Q(select_all=False, selected_goods__good=good))
             if relate_activities.exists() and good.store == store:
-                return relate_activities.values()
+                return relate_activities.values('id')
 
     def create(self, validated_data):
         ModelClass = self.Meta.model
@@ -61,6 +60,12 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
     items = ShoppingCarItemSerializer(many=True, read_only=True)
     store_name = serializers.ReadOnlyField(source='store.info.store_name')
     store_logo = serializers.ReadOnlyField(source='store.logo')
+    store_activity = serializers.SerializerMethodField()
+
+    def get_store_activities(self, obj):
+        now = datetime.datetime.now()
+        return models.StoreActivity.objects.filter(store=obj.store, state=0, datetime_to__gte=now,
+                                                   datetime_from__lte=now).values()
 
     class Meta:
         model = models.ShoppingCar
