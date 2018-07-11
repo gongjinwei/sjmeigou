@@ -60,7 +60,7 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
     items = ShoppingCarItemSerializer(many=True, read_only=True)
     store_name = serializers.ReadOnlyField(source='store.info.store_name')
     store_logo = serializers.ReadOnlyField(source='store.logo')
-    store_activity = serializers.SerializerMethodField()
+    store_activities = serializers.SerializerMethodField()
 
     def get_store_activities(self, obj):
         now = datetime.datetime.now()
