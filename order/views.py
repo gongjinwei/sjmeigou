@@ -121,7 +121,7 @@ class GetCouponView(CreateListViewSet):
             coupon.available_num = F('available_num') - 1
             coupon.save()
             headers = self.get_success_headers(serializer.data)
-            return Response({"msg":"优惠券领取成功","code":10000}, status=status.HTTP_201_CREATED, headers=headers)
+            return Response({"msg":"优惠券领取成功","code":1000}, status=status.HTTP_201_CREATED, headers=headers)
         else:
             return Response({"msg": '该券不可领取或可领取数量为0', "code": 4004})
 
