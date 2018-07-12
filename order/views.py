@@ -116,12 +116,12 @@ class GetCouponView(CreateListViewSet):
             if models.GetCoupon.objects.filter(user=self.request.user, coupon=coupon).exists():
                 user_coupon = models.GetCoupon.objects.filter(user=self.request.user, coupon=coupon)[0]
                 if user_coupon.has_num >= coupon.limit_per_user:
-                    return Response({'code': 4003, "msg": '你可领的券数超限'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'code': 4003, "msg": '你可领的券数超限'})
             self.perform_create(serializer)
             coupon.available_num = F('available_num') - 1
             coupon.save()
             headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            return Response({"msg":"优惠券领取成功","code":10000}, status=status.HTTP_201_CREATED, headers=headers)
         else:
             return Response({"msg": '该券不可领取或可领取数量为0', "code": 4004})
 
