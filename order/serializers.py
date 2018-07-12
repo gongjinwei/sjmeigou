@@ -73,6 +73,10 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
         car_items=models.ShoppingCarItem.objects.filter(shopping_car=obj)
         items_num=car_items.annotate(total_num=Sum('num')).values('total_num')
         items_money=car_items.annotate(total_money=Sum('total_money')).values('total_money')
+        return {
+            'item_num':items_num,
+            'itme_money':items_money
+        }
 
     def get_coupons(self,obj):
         today = datetime.date.today()
