@@ -44,6 +44,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
         ModelClass = self.Meta.model
         num = validated_data.get('num')
         total_money=validated_data.get('total_money')
+        price_of_added=validated_data.get('price_of_added')
         store_id = validated_data.pop('store')
         store = Stores.objects.get(pk=store_id)
         user = validated_data.pop('user')
@@ -54,7 +55,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
         instance, created = ModelClass.objects.get_or_create(defaults=validated_data, sku=validated_data['sku'],
                                                              shopping_car=validated_data['shopping_car'])
         if not created:
-            ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num,total_money=total_money)
+            ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num,total_money=total_money,price_of_added=price_of_added)
         return instance
 
 
