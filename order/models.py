@@ -16,10 +16,6 @@ class ShoppingCarItem(models.Model):
     state = models.SmallIntegerField(choices=((0, '正常'), (1, '失效')), default=0, editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args,**kwargs):
-        self.total_money=self.num*self.sku.price
-        super().save(*args,**kwargs)
-
 
 class ShoppingCar(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='shopping_items', editable=False)
