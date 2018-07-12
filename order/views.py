@@ -102,7 +102,7 @@ class CouponView(CreateListDeleteViewSet):
 
 class GetCouponView(CreateListViewSet):
     """
-        普通用户获取有效优惠券，领取优惠券
+        普通用户获取有效优惠券列表，领取优惠券
     """
     serializer_class = serializers.GetCouponSerializer
 
