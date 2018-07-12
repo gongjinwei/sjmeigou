@@ -82,6 +82,7 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
             for activity in activities:
                 x,y=activity.algorithm(items_num,items_money)
                 ret.append({'id':activity.id,'activity':x,'reduction_money':y})
+            # 返回最优惠活动
             ret_max=max(ret,key=lambda x:x.get('reduction_money',0))
             return ret_max
         return ret
