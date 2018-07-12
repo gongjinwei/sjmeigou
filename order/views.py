@@ -68,6 +68,9 @@ class ShoppingCarView(ListOnlyViewSet):
 
 
 class CouponView(CreateListDeleteViewSet):
+    """
+        查看创建及删除店铺优惠券
+    """
     serializer_class = serializers.CouponSerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
 
@@ -98,6 +101,9 @@ class CouponView(CreateListDeleteViewSet):
 
 
 class GetCouponView(CreateListViewSet):
+    """
+        普通用户获取有效优惠券，领取优惠券
+    """
     serializer_class = serializers.GetCouponSerializer
 
     def create(self, request, *args, **kwargs):
@@ -133,17 +139,12 @@ class GetCouponView(CreateListViewSet):
 
 
 class StoreActivityView(CreateListDeleteViewSet):
+    """
+        查看、创建、删除店铺活动
+    """
     serializer_class = serializers.StoreActivitySerializer
     queryset = models.StoreActivity.objects.all()
     permission_classes = (MerchantOrReadOnlyPermission,)
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         serializer.save(store=self.request.user.stores)
@@ -169,18 +170,3 @@ class StoreActivityView(CreateListDeleteViewSet):
         instance.state = 1
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class BalanceReferenceView(CreateOnlyViewSet):
-    serializer_class = serializers.BalanceReferenceSerializer
-    queryset = models.StoreActivity.objects.all()
-
-    def create(self, request, *args, **kwargs):
-        serializer=self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        stores=serializer.validated_data['stores']
-        now=datetime.datetime.now()
-        activities=models.StoreActivity.objects.filter(store__in=stores,state=0,datetime_from__lte=now,datetime_to__gte=now)
-        ser=serializers.StoreActivitySerializer(activities,many=True)
-
-        return Response(ser.data)

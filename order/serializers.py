@@ -133,10 +133,6 @@ class StoreActivitySerializer(serializers.ModelSerializer):
         return activity
 
 
-class BalanceReferenceSerializer(serializers.Serializer):
-    stores = serializers.ListField()
-
-
 class JoinActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.JoinActivity
