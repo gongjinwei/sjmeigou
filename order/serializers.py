@@ -2,7 +2,7 @@
 import datetime
 from rest_framework import serializers
 
-from django.db.models import F, Q,Sum
+from django.db.models import F, Q, Sum
 
 from . import models
 from store.models import Stores
@@ -25,8 +25,8 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ModelClass = self.Meta.model
         num = validated_data.get('num')
-        total_money=validated_data.get('total_money')
-        price_of_added=validated_data.get('price_of_added')
+        total_money = validated_data.get('total_money')
+        price_of_added = validated_data.get('price_of_added')
         store_id = validated_data.pop('store')
         store = Stores.objects.get(pk=store_id)
         user = validated_data.pop('user')
@@ -37,7 +37,9 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
         instance, created = ModelClass.objects.get_or_create(defaults=validated_data, sku=validated_data['sku'],
                                                              shopping_car=validated_data['shopping_car'])
         if not created:
-            ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num,total_money=F('total_money')+total_money,price_of_added=price_of_added)
+            ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num,
+                                                             total_money=F('total_money') + total_money,
+                                                             price_of_added=price_of_added)
         return instance
 
 
@@ -51,28 +53,37 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
     def get_store_activities(self, obj):
         now = datetime.datetime.now()
         # 取出所有活动
-        activities=models.StoreActivity.objects.filter(store=obj.store, state=0, datetime_to__gte=now,
-                                                   datetime_from__lte=now)
+        activities = models.StoreActivity.objects.filter(store=obj.store, state=0, datetime_to__gte=now,
+                                                         datetime_from__lte=now)
         # 取出购车车中数量总金额与数量
-        car_items=models.ShoppingCarItem.objects.filter(shopping_car=obj)
-        items_num=car_items.annotate(total_num=Sum('num')).values('total_num')
-        items_money=car_items.annotate(all_money=Sum('total_money')).values('all_money')
+        car_items = models.ShoppingCarItem.objects.filter(shopping_car=obj)
+
         ret = []
-        if items_num and items_money:
-            items_num = items_num[0].get('total_num')
-            items_money=items_money[0].get('all_money')
-            for activity in activities:
-                x,y=activity.algorithm(items_num,items_money)
-                ret.append({'id':activity.id,'activity':x,'reduction_money':y})
+        for activity in activities:
+            car_item=car_items
+            if activity.select_all == False:
+                select_goods = activity.selected_goods.values_list('good', flat=True)
+                car_item = car_items.filter(sku__color__good_detail__in=select_goods)
+            items_num = car_item.annotate(total_num=Sum('num')).values('total_num')
+            items_money = car_item.annotate(all_money=Sum('total_money')).values('all_money')
+            if items_num and items_money:
+                items_num = items_num[0].get('total_num')
+                items_money = items_money[0].get('all_money')
+            else:
+                items_money=0
+                items_num=0
 
-            # 返回最优惠活动
-            ret_max=max(ret,key=lambda x:x.get('reduction_money',0))
-            return ret_max
-        return ret
+            x, y = activity.algorithm(items_num, items_money)
+            ret.append({'id': activity.id, 'activity': x, 'reduction_money': y,'item_num':items_num,'items_money':items_money})
 
-    def get_coupons(self,obj):
+        # 返回最优惠活动
+        ret_max = max(ret, key=lambda x: x.get('reduction_money', 0))
+        return ret_max
+
+    def get_coupons(self, obj):
         today = datetime.date.today()
-        return models.Coupon.objects.filter(store=obj.store, date_to__gte=today,date_from__lte=today,available_num__gt=0).values()
+        return models.Coupon.objects.filter(store=obj.store, date_to__gte=today, date_from__lte=today,
+                                            available_num__gt=0).values()
 
     class Meta:
         model = models.ShoppingCar
