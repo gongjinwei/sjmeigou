@@ -82,8 +82,9 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
             for activity in activities:
                 x,y=activity.algorithm(items_num,items_money)
                 ret.append({'id':activity.id,'activity':x,'reduction_money':y})
-        ret_max=max(ret,key=lambda x:x.get('reduction_money',0))
-        return ret_max
+            ret_max=max(ret,key=lambda x:x.get('reduction_money',0))
+            return ret_max
+        return ret
 
     def get_coupons(self,obj):
         today = datetime.date.today()
