@@ -17,17 +17,12 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
     activities = serializers.SerializerMethodField()
-    coupons = serializers.SerializerMethodField()
+
     store = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = models.ShoppingCarItem
         exclude = ('shopping_car',)
-
-    def get_coupons(self,obj):
-        store = obj.shopping_car.store
-        now = datetime.datetime.now()
-        return models.Coupon.objects.filter(store=store, datetime_to__gte=now,datetime_from__lte=now,available_num__gt=0)
 
     def get_activities(self, obj):
         store = obj.shopping_car.store
@@ -66,12 +61,18 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
     items = ShoppingCarItemSerializer(many=True, read_only=True)
     store_name = serializers.ReadOnlyField(source='store.info.store_name')
     store_logo = serializers.ReadOnlyField(source='store.logo')
+    coupons = serializers.SerializerMethodField()
     store_activities = serializers.SerializerMethodField()
 
     def get_store_activities(self, obj):
         now = datetime.datetime.now()
         return models.StoreActivity.objects.filter(store=obj.store, state=0, datetime_to__gte=now,
                                                    datetime_from__lte=now).values()
+
+    def get_coupons(self,obj):
+        now = datetime.datetime.now()
+        return models.Coupon.objects.filter(store=obj.store, datetime_to__gte=now,datetime_from__lte=now,available_num__gt=0).values()
+
 
     class Meta:
         model = models.ShoppingCar
