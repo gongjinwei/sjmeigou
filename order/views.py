@@ -13,6 +13,9 @@ from tools.viewset import CreateListDeleteViewSet, CreateListViewSet,ListOnlyVie
 
 
 class ShoppingCarItemView(ModelViewSet):
+    """
+        修改、删除具体购物车项
+    """
     serializer_class = serializers.ShoppingCarItemSerializer
     queryset = models.ShoppingCarItem.objects.all()
 

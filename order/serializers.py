@@ -2,7 +2,7 @@
 import datetime
 from rest_framework import serializers
 
-from django.db.models import F, Q
+from django.db.models import F, Q,Sum
 
 from . import models
 from store.models import Stores
@@ -66,8 +66,13 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
 
     def get_store_activities(self, obj):
         now = datetime.datetime.now()
-        return models.StoreActivity.objects.filter(store=obj.store, state=0, datetime_to__gte=now,
+        # 取出所有活动
+        activities=models.StoreActivity.objects.filter(store=obj.store, state=0, datetime_to__gte=now,
                                                    datetime_from__lte=now).values()
+        # 取出购车车中数量总金额与数量
+        car_items=models.ShoppingCarItem.objects.filter(shopping_car=obj)
+        items_num=car_items.annotate(total_num=Sum('num')).values('total_num')
+        items_money=car_items.annotate(total_money=Sum('total_money')).values('total_money')
 
     def get_coupons(self,obj):
         today = datetime.date.today()
