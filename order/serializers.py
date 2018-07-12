@@ -81,8 +81,6 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
             ret.append({'id':activity.id,'activity':x,'reduction_money':y})
         return ret
 
-
-
     def get_coupons(self,obj):
         today = datetime.date.today()
         return models.Coupon.objects.filter(store=obj.store, date_to__gte=today,date_from__lte=today,available_num__gt=0).values()
