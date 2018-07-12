@@ -21,7 +21,7 @@ class ShoppingCarItemView(ModelViewSet):
 
     def perform_create(self, serializer):
         price_added = serializer.validated_data['sku'].price
-        total_money = price_added*serializer.validated_data['num']
+        total_money = serializer.validated_data['num']*price_added
         serializer.save(user=self.request.user, price_of_added=price_added,total_money=total_money)
 
     def list(self, request, *args, **kwargs):
