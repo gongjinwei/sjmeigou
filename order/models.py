@@ -12,7 +12,7 @@ class ShoppingCarItem(models.Model):
     price_of_added = models.DecimalField(decimal_places=2, max_digits=30, editable=False)
     num = models.IntegerField()
     sku = models.ForeignKey(to='goods.SKU', on_delete=models.CASCADE)
-    total_money=models.DecimalField(max_digits=30,decimal_places=2,null=True)
+    total_money=models.DecimalField(max_digits=30,decimal_places=2,null=True,editable=False)
     state = models.SmallIntegerField(choices=((0, '正常'), (1, '失效')), default=0, editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
 
