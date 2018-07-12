@@ -72,10 +72,10 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
         # 取出购车车中数量总金额与数量
         car_items=models.ShoppingCarItem.objects.filter(shopping_car=obj)
         items_num=car_items.annotate(total_num=Sum('num')).values('total_num')
-        items_money=car_items.annotate(total_money=Sum('total_money')).values('total_money')
+        items_money=car_items.annotate(all_money=Sum('total_money')).values('all_money')
         return {
             'item_num':items_num,
-            'itme_money':items_money
+            'item_money':items_money
         }
 
     def get_coupons(self,obj):
