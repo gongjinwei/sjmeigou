@@ -70,9 +70,8 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
                                                    datetime_from__lte=now).values()
 
     def get_coupons(self,obj):
-        now = datetime.datetime.now()
-        return models.Coupon.objects.filter(store=obj.store, datetime_to__gte=now,datetime_from__lte=now,available_num__gt=0).values()
-
+        today = datetime.date.today()
+        return models.Coupon.objects.filter(store=obj.store, date_to__gte=today,date_from__lte=today,available_num__gt=0).values()
 
     class Meta:
         model = models.ShoppingCar
