@@ -63,15 +63,9 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
             car_item=car_items
             if activity.select_all == False:
                 select_goods = activity.selected_goods.values_list('good', flat=True)
-                car_item = car_items.filter(sku__color__good_detail__in=select_goods)
-            items_num = car_item.annotate(total_num=Sum('num')).values('total_num')
-            items_money = car_item.annotate(all_money=Sum('total_money')).values('all_money')
-            if items_num and items_money:
-                items_num = items_num[0].get('total_num')
-                items_money = items_money[0].get('all_money')
-            else:
-                items_money=0
-                items_num=0
+                car_item = car_item.filter(sku__color__good_detail__in=select_goods)
+            items_num = sum([t.num for t in car_item])
+            items_money = sum([t.total_money for t in car_item])
 
             x, y = activity.algorithm(items_num, items_money)
             ret.append({'id': activity.id, 'activity': x, 'reduction_money': y,'item_num':items_num,'items_money':items_money})
