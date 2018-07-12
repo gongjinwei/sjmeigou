@@ -17,11 +17,17 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
     activities = serializers.SerializerMethodField()
+    coupons = serializers.SerializerMethodField()
     store = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = models.ShoppingCarItem
         exclude = ('shopping_car',)
+
+    def get_coupons(self,obj):
+        store = obj.shopping_car.store
+        now = datetime.datetime.now()
+        return models.Coupon.objects.filter(store=store, datetime_to__gte=now,datetime_from__lte=now)
 
     def get_activities(self, obj):
         store = obj.shopping_car.store
