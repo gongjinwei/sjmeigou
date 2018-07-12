@@ -70,15 +70,18 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
         now = datetime.datetime.now()
         # 取出所有活动
         activities=models.StoreActivity.objects.filter(store=obj.store, state=0, datetime_to__gte=now,
-                                                   datetime_from__lte=now).values()
+                                                   datetime_from__lte=now)
         # 取出购车车中数量总金额与数量
         car_items=models.ShoppingCarItem.objects.filter(shopping_car=obj)
-        items_num=car_items.annotate(total_num=Sum('num')).values('total_num')
-        items_money=car_items.annotate(all_money=Sum('total_money')).values('all_money')
-        return {
-            'item_num':items_num,
-            'item_money':items_money
-        }
+        items_num=car_items.annotate(total_num=Sum('num')).values('total_num')[0]['total_num']
+        items_money=car_items.annotate(all_money=Sum('total_money')).values('all_money')[0]['all_money']
+        ret=[]
+        for activity in activities:
+            x,y=activity.algorithm(items_num,items_money)
+            ret.append({'id':activity.id,'activity':x,'reduction_money':y})
+        return ret
+
+
 
     def get_coupons(self,obj):
         today = datetime.date.today()
