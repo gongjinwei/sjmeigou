@@ -12,7 +12,7 @@ class ShoppingCarItem(models.Model):
     price_of_added = models.DecimalField(decimal_places=2, max_digits=30, editable=False)
     num = models.IntegerField()
     sku = models.ForeignKey(to='goods.SKU', on_delete=models.CASCADE)
-    total_money=models.DecimalField(max_digits=30,decimal_places=2,null=True,editable=False)
+    total_money = models.DecimalField(max_digits=30, decimal_places=2, null=True, editable=False)
     state = models.SmallIntegerField(choices=((0, '正常'), (1, '失效')), default=0, editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
 
@@ -76,18 +76,28 @@ class StoreActivity(models.Model):
 
     def algorithm(self, num, money):
         strategy = self.store_activity_type.type_strategy
-        if strategy == 1 and (self.threshold_num == 0 or num >= self.threshold_num):
-            return ('%s:满%s件打%s折' % (self.activity_name, self.threshold_num, self.discount), money *(1- self.discount/10))
+        discount = 0
+        if strategy == 1:
+            if self.threshold_num == 0 or num >= self.threshold_num:
+                discount = money * (1 - self.discount / 10)
+            return ('%s:满%s件打%s折' % (self.activity_name, self.threshold_num, self.discount), discount)
 
-        elif strategy == 2 and (self.threshold_money == Decimal(0.00) or money >= self.threshold_money):
-            return ('%s:满%s打%s折' %(self.activity_name,self.threshold_money,self.discount),money * (1-self.discount/10))
+        elif strategy == 2:
+            if self.threshold_money == Decimal(0.00) or money >= self.threshold_money:
+                discount = money * (1 - self.discount / 10)
+            return ('%s:满%s打%s折' % (self.activity_name, self.threshold_money, self.discount), discount)
 
-        elif strategy == 3 and (self.threshold_num == 0 or num >= self.threshold_num):
-            return ('%s:满%s件减%s' % (self.activity_name, self.threshold_num, self.discount_money),self.discount_money)
+        elif strategy == 3:
+            if self.threshold_num == 0 or num >= self.threshold_num:
+                discount = self.discount_money
+            return ('%s:满%s件减%s' % (self.activity_name, self.threshold_num, self.discount_money), discount)
 
-        elif strategy == 4 and (self.threshold_money == Decimal(0.00) or money >= self.threshold_money):
-            return ('%s:满%s减%s' %(self.activity_name,self.threshold_money,self.discount_money),self.discount_money)
-        return ("不使用优惠",0)
+        elif strategy == 4:
+            if self.threshold_money == Decimal(0.00) or money >= self.threshold_money:
+                discount = self.discount_money
+            return ('%s:满%s减%s' % (self.activity_name, self.threshold_money, self.discount_money), discount)
+
+        return ("不使用优惠", 0)
 
 
 class JoinActivity(models.Model):
