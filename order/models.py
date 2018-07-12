@@ -83,6 +83,7 @@ class JoinActivity(models.Model):
 class StoreActivityType(models.Model):
     type_name=models.CharField(max_length=10)
     type_pic=models.ImageField(upload_to='sjmeigou/activity')
+    type_strategy=models.SmallIntegerField(choices=((1,'满数量打折扣'),(2,'满金额打折扣'),(3,'满数量减金额'),(4,'满金额减金额'),(5,'取特价'),(6,'取折扣价')),default=1)
 
 
 class StoreActivitySelected(models.Model):
