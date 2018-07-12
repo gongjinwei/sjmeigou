@@ -55,7 +55,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
         instance, created = ModelClass.objects.get_or_create(defaults=validated_data, sku=validated_data['sku'],
                                                              shopping_car=validated_data['shopping_car'])
         if not created:
-            ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num,total_money=total_money,price_of_added=price_of_added)
+            ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num,total_money=F('total_money')+total_money,price_of_added=price_of_added)
         return instance
 
 
