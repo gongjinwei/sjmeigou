@@ -27,7 +27,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
     def get_coupons(self,obj):
         store = obj.shopping_car.store
         now = datetime.datetime.now()
-        return models.Coupon.objects.filter(store=store, datetime_to__gte=now,datetime_from__lte=now)
+        return models.Coupon.objects.filter(store=store, datetime_to__gte=now,datetime_from__lte=now,available_num__gt=0)
 
     def get_activities(self, obj):
         store = obj.shopping_car.store
