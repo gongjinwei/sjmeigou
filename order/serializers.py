@@ -161,6 +161,7 @@ class BalanceSkuSerializer(serializers.Serializer):
     sku = serializers.PrimaryKeyRelatedField(queryset=SKU.objects.all())
     num = serializers.IntegerField()
 
+
 class BalanceListSerializer(serializers.Serializer):
     store = serializers.PrimaryKeyRelatedField(queryset=Stores.objects.all())
     skus = BalanceSkuSerializer(many=True)
@@ -169,21 +170,22 @@ class BalanceListSerializer(serializers.Serializer):
         store = validated_data.get('store')
         return store
 
+
 class BalanceSerializer(serializers.Serializer):
     stores = BalanceListSerializer(many=True)
 
     def create(self, validated_data):
-        stores=validated_data.get('stores')
+        stores = validated_data.get('stores')
         return stores
 
 
 class SkuDetailSerializer(serializers.ModelSerializer):
-    title=serializers.ReadOnlyField(source='color.good_detail.title')
-    color_name=serializers.ReadOnlyField(source='color.color_name')
+    title = serializers.ReadOnlyField(source='color.good_detail.title')
+    color_name = serializers.ReadOnlyField(source='color.color_name')
     color_pic = serializers.ReadOnlyField(source='color.color_pic')
-    size_name=serializers.ReadOnlyField(source='size.size_name')
+    size_name = serializers.ReadOnlyField(source='size.size_name')
     good_id = serializers.ReadOnlyField(source='color.good_detail.id')
 
     class Meta:
         model = SKU
-        fields=('price','stock','size_name','color_name','title','color_pic','id','good_id')
+        fields = ('price', 'stock', 'size_name', 'color_name', 'title', 'color_pic', 'id', 'good_id')

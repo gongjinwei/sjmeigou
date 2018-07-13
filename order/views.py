@@ -217,6 +217,7 @@ class BalanceView(CreateOnlyViewSet):
                     ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
                                 'items_money': items_money})
 
+
             # 附加SKU信息
             sd = []
             for sk in sku_data:
