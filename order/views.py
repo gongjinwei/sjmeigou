@@ -216,6 +216,8 @@ class BalanceView(CreateOnlyViewSet):
                     x, y = activity.algorithm(items_num, items_money)
                     ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
                                 'items_money': items_money})
+
+            # 返回优惠券信息
             cost_price = sum([t['num'] * t['sku'].price for t in sku_data])
             cost_num = sum([t['num'] for t in sku_data])
             today=datetime.date.today()
@@ -226,13 +228,17 @@ class BalanceView(CreateOnlyViewSet):
                     x,y=coupon.algorithm(cost_price)
                     if y>0:
                         ac.append({'coupon_id':coupon.id,'activity':x,'reduction_money': y,'item_num':cost_num,'items_money':cost_price})
-            # 附加SKU信息
+
+            op =request.query_params.get('op')
             sd = []
-            for sk in sku_data:
-                ser = serializers.SkuDetailSerializer(instance=sk['sku'])
-                ser_ = ser.data
-                ser_.update({'num': sk['num']})
-                sd.append(ser_)
+
+            if op != 'update':
+                # 附加SKU信息
+                for sk in sku_data:
+                    ser = serializers.SkuDetailSerializer(instance=sk['sku'])
+                    ser_ = ser.data
+                    ser_.update({'num': sk['num']})
+                    sd.append(ser_)
 
             # 附加店铺信息
             ret.append({'store': {
