@@ -161,14 +161,20 @@ class BalanceSkuSerializer(serializers.Serializer):
     sku = serializers.PrimaryKeyRelatedField(queryset=SKU.objects.all())
     num = serializers.IntegerField()
 
-
-class BalanceSerializer(serializers.Serializer):
+class BalanceListSerializer(serializers.Serializer):
     store = serializers.PrimaryKeyRelatedField(queryset=Stores.objects.all())
     skus = BalanceSkuSerializer(many=True)
 
     def create(self, validated_data):
         store = validated_data.get('store')
         return store
+
+class BalanceSerializer(serializers.Serializer):
+    stores = BalanceListSerializer(many=True)
+
+    def create(self, validated_data):
+        stores=validated_data.get('stores')
+        return stores
 
 
 class SkuDetailSerializer(serializers.ModelSerializer):

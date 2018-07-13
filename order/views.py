@@ -184,50 +184,53 @@ class BalanceView(CreateOnlyViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        store = serializer.validated_data['store']
-
-        # 判断是否为该店铺下的sku，如果不属于指定店铺直接报错
-        sku_data = serializer.validated_data['skus']
-        sku_ids = [item['sku'].id for item in sku_data]
-        if not SKU.objects.filter(id__in=sku_ids, color__good_detail__store=store).exists():
-            return Response('sku所属店铺出错', status=status.HTTP_400_BAD_REQUEST)
-
-        # 取出店铺的所有有效活动
-        now = datetime.datetime.now()
-        activities = models.StoreActivity.objects.filter(store=store, datetime_from__lte=now, datetime_to__gte=now,
-                                                         state=0)
-        # 计算每个活动的优惠金额
+        stores = serializer.validated_data['stores']
         ret = []
-        ac = []
-        for activity in activities:
-            # 取出所有可参与活动的sku
-            fit_sku = sku_data
-            if not activity.select_all:
-                select_goods = activity.selected_goods.values_list('good', flat=True)
-                fit_sku = filter(lambda x: x['sku'].color.good_detail in select_goods, sku_data)
+        for st in stores:
+            store = st['store']
 
-            if fit_sku:
-                items_num = sum([t['num'] for t in fit_sku])
-                items_money = sum([t['num'] * t['sku'].price for t in fit_sku])
+            # 判断是否为该店铺下的sku，如果不属于指定店铺直接报错
+            sku_data = st['skus']
+            sku_ids = [item['sku'].id for item in sku_data]
+            if not SKU.objects.filter(id__in=sku_ids, color__good_detail__store=store).exists():
+                return Response('sku所属店铺出错', status=status.HTTP_400_BAD_REQUEST)
 
-                x, y = activity.algorithm(items_num, items_money)
-                ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
-                            'items_money': items_money})
+            # 取出店铺的所有有效活动
+            now = datetime.datetime.now()
+            activities = models.StoreActivity.objects.filter(store=store, datetime_from__lte=now, datetime_to__gte=now,
+                                                             state=0)
+            # 计算每个活动的优惠金额
 
-        # 附加SKU信息
-        sd = []
-        for sk in sku_data:
-            ser = serializers.SkuDetailSerializer(instance=sk['sku'])
-            ser.data.update({'num': sk['num']})
-            sd.append(ser.data)
+            ac = []
+            for activity in activities:
+                # 取出所有可参与活动的sku
+                fit_sku = sku_data
+                if not activity.select_all:
+                    select_goods = activity.selected_goods.values_list('good', flat=True)
+                    fit_sku = filter(lambda x: x['sku'].color.good_detail in select_goods, sku_data)
 
-        # 附加店铺信息
-        ret.append({'store': {
-            'id': store.id,
-            'name': store.name,
-            'logo': store.logo,
-            'activities':ac,
-            'skus':sd
-        }})
+                if fit_sku:
+                    items_num = sum([t['num'] for t in fit_sku])
+                    items_money = sum([t['num'] * t['sku'].price for t in fit_sku])
+
+                    x, y = activity.algorithm(items_num, items_money)
+                    ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
+                                'items_money': items_money})
+
+            # 附加SKU信息
+            sd = []
+            for sk in sku_data:
+                ser = serializers.SkuDetailSerializer(instance=sk['sku'])
+                ser.data.update({'num': sk['num']})
+                sd.append(ser.data)
+
+            # 附加店铺信息
+            ret.append({'store': {
+                'id': store.id,
+                'name': store.name,
+                'logo': store.logo,
+                'activities':ac,
+                'skus':sd
+            }})
 
         return Response(ret)
