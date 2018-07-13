@@ -11,5 +11,6 @@ router.register('shoppingCarItem',views.ShoppingCarItemView,base_name='shoppingC
 router.register('coupon',views.CouponView,base_name='coupon')
 router.register('getCoupon',views.GetCouponView,base_name='getCoupon')
 router.register('storeActivity',views.StoreActivityView,base_name='storeActivity')
+router.register('balance',views.BalanceView,base_name='balance')
 
 urlpatterns=router.urls

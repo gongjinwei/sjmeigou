@@ -174,3 +174,7 @@ class StoreActivityView(CreateListDeleteViewSet):
         instance.state = 1
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class BalanceView(CreateOnlyViewSet):
+    serializer_class = serializers.BalanceSerializer
+

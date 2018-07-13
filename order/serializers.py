@@ -2,10 +2,12 @@
 import datetime
 from rest_framework import serializers
 
-from django.db.models import F, Q, Sum
+from django.db.models import F
 
 from . import models
 from store.models import Stores
+
+from goods.models import SKU
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -26,7 +28,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
         ModelClass = self.Meta.model
         num = validated_data.get('num')
         price_of_added = validated_data.get('price_of_added')
-        total_money=validated_data.get('total_money')
+        total_money = validated_data.get('total_money')
         store_id = validated_data.pop('store')
         store = Stores.objects.get(pk=store_id)
         user = validated_data.pop('user')
@@ -38,7 +40,7 @@ class ShoppingCarItemSerializer(serializers.ModelSerializer):
                                                              shopping_car=validated_data['shopping_car'])
         if not created:
             ModelClass.objects.filter(pk=instance.id).update(num=F('num') + num,
-                                                             total_money=F('total_money')+total_money,
+                                                             total_money=F('total_money') + total_money,
                                                              price_of_added=price_of_added)
         return instance
 
@@ -60,7 +62,7 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
 
         ret = []
         for activity in activities:
-            car_item=car_items
+            car_item = car_items
             if activity.select_all == False:
                 select_goods = activity.selected_goods.values_list('good', flat=True)
                 car_item = car_item.filter(sku__color__good_detail__in=select_goods)
@@ -68,7 +70,8 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
             items_money = sum([t.total_money for t in car_item])
 
             x, y = activity.algorithm(items_num, items_money)
-            ret.append({'id': activity.id, 'activity': x, 'reduction_money': y,'item_num':items_num,'items_money':items_money})
+            ret.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
+                        'items_money': items_money})
 
         # 返回最优惠活动
         if ret:
@@ -104,6 +107,8 @@ class CouponSerializer(serializers.ModelSerializer):
 class GetCouponSerializer(serializers.ModelSerializer):
     date_from = serializers.ReadOnlyField(source='coupon.date_from')
     date_to = serializers.ReadOnlyField(source='coupon.date_to')
+    discount = serializers.ReadOnlyField(source='coupon.discount')
+    threshold_count = serializers.ReadOnlyField(source='coupon.threshold_count')
     store_name = serializers.ReadOnlyField(source='coupon.store.info.store_name')
     logo = serializers.ReadOnlyField(source='coupon.store.logo')
     store_id = serializers.ReadOnlyField(source='coupon.store.id')
@@ -152,5 +157,15 @@ class JoinActivitySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class BalanceSkuSerializer(serializers.Serializer):
+    sku = serializers.PrimaryKeyRelatedField(queryset=SKU.objects.all())
+    num = serializers.IntegerField()
+
+
 class BalanceSerializer(serializers.Serializer):
-    store=serializers.IntegerField()
+    store = serializers.PrimaryKeyRelatedField(queryset=Stores.objects.all())
+    skus = BalanceSkuSerializer(many=True)
+
+    def create(self, validated_data):
+        store = validated_data.get('store')
+        sku_data = validated_data.pop('skus')
