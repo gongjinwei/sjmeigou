@@ -44,8 +44,10 @@ class Coupon(models.Model):
         ordering = ('-create_date',)
 
     def algorithm(self, money):
+        discount=0
         if money>=self.threshold_count:
-            return '%s:满%s减%s' % (self.name,self.threshold_count,self.discount)
+            discount=self.discount
+        return ('%s:满%s减%s' % (self.name,self.threshold_count,self.discount),0)
 
 
 class GetCoupon(models.Model):
