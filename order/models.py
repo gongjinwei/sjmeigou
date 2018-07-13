@@ -47,7 +47,7 @@ class Coupon(models.Model):
         discount=0
         if money>=self.threshold_count:
             discount=self.discount
-        return ('%s:满%s减%s' % (self.name,self.threshold_count,self.discount),0)
+        return ('%s:满%s减%s' % (self.name,self.threshold_count,self.discount),discount)
 
 
 class GetCoupon(models.Model):
