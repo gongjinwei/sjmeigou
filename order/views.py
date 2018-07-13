@@ -198,6 +198,7 @@ class BalanceView(CreateOnlyViewSet):
                                                          state=0)
         # 计算每个活动的优惠金额
         ret = []
+        ac = []
         for activity in activities:
             # 取出所有可参与活动的sku
             fit_sku = sku_data
@@ -210,22 +211,23 @@ class BalanceView(CreateOnlyViewSet):
                 items_money = sum([t['num'] * t['sku'].price for t in fit_sku])
 
                 x, y = activity.algorithm(items_num, items_money)
-                ret.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
+                ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
                             'items_money': items_money})
 
-        # 附加店铺信息
-        ret.append({'store':{
-            'id':store.id,
-            'name':store.name,
-            'logo':store.logo
-        }})
-
         # 附加SKU信息
-        data=[]
+        sd = []
         for sk in sku_data:
-            ser=serializers.SkuDetailSerializer(instance=sk['sku'])
-            ser.data.update({'num':sk['num']})
-            data.append(ser.data)
-        ret.append({'sku':data})
+            ser = serializers.SkuDetailSerializer(instance=sk['sku'])
+            ser.data.update({'num': sk['num']})
+            sd.append(ser.data)
+
+        # 附加店铺信息
+        ret.append({'store': {
+            'id': store.id,
+            'name': store.name,
+            'logo': store.logo,
+            'activities':ac,
+            'skus':sd
+        }})
 
         return Response(ret)
