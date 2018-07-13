@@ -216,14 +216,20 @@ class BalanceView(CreateOnlyViewSet):
                     x, y = activity.algorithm(items_num, items_money)
                     ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
                                 'items_money': items_money})
-
-
+            # today=datetime.date.today()
+            # if models.GetCoupon.objects.filter(user=request.user,coupon__store=store,has_num__gt=0,coupon__date_to__gte=today,coupon__date_from__lte=today).exists():
+            #     user_coupons=models.GetCoupon.objects.filter(user=request.user,coupon__store=store,has_num__gt=0,coupon__date_to__gte=today,coupon__date_from__lte=today)
+            #     for get_user_coupon in user_coupons:
+            #         coupon=get_user_coupon.coupon
+            #         if coupon.algorithm(100):
+            #             pass
             # 附加SKU信息
             sd = []
             for sk in sku_data:
                 ser = serializers.SkuDetailSerializer(instance=sk['sku'])
-                ser.data.update({'num': sk['num']})
-                sd.append(ser.data)
+                ser_ = ser.data
+                ser_.update({'num': sk['num']})
+                sd.append(ser_)
 
             # 附加店铺信息
             ret.append({'store': {

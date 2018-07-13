@@ -43,6 +43,10 @@ class Coupon(models.Model):
     class Meta:
         ordering = ('-create_date',)
 
+    def algorithm(self, money):
+        if money>=self.threshold_count:
+            return '%s:满%s减%s' % (self.name,self.threshold_count,self.discount)
+
 
 class GetCoupon(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
