@@ -105,6 +105,9 @@ class GetCouponSerializer(serializers.ModelSerializer):
     date_from = serializers.ReadOnlyField(source='coupon.date_from')
     date_to = serializers.ReadOnlyField(source='coupon.date_to')
     store_name = serializers.ReadOnlyField(source='coupon.store.info.store_name')
+    logo = serializers.ReadOnlyField(source='coupon.store.logo')
+    store_id = serializers.ReadOnlyField(source='coupon.store.id')
+    name = serializers.ReadOnlyField(source='coupon.name')
 
     class Meta:
         model = models.GetCoupon
@@ -147,3 +150,7 @@ class JoinActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.JoinActivity
         fields = '__all__'
+
+
+class BalanceSerializer(serializers.Serializer):
+    store=serializers.IntegerField()
