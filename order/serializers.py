@@ -168,4 +168,4 @@ class BalanceSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         store = validated_data.get('store')
-        sku_data = validated_data.pop('skus')
+        return store

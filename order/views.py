@@ -8,8 +8,9 @@ from rest_framework.viewsets import ModelViewSet
 # Create your views here.
 
 from . import serializers, models
+from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.viewset import CreateListDeleteViewSet, CreateListViewSet,ListOnlyViewSet,CreateOnlyViewSet
+from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet
 
 
 class ShoppingCarItemView(ModelViewSet):
@@ -21,15 +22,15 @@ class ShoppingCarItemView(ModelViewSet):
 
     def perform_create(self, serializer):
         price_added = serializer.validated_data['sku'].price
-        total_money = serializer.validated_data['num']*price_added
-        serializer.save(user=self.request.user, price_of_added=price_added,total_money=total_money)
+        total_money = serializer.validated_data['num'] * price_added
+        serializer.save(user=self.request.user, price_of_added=price_added, total_money=total_money)
 
     def list(self, request, *args, **kwargs):
         return Response(status=status.HTTP_200_OK)
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            queryset=models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user,num__gt=0)
+            queryset = models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, num__gt=0)
         else:
             queryset = models.ShoppingCarItem.objects.none()
         return queryset
@@ -37,15 +38,15 @@ class ShoppingCarItemView(ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        sku_id=request.data.get('sku')
+        sku_id = request.data.get('sku')
         try:
-            sku_id=int(sku_id)
-        except 	ValueError:
-            return Response("必须填写SKU",status=status.HTTP_400_BAD_REQUEST)
+            sku_id = int(sku_id)
+        except    ValueError:
+            return Response("必须填写SKU", status=status.HTTP_400_BAD_REQUEST)
 
         if instance.sku.id != sku_id:
             instance.delete()
-            return Response({'code':4005,'msg':'对象重复删除'})
+            return Response({'code': 4005, 'msg': '对象重复删除'})
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
 
@@ -125,7 +126,7 @@ class GetCouponView(CreateListViewSet):
             coupon.available_num = F('available_num') - 1
             coupon.save()
             headers = self.get_success_headers(serializer.data)
-            return Response({"msg":"优惠券领取成功","code":1000}, status=status.HTTP_201_CREATED, headers=headers)
+            return Response({"msg": "优惠券领取成功", "code": 1000}, status=status.HTTP_201_CREATED, headers=headers)
         else:
             return Response({"msg": '该券不可领取或可领取数量为0', "code": 4004})
 
@@ -167,7 +168,7 @@ class StoreActivityView(CreateListDeleteViewSet):
                 return models.StoreActivity.objects.filter(store_id=store_id)
 
         return models.StoreActivity.objects.filter(store_id=store_id, datetime_from__lte=now, datetime_to__gte=now,
-                                            state=0)
+                                                   state=0)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -175,6 +176,40 @@ class StoreActivityView(CreateListDeleteViewSet):
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class BalanceView(CreateOnlyViewSet):
     serializer_class = serializers.BalanceSerializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        store = serializer.validated_data['store']
+
+        # 判断是否为该店铺下的sku，如果不属于指定店铺直接报错
+        sku_data = serializer.validated_data['skus']
+        sku_ids = [item['sku'].id for item in sku_data]
+        if not SKU.objects.filter(id__in=sku_ids, color__good_detail__store=store).exists():
+            return Response('sku所属店铺出错', status=status.HTTP_400_BAD_REQUEST)
+
+        # 取出店铺的所有有效活动
+        now = datetime.datetime.now()
+        activities = models.StoreActivity.objects.filter(store=store, datetime_from__lte=now, datetime_to__gte=now,
+                                                         state=0)
+        # 计算每个活动的优惠金额
+        ret = []
+        for activity in activities:
+            # 取出所有可参与活动的sku
+            fit_sku = sku_data
+            if not activity.select_all:
+                select_goods = activity.selected_goods.values_list('good', flat=True)
+                fit_sku = filter(lambda x: x['sku'].color.good_detail in select_goods, sku_data)
+
+            if fit_sku:
+                items_num = sum([t['num'] for t in fit_sku])
+                items_money = sum([t['num'] * t['sku'].price for t in fit_sku])
+
+                x, y = activity.algorithm(items_num, items_money)
+                ret.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
+                            'items_money': items_money})
+        return Response(ret)
