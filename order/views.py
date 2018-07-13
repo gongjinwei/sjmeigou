@@ -212,4 +212,20 @@ class BalanceView(CreateOnlyViewSet):
                 x, y = activity.algorithm(items_num, items_money)
                 ret.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
                             'items_money': items_money})
+
+        # 附加店铺信息
+        ret.append({'store':{
+            'id':store.id,
+            'name':store.name,
+            'logo':store.logo
+        }})
+
+        # 附加SKU信息
+        data=[]
+        for sk in sku_data:
+            ser=serializers.SkuDetailSerializer(instance=sk['sku'])
+            ser.data.update({'num':sk['num']})
+            data.append(ser.data)
+        ret.append({'sku':data})
+
         return Response(ret)

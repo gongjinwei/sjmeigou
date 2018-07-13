@@ -169,3 +169,15 @@ class BalanceSerializer(serializers.Serializer):
     def create(self, validated_data):
         store = validated_data.get('store')
         return store
+
+
+class SkuDetailSerializer(serializers.ModelSerializer):
+    title=serializers.ReadOnlyField(source='color.good_detail.title')
+    color_name=serializers.ReadOnlyField(source='color.color_name')
+    color_pic = serializers.ReadOnlyField(source='color.color_pic')
+    size_name=serializers.ReadOnlyField(source='size.size_name')
+    good_id = serializers.ReadOnlyField(source='color.good_detail.id')
+
+    class Meta:
+        model = SKU
+        fields=('price','stock','size_name','color_name','title','color_pic','id','good_id')
