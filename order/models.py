@@ -129,3 +129,28 @@ class StoreActivitySelected(models.Model):
                                  editable=False)
     good = models.ForeignKey(to='goods.GoodDetail', on_delete=models.CASCADE)
     select_type = models.SmallIntegerField(choices=((0, '参与活动的商品'), (1, '赠品')), default=0, editable=False)
+
+
+class UnifyOrder(models.Model):
+    order_no = models.CharField(primary_key=True,editable=False,max_length=18)
+    order_desc = models.CharField(max_length=100,editable=False)
+    order_num = models.PositiveIntegerField(editable=False)
+    account = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
+    account_paid = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
+    coupon = models.ForeignKey(to='Coupon',on_delete=models.DO_NOTHING,null=True)
+    activity = models.ForeignKey(to='StoreActivity',on_delete=models.DO_NOTHING,null=True)
+    deliver_server=models.ForeignKey(to='goods.DeliverServices',on_delete=models.DO_NOTHING)
+    store = models.ForeignKey(to='store.Stores',on_delete=models.DO_NOTHING)
+    user_message=models.CharField(max_length=255,default='',blank=True)
+    user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+    state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成')),editable=False)
+
+
+class OrderSku(models.Model):
+    order = models.ForeignKey(to='UnifyOrder',on_delete=models.CASCADE,related_name='relate_sku')
+    sku=models.ForeignKey(to='goods.SKU',on_delete=models.DO_NOTHING)
+    num=models.IntegerField()
+
+

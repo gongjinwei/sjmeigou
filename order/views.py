@@ -207,7 +207,7 @@ class BalanceView(CreateOnlyViewSet):
                 fit_sku = sku_data
                 if not activity.select_all:
                     select_goods = activity.selected_goods.values_list('good', flat=True)
-                    fit_sku = filter(lambda x: x['sku'].color.good_detail in select_goods, sku_data)
+                    fit_sku = list(filter(lambda x: x['sku'].color.good_detail.id in select_goods, sku_data))
 
                 if fit_sku:
                     items_num = sum([t['num'] for t in fit_sku])
@@ -216,7 +216,6 @@ class BalanceView(CreateOnlyViewSet):
                     x, y = activity.algorithm(items_num, items_money)
                     ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
                                 'items_money': items_money})
-
             # 返回优惠券信息
             cost_price = sum([t['num'] * t['sku'].price for t in sku_data])
             cost_num = sum([t['num'] for t in sku_data])
