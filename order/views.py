@@ -258,7 +258,7 @@ class BalanceView(CreateOnlyViewSet):
         # 取出收货地址
 
         receive_address = models.ReceiveAddress.objects.filter(user=self.request.user,is_default=True)
-        rec={'stores':ret,'receive_address':serializers.ReceiveAddressSerializer(receive_address,many=True)}
+        rec={'stores':ret,'receive_address':serializers.ReceiveAddressSerializer(receive_address,many=True).data}
 
         return Response(rec)
 
