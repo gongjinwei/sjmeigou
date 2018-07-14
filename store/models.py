@@ -3,6 +3,7 @@ import string
 from django.db import models
 from django.contrib.auth.models import User
 from index.models import Application
+from decimal import Decimal
 
 # Create your models here.
 
@@ -29,6 +30,7 @@ class Stores(models.Model):
     receive_address=models.CharField(null=True,max_length=128)
     longitude = models.FloatField(null=True)
     latitude = models.FloatField(null=True)
+    take_off = models.DecimalField(max_digits=10,decimal_places=1,default=Decimal(50.0))
     store_phone=models.CharField(max_length=12,null=True)
     active_state=models.SmallIntegerField(default=0,editable=False)
     user=models.OneToOneField(to=User,editable=False,on_delete=models.CASCADE)
