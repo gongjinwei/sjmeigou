@@ -218,7 +218,7 @@ class BalanceView(CreateOnlyViewSet):
                     # 将优惠大于0的信息返回
                     if y>0:
                         ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
-                                    'items_money': items_money})
+                                    'items_money': items_money,'type':'activity'})
             # 返回优惠券信息
             cost_price = sum([t['num'] * t['sku'].price for t in sku_data])
             cost_num = sum([t['num'] for t in sku_data])
@@ -229,7 +229,8 @@ class BalanceView(CreateOnlyViewSet):
                     coupon = get_user_coupon.coupon
                     x,y=coupon.algorithm(cost_price)
                     if y>0:
-                        ac.append({'coupon_id':coupon.id,'activity':x,'reduction_money': y})
+                        ac.append({'id':coupon.id,'activity':x,'reduction_money': y,'item_num': cost_num,
+                                    'items_money': cost_price,'type':'coupon'})
 
             op =request.query_params.get('op')
             sd = []
