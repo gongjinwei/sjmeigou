@@ -7,7 +7,7 @@ from django.db.models import F
 from . import models
 from store.models import Stores
 
-from goods.models import SKU,DeliverServices
+from goods.models import SKU,GoodDeliver
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -188,10 +188,10 @@ class SkuDetailSerializer(serializers.ModelSerializer):
     deliver_services=serializers.SerializerMethodField()
 
     def get_deliver_services(self,obj):
-        delivers = DeliverServices.objects.filter(good_detail=obj.color.good_detail)
+        delivers = GoodDeliver.objects.filter(good_detail=obj.color.good_detail)
         ret=[]
         for de in delivers:
-            ret.append({'id':de.id,'name':de.get_server_display(),'server':de.server})
+            ret.append({'id':de.id,'deliver':de.server.name,'server':de.server,'server_name':de.server.deliver_server.server_name})
         return ret
 
     class Meta:

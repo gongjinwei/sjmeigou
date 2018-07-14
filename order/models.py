@@ -139,7 +139,7 @@ class UnifyOrder(models.Model):
     account_paid = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
     coupon = models.ForeignKey(to='Coupon',on_delete=models.DO_NOTHING,null=True)
     activity = models.ForeignKey(to='StoreActivity',on_delete=models.DO_NOTHING,null=True)
-    deliver_server=models.ForeignKey(to='goods.DeliverServices',on_delete=models.DO_NOTHING)
+    deliver_server=models.ForeignKey(to='goods.GoodDeliver',on_delete=models.DO_NOTHING)
     store = models.ForeignKey(to='store.Stores',on_delete=models.DO_NOTHING)
     user_message=models.CharField(max_length=255,default='',blank=True)
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
