@@ -159,6 +159,8 @@ class ReceiveAddress(models.Model):
     call = models.IntegerField(choices=((0,"先生"),(1,"女士")),null=True)
     phone = models.CharField(max_length=12)
     address = models.CharField(max_length=128)
+    longitude = models.FloatField()
+    latitude = models.FloatField()
     room_no = models.CharField(max_length=128)
     tag = models.CharField(choices=(("家","家"),("公司","公司"),("学校","学校")),null=True,max_length=10)
     is_default = models.BooleanField(default=False)
