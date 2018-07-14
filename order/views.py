@@ -41,7 +41,7 @@ class ShoppingCarItemView(ModelViewSet):
         sku_id = request.data.get('sku')
         try:
             sku_id = int(sku_id)
-        except    ValueError:
+        except ValueError:
             return Response("必须填写SKU", status=status.HTTP_400_BAD_REQUEST)
 
         if instance.sku.id != sku_id:

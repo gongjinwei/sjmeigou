@@ -156,6 +156,7 @@ class OrderSku(models.Model):
 
 class ReceiveAddress(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
+    contact=models.CharField(max_length=100)
     call = models.IntegerField(choices=((0,"先生"),(1,"女士")),null=True)
     phone = models.CharField(max_length=12)
     address = models.CharField(max_length=128)
