@@ -214,8 +214,9 @@ class BalanceView(CreateOnlyViewSet):
                     items_money = sum([t['num'] * t['sku'].price for t in fit_sku])
 
                     x, y = activity.algorithm(items_num, items_money)
-                    ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
-                                'items_money': items_money})
+                    if items_money>0:
+                        ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
+                                    'items_money': items_money})
             # 返回优惠券信息
             cost_price = sum([t['num'] * t['sku'].price for t in sku_data])
             cost_num = sum([t['num'] for t in sku_data])
