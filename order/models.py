@@ -137,19 +137,23 @@ class UnifyOrder(models.Model):
     order_num = models.PositiveIntegerField(editable=False)
     account = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
     account_paid = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
-    coupon = models.ForeignKey(to='Coupon',on_delete=models.DO_NOTHING,null=True)
-    activity = models.ForeignKey(to='StoreActivity',on_delete=models.DO_NOTHING,null=True)
-    deliver_server=models.ForeignKey(to='goods.GoodDeliver',on_delete=models.DO_NOTHING,null=True)
-    store = models.ForeignKey(to='store.Stores',on_delete=models.DO_NOTHING)
     user_message=models.CharField(max_length=255,default='',blank=True)
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
+    deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
     update_time = models.DateTimeField(auto_now=True)
     state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成')),editable=False,default=1)
 
 
-class OrderSku(models.Model):
-    order = models.ForeignKey(to='UnifyOrder',on_delete=models.CASCADE,related_name='relate_sku')
+class StoreOrder(models.Model):
+    order = models.ForeignKey(to='UnifyOrder',on_delete=models.CASCADE,related_name='store_orders')
+    coupon = models.ForeignKey(to='Coupon', on_delete=models.DO_NOTHING, null=True)
+    activity = models.ForeignKey(to='StoreActivity', on_delete=models.DO_NOTHING, null=True)
+    store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING)
+
+
+class SkuOrder(models.Model):
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,related_name='sku_orders')
     sku=models.ForeignKey(to='goods.SKU',on_delete=models.DO_NOTHING)
     num=models.IntegerField()
 

@@ -206,14 +206,23 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class OrderSkuSerializer(serializers.ModelSerializer):
+class SkuOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = models.OrderSku
+        model = models.SkuOrder
         fields ='_all__'
 
 
+class StoreOrderSerializer(serializers.ModelSerializer):
+    sku_orders = SkuOrderSerializer(many=True)
+
+    class Meta:
+        model = models.StoreOrder
+        fields = '__all__'
+
+
 class UnifyOrderSerializer(serializers.ModelSerializer):
+    store_orders = StoreOrderSerializer(many=True)
 
     class Meta:
         model = models.UnifyOrder

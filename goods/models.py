@@ -157,7 +157,7 @@ class AfterSaleServices(models.Model):
 
 
 class GoodDeliver(models.Model):
-    good_detail = models.ForeignKey(to='GoodDetail',on_delete=models.CASCADE)
+    good_detail = models.ForeignKey(to='GoodDetail',on_delete=models.CASCADE,related_name='delivers')
     server = models.ForeignKey(to='platforms.Delivers',on_delete=models.CASCADE)
 
 
