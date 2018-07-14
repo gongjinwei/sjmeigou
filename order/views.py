@@ -206,6 +206,7 @@ class BalanceView(CreateOnlyViewSet):
                 # 取出所有可参与活动的sku
                 fit_sku = sku_data
                 if not activity.select_all:
+                    # 筛选时good要加id,筛选的结果要加list()
                     select_goods = activity.selected_goods.values_list('good', flat=True)
                     fit_sku = list(filter(lambda x: x['sku'].color.good_detail.id in select_goods, sku_data))
 
@@ -214,6 +215,7 @@ class BalanceView(CreateOnlyViewSet):
                     items_money = sum([t['num'] * t['sku'].price for t in fit_sku])
 
                     x, y = activity.algorithm(items_num, items_money)
+                    # 将优惠大于0的信息返回
                     if y>0:
                         ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
                                     'items_money': items_money})
@@ -227,7 +229,7 @@ class BalanceView(CreateOnlyViewSet):
                     coupon = get_user_coupon.coupon
                     x,y=coupon.algorithm(cost_price)
                     if y>0:
-                        ac.append({'coupon_id':coupon.id,'activity':x,'reduction_money': y,'item_num':cost_num,'items_money':cost_price})
+                        ac.append({'coupon_id':coupon.id,'activity':x,'reduction_money': y})
 
             op =request.query_params.get('op')
             sd = []
@@ -245,7 +247,9 @@ class BalanceView(CreateOnlyViewSet):
                 'id': store.id,
                 'name': store.name,
                 'logo': store.logo,
-                'activities':ac,
+                'activities':sorted(ac,key=lambda x:x['reduction_money']) if ac else ac,
+                'cost_num':cost_num,
+                'cost_money':cost_price,
                 'skus':sd
             }})
 
