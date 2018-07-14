@@ -274,11 +274,11 @@ class ReceiveAddressViewSets(ModelViewSet):
         is_default=serializer.validated_data['is_default']
         if is_default:
             models.ReceiveAddress.objects.filter(user=self.request.user).update(is_default=False)
-        serializer.save()
+        serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
         is_default = serializer.validated_data['is_default']
         if is_default:
             models.ReceiveAddress.objects.filter(user=self.request.user).update(is_default=False)
-        serializer.save()
+        serializer.save(user=self.request.user)
 
