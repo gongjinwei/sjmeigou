@@ -255,7 +255,12 @@ class BalanceView(CreateOnlyViewSet):
                 'skus':sd
             }})
 
-        return Response(ret)
+        # 取出收货地址
+
+        receive_address = models.ReceiveAddress.objects.filter(user=self.request.user,is_default=True)
+        rec={'stores':ret,'receive_address':serializers.ReceiveAddressSerializer(receive_address,many=True)}
+
+        return Response(rec)
 
 
 class ReceiveAddressViewSets(ModelViewSet):
