@@ -16,6 +16,9 @@ class CheckApplication(models.Model):
 class DeliverServices(models.Model):
     server_name=models.CharField(max_length=20)
 
+    def __str__(self):
+        return self.server_name
+
 
 class Delivers(models.Model):
     deliver_server=models.ForeignKey(to='DeliverServices',on_delete=models.CASCADE,related_name='delivers')
