@@ -256,3 +256,17 @@ class BalanceView(CreateOnlyViewSet):
             }})
 
         return Response(ret)
+
+
+class ReceiveAddressViewSets(ModelViewSet):
+    queryset = models.ReceiveAddress.objects.all()
+    serializer_class = serializers.ReceiveAddressSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            queryset = models.ReceiveAddress.objects.filter(user=self.request.user)
+        else:
+            return models.ReceiveAddress.objects.none()
+
+        return queryset
+

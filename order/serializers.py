@@ -197,3 +197,10 @@ class SkuDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = SKU
         fields = ('price', 'stock', 'size_name', 'color_name', 'title', 'color_pic', 'id', 'good_id','deliver_services')
+
+
+class ReceiveAddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ReceiveAddress
+        fields = '__all__'
