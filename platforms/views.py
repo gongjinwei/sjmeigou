@@ -25,7 +25,7 @@ class CheckApplicationViewSets(ModelViewSet):
 
 
 class StoreActivityViewSets(ModelViewSet):
-    queryset = serializers.StoreActivityType.objects.all()
+    queryset = models.StoreActivityType.objects.all()
     serializer_class = serializers.StoreActivitySerializer
 
 

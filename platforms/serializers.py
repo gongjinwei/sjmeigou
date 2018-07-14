@@ -2,8 +2,6 @@
 
 from rest_framework import serializers
 from . import models
-from order.models import StoreActivityType
-
 
 class CheckApplicationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,7 +11,7 @@ class CheckApplicationSerializer(serializers.ModelSerializer):
 
 class StoreActivitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = StoreActivityType
+        model = models.StoreActivityType
         fields = '__all__'
 
 
