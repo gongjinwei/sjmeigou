@@ -163,6 +163,7 @@ class ReceiveAddress(models.Model):
     latitude = models.FloatField()
     room_no = models.CharField(max_length=128)
     tag = models.CharField(choices=(("家","家"),("公司","公司"),("学校","学校")),null=True,max_length=10)
+    postcode = models.CharField(max_length=7,null=True)
     is_default = models.BooleanField(default=False)
 
 
