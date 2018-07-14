@@ -146,14 +146,14 @@ class UnifyOrder(models.Model):
 
 
 class StoreOrder(models.Model):
-    order = models.ForeignKey(to='UnifyOrder',on_delete=models.CASCADE,related_name='store_orders')
+    unify_order = models.ForeignKey(to='UnifyOrder',on_delete=models.CASCADE)
     coupon = models.ForeignKey(to='Coupon', on_delete=models.DO_NOTHING, null=True)
     activity = models.ForeignKey(to='StoreActivity', on_delete=models.DO_NOTHING, null=True)
     store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING)
 
 
 class SkuOrder(models.Model):
-    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,related_name='sku_orders')
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE)
     sku=models.ForeignKey(to='goods.SKU',on_delete=models.DO_NOTHING)
     num=models.IntegerField()
 
