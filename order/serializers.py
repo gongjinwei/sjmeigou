@@ -204,3 +204,17 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ReceiveAddress
         fields = '__all__'
+
+
+class OrderSkuSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.OrderSku
+        fields ='_all__'
+
+
+class UnifyOrderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.UnifyOrder
+        fields ='__all__'

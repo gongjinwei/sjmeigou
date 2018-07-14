@@ -282,3 +282,7 @@ class ReceiveAddressViewSets(ModelViewSet):
             models.ReceiveAddress.objects.filter(user=self.request.user).update(is_default=False)
         serializer.save(user=self.request.user)
 
+class UnifyOrderView(ModelViewSet):
+    queryset = models.UnifyOrder.objects.all()
+    serializer_class = serializers.UnifyOrderSerializer
+

@@ -13,5 +13,6 @@ router.register('getCoupon',views.GetCouponView,base_name='getCoupon')
 router.register('storeActivity',views.StoreActivityView,base_name='storeActivity')
 router.register('balance',views.BalanceView,base_name='balance')
 router.register('receiveAddress',views.ReceiveAddressViewSets,base_name='receiveAddress')
+router.register('unifyOrder',views.UnifyOrderView,base_name='unifyOrder')
 
 urlpatterns=router.urls
