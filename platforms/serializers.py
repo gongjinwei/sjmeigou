@@ -6,7 +6,6 @@ from order.models import StoreActivityType
 
 
 class CheckApplicationSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.CheckApplication
         fields = '__all__'
@@ -14,5 +13,19 @@ class CheckApplicationSerializer(serializers.ModelSerializer):
 
 class StoreActivitySerializer(serializers.ModelSerializer):
     class Meta:
-        model=StoreActivityType
-        fields='__all__'
+        model = StoreActivityType
+        fields = '__all__'
+
+
+class DeliverSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Delivers
+        fields = '__all__'
+
+
+class DeliverServiceSerializer(serializers.ModelSerializer):
+    delivers=DeliverSerializer(many=True,read_only=True)
+
+    class Meta:
+        model = models.DeliverServices
+        fields = '__all__'

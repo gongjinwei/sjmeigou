@@ -11,3 +11,12 @@ class CheckApplication(models.Model):
     apply_status=models.SmallIntegerField(choices=((2,'打款验证中'),(4,'审核不通过')))
     opinion=models.CharField(max_length=255,help_text='审核意见')
     check_time=models.DateTimeField(auto_now=True,editable=False)
+
+
+class DeliverServices(models.Model):
+    server_name=models.CharField(max_length=20)
+
+
+class Delivers(models.Model):
+    deliver_server=models.ForeignKey(to='DeliverServices',on_delete=models.CASCADE,related_name='delivers')
+    name = models.CharField(max_length=20)

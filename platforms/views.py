@@ -27,3 +27,13 @@ class CheckApplicationViewSets(ModelViewSet):
 class StoreActivityViewSets(ModelViewSet):
     queryset = serializers.StoreActivityType.objects.all()
     serializer_class = serializers.StoreActivitySerializer
+
+
+class DeliversViewSets(ModelViewSet):
+    queryset = models.Delivers.objects.all()
+    serializer_class = serializers.DeliverSerializer
+
+
+class DeliverServicesViewSets(ModelViewSet):
+    queryset = models.DeliverServices.objects.all()
+    serializer_class = serializers.DeliverServiceSerializer

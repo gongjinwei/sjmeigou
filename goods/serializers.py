@@ -1,8 +1,10 @@
 # -*- coding:UTF-8 -*-
 from rest_framework import serializers
 
-from . import models
 
+from . import models
+from platforms.serializers import DeliverServiceSerializer
+from platforms.models import DeliverServices
 
 class SecondClassSerializer(serializers.ModelSerializer):
     class Meta:
@@ -59,11 +61,16 @@ class FirstPropertySerializer(serializers.ModelSerializer):
     # third_class_name=serializers.ReadOnlyField(source='third_class.third_class_name')
     # second_class_name=serializers.ReadOnlyField(source='third_class.second_class.second_class_name')
     secondProperties = SecondPropertySerializer(read_only=True, many=True)
+    delivers = serializers.SerializerMethodField()
 
     class Meta:
         model = models.FirstProperty
         fields = ('id', 'first_property_name', 'third_class', 'secondProperties')
         # fields=('id','first_property_name','third_class','third_class_name','second_class_name','secondProperties')
+
+    def get_delivers(self,obj):
+        serializer=DeliverServiceSerializer(DeliverServices.objects.all(),many=True)
+        return serializer.data
 
 
 class ItemsGroupDescSerializer(serializers.ModelSerializer):
@@ -90,12 +97,14 @@ class AfterSaleServicesSerializer(serializers.ModelSerializer):
         fields = ('server', 'server_name')
 
 
-class DeliverServicesSerializer(serializers.ModelSerializer):
-    server_name=serializers.ReadOnlyField(source='get_server_display')
+class GoodDeliverSerializer(serializers.ModelSerializer):
+    deliver_name = serializers.ReadOnlyField(source='server.name')
+    server_name = serializers.ReadOnlyField(source='server.deliver_server.name')
 
     class Meta:
-        model=models.DeliverServices
-        fields=('server','server_name')
+        model = models.GoodDetail
+        fields = ('server','server_name','deliver_name')
+
 
 class SKUColorSerializer(serializers.ModelSerializer):
     skus=SKUSerializer(many=True)
@@ -118,7 +127,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
     master_graphs=serializers.JSONField()
     colors=SKUColorSerializer(many=True)
     after_sale_services=AfterSaleServicesSerializer(many=True)
-    delivers=DeliverServicesSerializer(many=True)
+    delivers=GoodDeliverSerializer(many=True)
 
     def get_class_name(self,obj):
         return "%s>%s" % (obj.third_class.second_class.second_class_name,obj.third_class.third_class_name)
@@ -137,7 +146,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         for service in after_sale_services:
             models.AfterSaleServices.objects.create(good_detail=instance,**service)
         for deliver in delivers:
-            models.DeliverServices.objects.create(good_detail=instance,**deliver)
+            models.GoodDeliver.objects.create(good_detail=instance,**deliver)
         for color_data in colors:
             skus=color_data.pop('skus')
             color=models.SKUColor.objects.create(good_detail=instance,**color_data)

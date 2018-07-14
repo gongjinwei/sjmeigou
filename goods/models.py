@@ -156,11 +156,8 @@ class AfterSaleServices(models.Model):
                  (3, '服务承诺：该类商品必须支持【七天退货服务】')),default=3)
 
 
-class DeliverServices(models.Model):
-    good_detail = models.ForeignKey(to='GoodDetail',on_delete=models.CASCADE,related_name='delivers')
-    server=models.IntegerField(choices=(
-        (0,'上门自取'),(1,'同城配送'),(2,'异地快递')
-    ))
-
+class GoodDeliver(models.Model):
+    good_detail = models.ForeignKey(to='GoodDetail',on_delete=models.CASCADE)
+    server = models.ForeignKey(to='platforms.Delivers',on_delete=models.CASCADE)
 
 
