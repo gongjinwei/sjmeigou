@@ -247,7 +247,7 @@ class BalanceView(CreateOnlyViewSet):
                 'id': store.id,
                 'name': store.name,
                 'logo': store.logo,
-                'activities':sorted(ac,key=lambda x:x['reduction_money']) if ac else ac,
+                'activities':sorted(ac,key=lambda x:x['reduction_money'],reverse=True) if ac else ac,
                 'cost_num':cost_num,
                 'cost_money':cost_price,
                 'skus':sd
