@@ -145,7 +145,7 @@ class UnifyOrder(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
-    state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成')),editable=False)
+    state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成')),editable=False,default=1)
 
 
 class OrderSku(models.Model):
