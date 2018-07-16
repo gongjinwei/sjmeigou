@@ -318,6 +318,16 @@ class UnifyOrderView(ModelViewSet):
             price = serializer.validated_data.get('price',0)
             deliver_payment=serializer.validated_data.get('deliver_payment',Decimal(0.00))
             if price:
-                serializer.validated_data.update({'account':price+deliver_payment})
+                serializer.validated_data.update({
+                    'account':price+deliver_payment,
+                    'order_no':get_order_no(0)
+                })
             else:
                 return Response({'code':4101,'msg':'下单金额必须大于0'})
+
+        self.perform_create(serializer)
+
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
