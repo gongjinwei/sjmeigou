@@ -126,14 +126,16 @@ class StoreActivitySelected(models.Model):
 
 class UnifyOrder(models.Model):
     order_no = models.CharField(primary_key=True,editable=False,max_length=18)
-    order_desc = models.CharField(max_length=100,editable=False)
-    order_num = models.PositiveIntegerField(editable=False)
+    order_desc = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=30,decimal_places=2,default=Decimal(0.0))
+    order_num = models.PositiveIntegerField(default=1)
     account = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
-    account_paid = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
+    account_paid = models.DecimalField(editable=False,decimal_places=2,max_digits=30,default=Decimal(0.00))
     user_message=models.CharField(max_length=255,default='',blank=True)
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
+    deliver_payment = models.DecimalField(max_digits=30,decimal_places=2,default=Decimal(5.00))
     update_time = models.DateTimeField(auto_now=True)
     state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成')),editable=False,default=1)
 
