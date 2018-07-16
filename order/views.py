@@ -1,4 +1,4 @@
-import datetime,random
+import datetime,random,time
 from decimal import Decimal
 from django.db.models import F
 
@@ -12,6 +12,7 @@ from . import serializers, models
 from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet
+from wxpay.views import weixinpay
 
 client=get_redis_connection()
 
@@ -312,22 +313,44 @@ class UnifyOrderView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        deliver_payment = serializer.validated_data.get('deliver_payment', Decimal(0.00))
+        price = serializer.validated_data.get('price', 0)
+        account = price + deliver_payment
+        body = serializer.validated_data.get('order_desc')
         # 判断是否有店铺订单
         if not serializer.validated_data.get('store_orders',[]):
             # 验证价格大于0
-            price = serializer.validated_data.get('price',0)
-            deliver_payment=serializer.validated_data.get('deliver_payment',Decimal(0.00))
+            order_no = get_order_no(0)
+
             if price:
                 serializer.validated_data.update({
-                    'account':price+deliver_payment,
-                    'order_no':get_order_no(0)
+                    'account':account,
+                    'order_no':order_no
                 })
             else:
                 return Response({'code':4101,'msg':'下单金额必须大于0'})
 
+        # 有店铺订单的情况下
+
         self.perform_create(serializer)
 
-        return Response(serializer.data,status=status.HTTP_201_CREATED)
+        # 统一下单
+        res = weixinpay.unified_order(trade_type="JSAPI", openid=self.request.user.openId, body=body,
+                                      total_fee=account * 100, out_trade_no=order_no)
+
+        if res.get('return_code') == "SUCCESS":
+            package = res.get('prepay_id')
+            data = {
+                "appId": weixinpay.app_id,
+                "timeStamp": str(int(time.time())),
+                "nonceStr": weixinpay.nonce_str,
+                "package": "prepay_id=%s" % package,
+                "signType": "MD5"
+            }
+            data.update(paySign=weixinpay.sign(data))
+            return Response(data)
+        else:
+            return Response(res.get('return_msg'))
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
