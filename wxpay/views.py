@@ -3,10 +3,12 @@ from django.conf import settings
 from rest_framework.views import Response
 from rest_framework.permissions import AllowAny
 from register.models import UserInfo
+from decimal import Decimal
 
 from tools import viewset
 
 from weixin.pay import WeixinPay
+from order.models import UnifyOrder
 
 from . import serializers,models
 from register.views import CustomerXMLRender,CustomerXMLParser
@@ -31,11 +33,16 @@ class UnifiedOrderView(viewset.CreateOnlyViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        order_no = serializer.validated_data('out_trade_no')
+        if UnifyOrder.objects.filter(pk=order_no,account_paid=Decimal(0.00)).exists():
+            order = UnifyOrder.objects.get(pk=order_no)
+        else:
+            return Response({'code':6001,'msg':'订单号不存在或已支付'})
 
         userId = serializer.validated_data.pop('userId')
         if UserInfo.objects.filter(id=userId).exists():
             user = UserInfo.objects.get(pk=userId)
-            res = weixinpay.unified_order(trade_type="JSAPI", openid=user.openId, **serializer.validated_data)
+            res = weixinpay.unified_order(trade_type="JSAPI", openid=user.openId,body=order.order_desc,total_fee=order.account*100,**serializer.validated_data)
             if res.get('return_code') == "SUCCESS":
                 package = res.get('prepay_id')
                 data = {

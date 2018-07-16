@@ -127,7 +127,7 @@ class StoreActivitySelected(models.Model):
 class UnifyOrder(models.Model):
     order_no = models.CharField(primary_key=True,editable=False,max_length=18)
     order_desc = models.CharField(max_length=100,help_text='订单描述')
-    price = models.DecimalField(max_digits=30,decimal_places=2,help_text='下单价格')
+    price = models.DecimalField(max_digits=30,decimal_places=2,help_text='下单价格:元')
     account = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
     account_paid = models.DecimalField(editable=False,decimal_places=2,max_digits=30,default=Decimal(0.00))
     user_message=models.CharField(max_length=255,default='',blank=True)
