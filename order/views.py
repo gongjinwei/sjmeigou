@@ -1,5 +1,5 @@
 import datetime,random
-
+from decimal import Decimal
 from django.db.models import F
 
 from rest_framework.views import Response, status
@@ -308,3 +308,16 @@ def get_order_no(store_id):
 class UnifyOrderView(ModelViewSet):
     queryset = models.UnifyOrder.objects.all()
     serializer_class = serializers.UnifyOrderSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # 判断是否有店铺订单
+        if not serializer.validated_data.get('store_orders',[]):
+            # 验证价格大于0
+            price = serializer.validated_data.get('price',0)
+            deliver_payment=serializer.validated_data.get('deliver_payment',Decimal(0.00))
+            if price:
+                serializer.validated_data.update({'account':price+deliver_payment})
+            else:
+                return Response({'code':4101,'msg':'下单金额必须大于0'})
