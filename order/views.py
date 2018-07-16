@@ -320,7 +320,7 @@ class UnifyOrderView(ModelViewSet):
             return Response({'code': 4102, 'msg': '此用户没有在小程序注册', 'success': 'failure'})
         deliver_payment = serializer.validated_data.get('deliver_payment', Decimal(0.00))
         price = serializer.validated_data.get('price', 0)
-        account = price + deliver_payment
+
         body = serializer.validated_data.get('order_desc')
         order_no = get_order_no(0)
         order_num = 0
@@ -385,6 +385,7 @@ class UnifyOrderView(ModelViewSet):
         if order_money != price:
             return Response({'code':4107,'msg':'下单价格不符','success': 'failure'})
 
+        account = order_money + deliver_payment
         serializer.validated_data.update({
             'account': account,
             'order_no': order_no
