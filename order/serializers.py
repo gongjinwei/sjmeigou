@@ -244,3 +244,10 @@ class UnifyOrderSerializer(serializers.ModelSerializer):
             for sku in sku_data:
                 models.SkuOrder.objects.create(store_order=store_order, **sku)
         return unify_order
+
+
+class InitiatePaymentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.InitiatePayment
+        fields='__all__'

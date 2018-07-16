@@ -134,7 +134,6 @@ class UnifyOrder(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
     address = models.ForeignKey(to='ReceiveAddress',on_delete=models.SET_NULL,null=True)
-    deliver_payment = models.DecimalField(max_digits=30,decimal_places=2,default=Decimal(0.00))
     update_time = models.DateTimeField(auto_now=True)
     state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成')),editable=False,default=1)
 
@@ -150,6 +149,7 @@ class StoreOrder(models.Model):
     state = models.SmallIntegerField(choices=((1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '待评价'), (5, '已完成')),
                                      editable=False, default=1)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
+    deliver_payment = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00))
 
 
 class SkuOrder(models.Model):
@@ -170,6 +170,20 @@ class ReceiveAddress(models.Model):
     tag = models.CharField(choices=(("家","家"),("公司","公司"),("学校","学校")),null=True,max_length=10)
     postcode = models.CharField(max_length=7,null=True)
     is_default = models.BooleanField(default=False)
+
+
+class InitiatePayment(models.Model):
+    user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING)
+    unify_order = models.OneToOneField(to='UnifyOrder',on_delete=models.SET_NULL,null=True)
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.SET_NULL,null=True)
+    appId = models.CharField(max_length=100)
+    timeStamp=models.CharField(max_length=30)
+    nonceStr=models.CharField(max_length=40)
+    package=models.CharField(max_length=128)
+    signType=models.CharField(max_length=20,default='MD5')
+    paySign=models.CharField(max_length=50)
+    create_time=models.DateTimeField(auto_now_add=True)
+    has_paid = models.BooleanField(default=False)
 
 
 

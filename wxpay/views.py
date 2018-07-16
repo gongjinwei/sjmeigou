@@ -8,7 +8,6 @@ from decimal import Decimal
 from tools import viewset
 
 from weixin.pay import WeixinPay
-from order.models import UnifyOrder
 
 from . import serializers,models
 from register.views import CustomerXMLRender,CustomerXMLParser
@@ -24,40 +23,6 @@ app_secret = getattr(settings, "APPSECRET")
 
 
 weixinpay = WeixinPay(app_id, mch_id, mch_key, notify_url)
-
-
-class UnifiedOrderView(viewset.CreateOnlyViewSet):
-    serializer_class = serializers.UnifiedOrderSerializer
-    permission_classes = (AllowAny,)
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        order_no = serializer.validated_data('out_trade_no')
-        if UnifyOrder.objects.filter(pk=order_no,account_paid=Decimal(0.00)).exists():
-            order = UnifyOrder.objects.get(pk=order_no)
-        else:
-            return Response({'code':6001,'msg':'订单号不存在或已支付'})
-
-        userId = serializer.validated_data.pop('userId')
-        if UserInfo.objects.filter(id=userId).exists():
-            user = UserInfo.objects.get(pk=userId)
-            res = weixinpay.unified_order(trade_type="JSAPI", openid=user.openId,body=order.order_desc,total_fee=order.account*100,**serializer.validated_data)
-            if res.get('return_code') == "SUCCESS":
-                package = res.get('prepay_id')
-                data = {
-                    "appId": weixinpay.app_id,
-                    "timeStamp": str(int(time.time())),
-                    "nonceStr": weixinpay.nonce_str,
-                    "package": "prepay_id=%s" % package,
-                    "signType": "MD5"
-                }
-                data.update(paySign=weixinpay.sign(data))
-                return Response(data)
-            else:
-                return Response(res.get('return_msg'))
-        else:
-            return Response('用户不存在')
 
 
 class NotifyOrderView(viewset.CreateOnlyViewSet):

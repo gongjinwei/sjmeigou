@@ -309,6 +309,31 @@ def get_order_no(store_id):
     return ret
 
 
+def prepare_payment(user,body,account,order_no,order_type='unify_order'):
+    res = weixinpay.unified_order(trade_type="JSAPI", openid=user.userinfo.openId, body=body,
+                                  total_fee=int(account * 100), out_trade_no=order_no)
+
+    if res.get('return_code') == "SUCCESS":
+        package = res.get('prepay_id')
+        data = {
+            "appId": weixinpay.app_id,
+            "timeStamp": str(int(time.time())),
+            "nonceStr": weixinpay.nonce_str,
+            "package": "prepay_id=%s" % package,
+            "signType": "MD5"
+        }
+        if order_type=='unify_order':
+            data.update(paySign=weixinpay.sign(data), unify_order_id=order_no,user=user)
+        else:
+            data.update(paySign=weixinpay.sign(data),store_order_id=order_no,user=user)
+
+        models.InitiatePayment.objects.create(**data)
+        data.pop('user')
+        return data
+    else:
+        return res.get('return_msg')
+
+
 class UnifyOrderView(ModelViewSet):
     queryset = models.UnifyOrder.objects.all()
     serializer_class = serializers.UnifyOrderSerializer
@@ -316,9 +341,9 @@ class UnifyOrderView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        store_payment = []
         if not getattr(self.request.user, 'userinfo', None):
             return Response({'code': 4102, 'msg': '此用户没有在小程序注册', 'success': 'failure'})
-        deliver_payment = serializer.validated_data.get('deliver_payment', Decimal(0.00))
         price = serializer.validated_data.get('price', 0)
 
         body = serializer.validated_data.get('order_desc')
@@ -335,6 +360,7 @@ class UnifyOrderView(ModelViewSet):
 
         # 有店铺订单的情况下
         else:
+
             for data_st in store_orders:
                 store = data_st['store']
                 sku_data = data_st.get('sku_orders', [])
@@ -345,13 +371,14 @@ class UnifyOrderView(ModelViewSet):
                 coupon_discount = 0
                 activity = data_st.get('activity',None)
                 get_coupon_data = data_st.get('coupon',None)
+                store_deliver_payment=data_st.get('deliver_payment',Decimal(0.00))
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'failure'})
                 now = datetime.datetime.now()
                 today = datetime.date.today()
 
                 store_num = sum([s['num'] for s in sku_data])
-                store_money = sum([s['num'] * s['sku'].price for s in sku_data])
+                store_money = sum([s['num'] * s['sku'].price for s in sku_data])+store_deliver_payment
                 if activity and activity.store == store and activity.datetime_from <= now and activity.datetime_to >= now and activity.state == 0:
                     fit_sku = sku_data
                     if not activity.select_all:
@@ -377,33 +404,35 @@ class UnifyOrderView(ModelViewSet):
                 order_money+=store_order_money
                 data_st.update({'store_order_no':store_order_no,'account':store_order_money})
 
+                # 准备下单
+                store_payment.append({
+                    "user":self.request.user,
+                    "body":body,
+                    "account":store_order_money,
+                    "order_no":store_order_no,
+                    "order_type":"store_order"
+                })
+
         # 统一下单
         if order_money != price:
             return Response({'code':4107,'msg':'下单价格不符','success': 'failure'})
 
-        account = order_money + deliver_payment
+        account = order_money
         serializer.validated_data.update({
             'account': account,
             'order_no': order_no
         })
 
         self.perform_create(serializer)
-        res = weixinpay.unified_order(trade_type="JSAPI", openid=self.request.user.userinfo.openId, body=body,
-                                      total_fee=int(account * 100), out_trade_no=order_no)
 
-        if res.get('return_code') == "SUCCESS":
-            package = res.get('prepay_id')
-            data = {
-                "appId": weixinpay.app_id,
-                "timeStamp": str(int(time.time())),
-                "nonceStr": weixinpay.nonce_str,
-                "package": "prepay_id=%s" % package,
-                "signType": "MD5"
-            }
-            data.update(paySign=weixinpay.sign(data))
-            return Response(data)
-        else:
-            return Response(res.get('return_msg'))
+        # 生成待付款信息
+
+        ret=prepare_payment(self.request.user,body,account,order_no)
+        for prepare in store_payment:
+            prepare_payment(**prepare)
+
+        return Response(ret)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
