@@ -365,16 +365,12 @@ class UnifyOrderView(ModelViewSet):
 
                         x, activity_discount = activity.algorithm(items_num, items_money)
 
-                else:
-                    return Response({'code': 4104, 'msg': '活动无效', 'success': 'failure'})
                 # 验证优惠券
 
                 if get_coupon_data and get_coupon_data.user == self.request.user and get_coupon_data.has_num > 0 and get_coupon_data.coupon.date_from <= today and get_coupon_data.coupon >= today:
                     coupon = get_coupon_data.coupon
                     x, coupon_discount = coupon.algorithm(store_money)
 
-                else:
-                    return Response({'code': 4103, 'msg': "优惠券无效", 'success': 'failure'})
                 store_order_no = get_order_no(store.id)
                 store_order_money = store_money-activity_discount-coupon_discount
                 order_num+=store_num
