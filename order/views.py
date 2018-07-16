@@ -339,7 +339,7 @@ class UnifyOrderView(ModelViewSet):
         # 统一下单
 
         res = weixinpay.unified_order(trade_type="JSAPI", openid=self.request.user.userinfo.openId, body=body,
-                                      total_fee=account * 100, out_trade_no=order_no)
+                                      total_fee=int(account * 100), out_trade_no=order_no)
 
         if res.get('return_code') == "SUCCESS":
             package = res.get('prepay_id')
