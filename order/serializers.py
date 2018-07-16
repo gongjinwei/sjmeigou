@@ -7,7 +7,7 @@ from django.db.models import F
 from . import models
 from store.models import Stores
 
-from goods.models import SKU,GoodDeliver
+from goods.models import SKU, GoodDeliver
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -185,46 +185,46 @@ class SkuDetailSerializer(serializers.ModelSerializer):
     color_pic = serializers.ReadOnlyField(source='color.color_pic')
     size_name = serializers.ReadOnlyField(source='size.size_name')
     good_id = serializers.ReadOnlyField(source='color.good_detail.id')
-    deliver_services=serializers.SerializerMethodField()
+    deliver_services = serializers.SerializerMethodField()
 
-    def get_deliver_services(self,obj):
+    def get_deliver_services(self, obj):
         delivers = GoodDeliver.objects.filter(good_detail=obj.color.good_detail)
-        ret=[]
+        ret = []
         for de in delivers:
-            ret.append({'id':de.id,'deliver':de.server.name,'server':de.server,'server_name':de.server.deliver_server.server_name})
+            ret.append({'id': de.id, 'deliver': de.server.name, 'server': de.server,
+                        'server_name': de.server.deliver_server.server_name})
         return ret
 
     class Meta:
         model = SKU
-        fields = ('price', 'stock', 'size_name', 'color_name', 'title', 'color_pic', 'id', 'good_id','deliver_services')
+        fields = (
+        'price', 'stock', 'size_name', 'color_name', 'title', 'color_pic', 'id', 'good_id', 'deliver_services')
 
 
 class ReceiveAddressSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.ReceiveAddress
         fields = '__all__'
 
 
 class SkuOrderSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.SkuOrder
-        fields ='_all__'
+        fields = '__all__'
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
-    sku_orders = SkuOrderSerializer(many=True,required=False)
+    sku_orders = SkuOrderSerializer(many=True, required=False)
 
     class Meta:
         model = models.StoreOrder
         fields = '__all__'
 
     def create(self, validated_data):
-        sku_data = validated_data.pop('sku_orders',[])
+        sku_data = validated_data.pop('sku_orders', [])
         store_order = self.Meta.model.objects.create(**validated_data)
         for sku in sku_data:
-            models.SkuOrder.objects.create(store_order=store_order,**sku)
+            models.SkuOrder.objects.create(store_order=store_order, **sku)
         return store_order
 
 
@@ -233,11 +233,11 @@ class UnifyOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.UnifyOrder
-        fields ='__all__'
+        fields = '__all__'
 
     def create(self, validated_data):
-        store_data=validated_data.pop('store_orders',[])
-        unify_order=self.Meta.model.objects.create(**validated_data)
+        store_data = validated_data.pop('store_orders', [])
+        unify_order = self.Meta.model.objects.create(**validated_data)
         for store in store_data:
-            models.StoreOrder.objects.create(unify_order=unify_order,**store)
+            models.StoreOrder.objects.create(unify_order=unify_order, **store)
         return unify_order
