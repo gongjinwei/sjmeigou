@@ -239,5 +239,8 @@ class UnifyOrderSerializer(serializers.ModelSerializer):
         store_data = validated_data.pop('store_orders', [])
         unify_order = self.Meta.model.objects.create(**validated_data)
         for store in store_data:
-            models.StoreOrder.objects.create(unify_order=unify_order, **store)
+            sku_data = store.pop('sku_orders',[])
+            store_order=models.StoreOrder.objects.create(unify_order=unify_order, **store)
+            for sku in sku_data:
+                models.SkuOrder.objects.create(store_order=store_order, **sku)
         return unify_order
