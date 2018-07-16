@@ -313,6 +313,8 @@ class UnifyOrderView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if not getattr(self.request.user,'userinfo',None):
+            return Response({'code':4102,'msg':'此用户没有在小程序注册'})
         deliver_payment = serializer.validated_data.get('deliver_payment', Decimal(0.00))
         price = serializer.validated_data.get('price', 0)
         account = price + deliver_payment
@@ -335,7 +337,8 @@ class UnifyOrderView(ModelViewSet):
         self.perform_create(serializer)
 
         # 统一下单
-        res = weixinpay.unified_order(trade_type="JSAPI", openid=self.request.user.openId, body=body,
+
+        res = weixinpay.unified_order(trade_type="JSAPI", openid=self.request.user.userinfo.openId, body=body,
                                       total_fee=account * 100, out_trade_no=order_no)
 
         if res.get('return_code') == "SUCCESS":
