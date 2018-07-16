@@ -1,4 +1,4 @@
-import datetime,random,time
+import datetime, random, time
 from decimal import Decimal
 from django.db.models import F
 
@@ -14,7 +14,8 @@ from tools.permissions import MerchantOrReadOnlyPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet
 from wxpay.views import weixinpay
 
-client=get_redis_connection()
+client = get_redis_connection()
+
 
 class ShoppingCarItemView(ModelViewSet):
     """
@@ -219,23 +220,25 @@ class BalanceView(CreateOnlyViewSet):
 
                     x, y = activity.algorithm(items_num, items_money)
                     # 将优惠大于0的信息返回
-                    if y>0:
+                    if y > 0:
                         ac.append({'id': activity.id, 'activity': x, 'reduction_money': y, 'item_num': items_num,
-                                    'items_money': items_money,'type':'activity'})
+                                   'items_money': items_money, 'type': 'activity'})
             # 返回优惠券信息
             cost_price = sum([t['num'] * t['sku'].price for t in sku_data])
             cost_num = sum([t['num'] for t in sku_data])
-            today=datetime.date.today()
-            if models.GetCoupon.objects.filter(user=request.user,coupon__store=store,has_num__gt=0,coupon__date_to__gte=today,coupon__date_from__lte=today).exists():
-                user_coupons=models.GetCoupon.objects.filter(user=request.user,coupon__store=store,has_num__gt=0,coupon__date_to__gte=today,coupon__date_from__lte=today)
+            today = datetime.date.today()
+            if models.GetCoupon.objects.filter(user=request.user, coupon__store=store, has_num__gt=0,
+                                               coupon__date_to__gte=today, coupon__date_from__lte=today).exists():
+                user_coupons = models.GetCoupon.objects.filter(user=request.user, coupon__store=store, has_num__gt=0,
+                                                               coupon__date_to__gte=today, coupon__date_from__lte=today)
                 for get_user_coupon in user_coupons:
                     coupon = get_user_coupon.coupon
-                    x,y=coupon.algorithm(cost_price)
-                    if y>0:
-                        ac.append({'id':coupon.id,'activity':x,'reduction_money': y,'item_num': cost_num,
-                                    'items_money': cost_price,'type':'coupon'})
+                    x, y = coupon.algorithm(cost_price)
+                    if y > 0:
+                        ac.append({'id': coupon.id, 'activity': x, 'reduction_money': y, 'item_num': cost_num,
+                                   'items_money': cost_price, 'type': 'coupon'})
 
-            op =request.query_params.get('op')
+            op = request.query_params.get('op')
             sd = []
 
             if op != 'update':
@@ -251,17 +254,17 @@ class BalanceView(CreateOnlyViewSet):
                 'id': store.id,
                 'name': store.name,
                 'logo': store.logo,
-                'activities':sorted(ac,key=lambda x:x['reduction_money'],reverse=True) if ac else ac,
-                'cost_num':cost_num,
-                'cost_money':cost_price,
+                'activities': sorted(ac, key=lambda x: x['reduction_money'], reverse=True) if ac else ac,
+                'cost_num': cost_num,
+                'cost_money': cost_price,
                 'take_off': store.take_off,
-                'skus':sd
+                'skus': sd
             }})
 
         # 取出收货地址
 
-        receive_address = models.ReceiveAddress.objects.filter(user=self.request.user,is_default=True)
-        rec={'stores':ret,'receive_address':serializers.ReceiveAddressSerializer(receive_address,many=True).data}
+        receive_address = models.ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
+        rec = {'stores': ret, 'receive_address': serializers.ReceiveAddressSerializer(receive_address, many=True).data}
 
         return Response(rec)
 
@@ -279,7 +282,7 @@ class ReceiveAddressViewSets(ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        is_default=serializer.validated_data['is_default']
+        is_default = serializer.validated_data['is_default']
         if is_default:
             models.ReceiveAddress.objects.filter(user=self.request.user).update(is_default=False)
         serializer.save(user=self.request.user)
@@ -293,7 +296,7 @@ class ReceiveAddressViewSets(ModelViewSet):
 
 # 缓存取号
 def get_order_no(store_id):
-    today_key='%s%s' % (1000+store_id,datetime.datetime.strftime(datetime.datetime.now(),'%y%m%d'))
+    today_key = '%s%s' % (1000 + store_id, datetime.datetime.strftime(datetime.datetime.now(), '%y%m%d'))
     if not client.exists(today_key):
         for i in range(1, 11):
             client.lpush(today_key, i)
@@ -313,31 +316,81 @@ class UnifyOrderView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if not getattr(self.request.user,'userinfo',None):
-            return Response({'code':4102,'msg':'此用户没有在小程序注册'})
+        if not getattr(self.request.user, 'userinfo', None):
+            return Response({'code': 4102, 'msg': '此用户没有在小程序注册', 'success': 'failure'})
         deliver_payment = serializer.validated_data.get('deliver_payment', Decimal(0.00))
         price = serializer.validated_data.get('price', 0)
         account = price + deliver_payment
         body = serializer.validated_data.get('order_desc')
+        order_no = get_order_no(0)
+        order_num = 0
+        order_money =0
+        store_orders=serializer.validated_data.get('store_orders', [])
         # 判断是否有店铺订单
-        if not serializer.validated_data.get('store_orders',[]):
+        if not store_orders:
             # 验证价格大于0
-            order_no = get_order_no(0)
-
-            if price:
-                serializer.validated_data.update({
-                    'account':account,
-                    'order_no':order_no
-                })
-            else:
-                return Response({'code':4101,'msg':'下单金额必须大于0'})
+            order_money=price
+            if not price:
+                return Response({'code': 4101, 'msg': '下单金额必须大于0', 'success': 'failure'})
 
         # 有店铺订单的情况下
+        else:
+            for data_st in store_orders:
+                store = data_st['store']
+                sku_data = data_st.get('sku_orders', [])
+                if not sku_data:
+                    return Response({'code': 4105, 'msg': '必须添加店铺具体规格商品', 'success': 'failure'})
+                # 验证活动
+                activity_discount = 0
+                coupon_discount = 0
+                activity = data_st['activity']
+                get_coupon_data = data_st['coupon']
+                if activity and get_coupon_data:
+                    return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'failure'})
+                now = datetime.datetime.now()
+                today = datetime.date.today()
 
-        self.perform_create(serializer)
+                store_num = sum([s['num'] for s in sku_data])
+                store_money = sum([s['num'] * s['sku'].price for s in sku_data])
+                if activity and activity.store == store and activity.datetime_from <= now and activity.datetime_to >= now and activity.state == 0:
+                    fit_sku = sku_data
+                    if not activity.select_all:
+                        # 筛选时good要加id,筛选的结果要加list()
+                        select_goods = activity.selected_goods.values_list('good', flat=True)
+                        fit_sku = list(filter(lambda x: x['sku'].color.good_detail.id in select_goods, sku_data))
+
+                    if fit_sku:
+                        items_num = sum([t['num'] for t in fit_sku])
+                        items_money = sum([t['num'] * t['sku'].price for t in fit_sku])
+
+                        x, activity_discount = activity.algorithm(items_num, items_money)
+
+                else:
+                    return Response({'code': 4104, 'msg': '活动无效', 'success': 'failure'})
+                # 验证优惠券
+
+                if get_coupon_data and get_coupon_data.user == self.request.user and get_coupon_data.has_num > 0 and get_coupon_data.coupon.date_from <= today and get_coupon_data.coupon >= today:
+                    coupon = get_coupon_data.coupon
+                    x, coupon_discount = coupon.algorithm(store_money)
+
+                else:
+                    return Response({'code': 4103, 'msg': "优惠券无效", 'success': 'failure'})
+                store_order_no = get_order_no(store.id)
+                store_order_money = store_money-activity_discount-coupon_discount
+                order_num+=store_num
+                order_money+=store_order_money
+                data_st.update({'store_order_no':store_order_no})
 
         # 统一下单
+        if order_money != price:
+            return Response({'code':4107,'msg':'下单价格不符','success': 'failure'})
 
+        serializer.validated_data.update({
+            'account': account,
+            'order_no': order_no
+        })
+
+        self.perform_create(serializer)
         res = weixinpay.unified_order(trade_type="JSAPI", openid=self.request.user.userinfo.openId, body=body,
                                       total_fee=int(account * 100), out_trade_no=order_no)
 
