@@ -229,7 +229,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
 
 
 class UnifyOrderSerializer(serializers.ModelSerializer):
-    store_orders = StoreOrderSerializer(many=True,required=False)
+    store_orders = StoreOrderSerializer(many=True)
 
     class Meta:
         model = models.UnifyOrder
