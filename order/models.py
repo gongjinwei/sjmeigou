@@ -134,7 +134,6 @@ class UnifyOrder(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
     address = models.ForeignKey(to='ReceiveAddress',on_delete=models.SET_NULL,null=True)
-    deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
     deliver_payment = models.DecimalField(max_digits=30,decimal_places=2,default=Decimal(0.00))
     update_time = models.DateTimeField(auto_now=True)
     state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成')),editable=False,default=1)
@@ -146,6 +145,7 @@ class StoreOrder(models.Model):
     coupon = models.ForeignKey(to='GetCoupon', on_delete=models.DO_NOTHING, null=True)
     activity = models.ForeignKey(to='StoreActivity', on_delete=models.DO_NOTHING, null=True)
     store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING)
+    deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
 
 
 class SkuOrder(models.Model):
