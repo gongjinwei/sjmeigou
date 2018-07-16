@@ -117,7 +117,6 @@ class JoinActivity(models.Model):
     update_time = models.DateTimeField(auto_now=True)
 
 
-
 class StoreActivitySelected(models.Model):
     activity = models.ForeignKey(to='StoreActivity', on_delete=models.CASCADE, related_name='selected_goods', null=True,
                                  editable=False)
@@ -140,14 +139,14 @@ class UnifyOrder(models.Model):
 
 
 class StoreOrder(models.Model):
-    unify_order = models.ForeignKey(to='UnifyOrder',on_delete=models.CASCADE)
+    unify_order = models.ForeignKey(to='UnifyOrder',on_delete=models.CASCADE,related_name='store_orders')
     coupon = models.ForeignKey(to='Coupon', on_delete=models.DO_NOTHING, null=True)
     activity = models.ForeignKey(to='StoreActivity', on_delete=models.DO_NOTHING, null=True)
     store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING)
 
 
 class SkuOrder(models.Model):
-    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE)
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,related_name='sku_orders')
     sku=models.ForeignKey(to='goods.SKU',on_delete=models.DO_NOTHING)
     num=models.IntegerField()
 

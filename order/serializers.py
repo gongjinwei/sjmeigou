@@ -214,16 +214,30 @@ class SkuOrderSerializer(serializers.ModelSerializer):
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
-    sku_orders = SkuOrderSerializer(many=True)
+    sku_orders = SkuOrderSerializer(many=True,required=False)
 
     class Meta:
         model = models.StoreOrder
         fields = '__all__'
 
+    def create(self, validated_data):
+        sku_data = validated_data.pop('sku_orders',[])
+        store_order = self.Meta.model.objects.create(**validated_data)
+        for sku in sku_data:
+            models.SkuOrder.objects.create(store_order=store_order,**sku)
+        return store_order
+
 
 class UnifyOrderSerializer(serializers.ModelSerializer):
-    store_orders = StoreOrderSerializer(many=True)
+    store_orders = StoreOrderSerializer(many=True,required=False)
 
     class Meta:
         model = models.UnifyOrder
         fields ='__all__'
+
+    def create(self, validated_data):
+        store_data=validated_data.pop('store_orders',[])
+        unify_order=self.Meta.model.objects.create(**validated_data)
+        for store in store_data:
+            models.StoreOrder.objects.create(unify_order=unify_order,**store)
+        return unify_order

@@ -1,9 +1,10 @@
-import datetime
+import datetime,random
 
 from django.db.models import F
 
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
+from django_redis import get_redis_connection
 
 # Create your views here.
 
@@ -12,6 +13,7 @@ from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet
 
+client=get_redis_connection()
 
 class ShoppingCarItemView(ModelViewSet):
     """
@@ -288,7 +290,21 @@ class ReceiveAddressViewSets(ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+# 缓存取号
+def get_order_no(store_id):
+    today_key='%s%s' % (1000+store_id,datetime.datetime.strftime(datetime.datetime.now(),'%y%m%d'))
+    if not client.exists(today_key):
+        for i in range(1, 11):
+            client.lpush(today_key, i)
+    x, y = client.brpop(today_key, timeout=30)
+    n = int(y)
+
+    client.lpush(today_key, n + 10)
+
+    ret = '%s%06d%s' % (today_key, n, random.randint(10, 100))
+    return ret
+
+
 class UnifyOrderView(ModelViewSet):
     queryset = models.UnifyOrder.objects.all()
     serializer_class = serializers.UnifyOrderSerializer
-
