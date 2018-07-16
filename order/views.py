@@ -343,8 +343,8 @@ class UnifyOrderView(ModelViewSet):
                 # 验证活动
                 activity_discount = 0
                 coupon_discount = 0
-                activity = data_st['activity']
-                get_coupon_data = data_st['coupon']
+                activity = data_st.get('activity',None)
+                get_coupon_data = data_st.get('coupon',None)
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'failure'})
                 now = datetime.datetime.now()
