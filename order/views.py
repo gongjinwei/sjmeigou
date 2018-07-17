@@ -441,7 +441,7 @@ class UnifyOrderView(ModelViewSet):
 class StoreOrderView(ListDetailDeleteViewSet):
     serializer_class = serializers.StoreOrderSerializer
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('state',)
+    filter_fields = ('state','store_order_no')
 
     def get_queryset(self):
         op =self.request.query_params.get('op','')

@@ -132,6 +132,7 @@ class UnifyOrder(models.Model):
     account_paid = models.DecimalField(editable=False,decimal_places=2,max_digits=30,default=Decimal(0.00))
     user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
+    paid_time = models.DateTimeField(editable=False, null=True)
     address = models.ForeignKey(to='ReceiveAddress',on_delete=models.SET_NULL,null=True)
     update_time = models.DateTimeField(auto_now=True)
     state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成')),editable=False,default=1)
@@ -145,6 +146,7 @@ class StoreOrder(models.Model):
     store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING)
     account = models.DecimalField(editable=False, decimal_places=2, max_digits=30)
     account_paid = models.DecimalField(editable=False, decimal_places=2, max_digits=30, default=Decimal(0.00))
+    paid_time = models.DateTimeField(editable=False,null=True)
     state = models.SmallIntegerField(choices=((1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '待评价'), (5, '已完成'),(6,'退款')),
                                      editable=False, default=1)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
