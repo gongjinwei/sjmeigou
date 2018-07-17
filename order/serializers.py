@@ -212,10 +212,11 @@ class SkuOrderSerializer(serializers.ModelSerializer):
     size = serializers.ReadOnlyField(source='sku.size.size_name')
     color = serializers.ReadOnlyField(source='sku.color.color_name')
     color_pic = serializers.ReadOnlyField(source='sku.color.color_pic')
+    price = serializers.ReadOnlyField(source='sku.price')
 
     class Meta:
         model = models.SkuOrder
-        fields = ('sku','num','title','color','size','color_pic')
+        fields = ('sku','num','title','color','size','price','color_pic')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
