@@ -145,7 +145,7 @@ class StoreOrder(models.Model):
     store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING)
     account = models.DecimalField(editable=False, decimal_places=2, max_digits=30)
     account_paid = models.DecimalField(editable=False, decimal_places=2, max_digits=30, default=Decimal(0.00))
-    state = models.SmallIntegerField(choices=((1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '待评价'), (5, '已完成')),
+    state = models.SmallIntegerField(choices=((1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '待评价'), (5, '已完成'),(6,'退款')),
                                      editable=False, default=1)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
     deliver_payment = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00))
