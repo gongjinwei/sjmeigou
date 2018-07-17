@@ -380,6 +380,7 @@ class UnifyOrderView(ModelViewSet):
 
                 store_num = sum([s['num'] for s in sku_data])
                 store_money = sum([s['num'] * s['sku'].price for s in sku_data])+store_deliver_payment
+                skus = [s['sku'] for s in sku_data]
                 if activity and activity.store == store and activity.datetime_from <= now and activity.datetime_to >= now and activity.state == 0:
                     fit_sku = sku_data
                     if not activity.select_all:
@@ -413,6 +414,9 @@ class UnifyOrderView(ModelViewSet):
                     "order_no":store_order_no,
                     "order_type":"store_order"
                 })
+
+                # 移除购物车
+                models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user,shopping_car__store=store,sku__in=skus).delete()
 
         # 统一下单
         if order_money != price:
