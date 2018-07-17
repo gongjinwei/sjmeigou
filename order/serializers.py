@@ -208,9 +208,14 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
 
 
 class SkuOrderSerializer(serializers.ModelSerializer):
+    title = serializers.ReadOnlyField(source='sku.color.good_detail.title')
+    size = serializers.ReadOnlyField(source='sku.size.size_name')
+    color = serializers.ReadOnlyField(source='sku.color.color_name')
+    color_pic = serializers.ReadOnlyField(source='sku.color.color_pic')
+
     class Meta:
         model = models.SkuOrder
-        fields = ('sku','num')
+        fields = ('sku','num','title')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
