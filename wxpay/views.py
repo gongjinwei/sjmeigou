@@ -58,18 +58,21 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                 elif StoreOrder.objects.filter(pk=out_trade_no).exists():
                     order=StoreOrder.objects.get(pk=out_trade_no)
                     self.receive_fee(order, cash_fee, paid_time)
-                    # # 减优惠券
-                    # if order.coupon:
-                    #     order.coupon.has_num-=1
-                    #     order.coupon.save()
-                    # # 参加活动一次
-                    # if order.activity:
-                    #     JoinActivity.objects.create(user=order.user,activity=order.activity,nums_join=F('nums_join')+1)
-                    # # 减库存
-                    # if hasattr(order,'sku_orders'):
-                    #     for sku_data in order.sku_orders:
-                    #         sku_data.sku.stock-=sku_data.num
-                    #         sku_data.sku.save()
+                    # 减优惠券
+                    if order.coupon:
+                        order.coupon.has_num-=1
+                        order.coupon.save()
+                    # 参加活动一次
+                    if order.activity:
+                        join_act,created=JoinActivity.objects.get_or_create(defaults=dict(user=order.user,activity=order.activity,nums_join=1),user=order.user,activity=order.activity)
+                        if not created:
+                            join_act.nums_join+=1
+                            join_act.save()
+                    # 减库存
+                    if hasattr(order,'sku_orders'):
+                        for sku_data in order.sku_orders.all():
+                            sku_data.sku.stock-=sku_data.num
+                            sku_data.sku.save()
 
             self.perform_create(serializer)
             return Response({"return_code":"SUCCESS","return_msg":"OK"})
