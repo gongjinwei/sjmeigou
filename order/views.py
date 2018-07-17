@@ -444,8 +444,12 @@ class StoreOrderView(ListDetailDeleteViewSet):
     filter_fields = ('state',)
 
     def get_queryset(self):
+        op =self.request.query_params.get('op','')
         if self.request.user.is_authenticated:
-            return models.StoreOrder.objects.filter(user=self.request.user)
+            if op=='backend':
+                return models.StoreOrder.objects.filter(store=self.request.user.stores)
+            else:
+                return models.StoreOrder.objects.filter(user=self.request.user)
         else:
             return models.StoreOrder.objects.none()
 
