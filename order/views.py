@@ -402,7 +402,7 @@ class UnifyOrderView(ModelViewSet):
                 store_order_money = store_money-activity_discount-coupon_discount
                 order_num+=store_num
                 order_money+=store_order_money
-                data_st.update({'store_order_no':store_order_no,'account':store_order_money})
+                data_st.update({'store_order_no':store_order_no,'account':store_order_money,'user':self.request.user})
 
                 # 准备下单
                 store_payment.append({

@@ -130,8 +130,7 @@ class UnifyOrder(models.Model):
     price = models.DecimalField(max_digits=30,decimal_places=2,help_text='下单价格:元')
     account = models.DecimalField(editable=False,decimal_places=2,max_digits=30)
     account_paid = models.DecimalField(editable=False,decimal_places=2,max_digits=30,default=Decimal(0.00))
-    user_message=models.CharField(max_length=255,default='',blank=True)
-    user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
+    user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
     address = models.ForeignKey(to='ReceiveAddress',on_delete=models.SET_NULL,null=True)
     update_time = models.DateTimeField(auto_now=True)
@@ -150,6 +149,8 @@ class StoreOrder(models.Model):
                                      editable=False, default=1)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
     deliver_payment = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00))
+    user_message = models.CharField(max_length=255, default='', blank=True)
+    user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
 
 
 class SkuOrder(models.Model):
