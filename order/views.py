@@ -5,6 +5,7 @@ from django.db.models import F,Q
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
 from django_redis import get_redis_connection
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
 
@@ -438,8 +439,15 @@ class UnifyOrderView(ModelViewSet):
 
 
 class StoreOrderView(ModelViewSet):
-    queryset = models.StoreOrder.objects.all()
     serializer_class = serializers.StoreOrderSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('state',)
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return models.StoreOrder.objects.filter(user=self.request.user)
+        else:
+            return models.StoreOrder.objects.none()
 
 
 class InitialPaymentView(ListOnlyViewSet):
