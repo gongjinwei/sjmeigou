@@ -12,7 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from . import serializers, models
 from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet,CreateDetailDeleteViewSet
+from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet,ListDetailDeleteViewSet
 from wxpay.views import weixinpay
 
 client = get_redis_connection()
@@ -438,7 +438,7 @@ class UnifyOrderView(ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class StoreOrderView(CreateDetailDeleteViewSet):
+class StoreOrderView(ListDetailDeleteViewSet):
     serializer_class = serializers.StoreOrderSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('state',)
