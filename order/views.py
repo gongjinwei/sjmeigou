@@ -462,7 +462,7 @@ class InitialPaymentView(ListOnlyViewSet):
     serializer_class = serializers.InitiatePaymentSerializer
 
     def get_queryset(self):
-        order_no = self.request.query_params.get('order')
+        order_no = self.request.query_params.get('order','')
         if self.request.user.is_authenticated:
             return models.InitiatePayment.objects.filter(user=self.request.user,store_order_id=order_no,has_paid=False)
         else:
