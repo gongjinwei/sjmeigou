@@ -210,7 +210,7 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
 class SkuOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SkuOrder
-        fields = '__all__'
+        fields = ('sku','num','sku_orders')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
@@ -218,7 +218,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.StoreOrder
-        fields = ('sku','num','sku_orders')
+        fields = '__all__'
 
     def create(self, validated_data):
         sku_data = validated_data.pop('sku_orders', [])
