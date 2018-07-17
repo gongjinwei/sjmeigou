@@ -215,7 +215,7 @@ class SkuOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.SkuOrder
-        fields = ('sku','num','title')
+        fields = ('sku','num','title','color','size','color_pic')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
