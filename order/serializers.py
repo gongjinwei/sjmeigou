@@ -218,7 +218,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.StoreOrder
-        fields = '__all__'
+        fields = ('sku','num')
 
     def create(self, validated_data):
         sku_data = validated_data.pop('sku_orders', [])
