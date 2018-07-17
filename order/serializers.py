@@ -210,7 +210,7 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
 class SkuOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SkuOrder
-        fields = ('sku','num','sku_orders')
+        fields = ('sku','num')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
