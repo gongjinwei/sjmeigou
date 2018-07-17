@@ -12,7 +12,7 @@ from weixin.pay import WeixinPay
 
 from . import serializers,models
 from register.views import CustomerXMLRender,CustomerXMLParser
-from order.models import StoreOrder,UnifyOrder
+from order.models import StoreOrder,UnifyOrder,JoinActivity
 
 # Create your views here.
 mch_id = getattr(settings, "WEIXIN_MCH_ID")
@@ -63,6 +63,8 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                         order.coupon.has_num-=1
                         order.coupon.save()
                     # 参加活动一次
+                    if order.activity:
+                        JoinActivity.objects.create(user=order.user,activity=order.activity,nums_join=F('nums_join')+1)
                     # 减库存
 
             self.perform_create(serializer)
