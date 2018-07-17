@@ -150,6 +150,7 @@ class StoreOrder(models.Model):
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
     deliver_payment = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00))
     user_message = models.CharField(max_length=255, default='', blank=True)
+    update_time = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
 
 
