@@ -66,6 +66,10 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                     if order.activity:
                         JoinActivity.objects.create(user=order.user,activity=order.activity,nums_join=F('nums_join')+1)
                     # 减库存
+                    if hasattr(order,'sku_orders'):
+                        for sku_data in order.sku_orders:
+                            sku_data.sku.stock-=sku_data.num
+                            sku_data.sku.save()
 
             self.perform_create(serializer)
             return Response({"return_code":"SUCCESS","return_msg":"OK"})
