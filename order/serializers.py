@@ -221,6 +221,8 @@ class SkuOrderSerializer(serializers.ModelSerializer):
 
 class StoreOrderSerializer(serializers.ModelSerializer):
     sku_orders = SkuOrderSerializer(many=True, required=False)
+    logo = serializers.ReadOnlyField(source='store.logo')
+    store_name = serializers.ReadOnlyField(source='store.name')
 
     class Meta:
         model = models.StoreOrder

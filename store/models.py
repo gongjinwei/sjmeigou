@@ -38,7 +38,7 @@ class Stores(models.Model):
     update_time=models.DateTimeField(auto_now=True,editable=False)
 
     def __str__(self):
-        return self.info.store_name
+        return self.name
 
 
 class Deposit(models.Model):

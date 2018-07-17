@@ -38,8 +38,14 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         serializer.is_valid(raise_exception=True)
         data=copy.copy(serializer.validated_data)
         received_sign=data.pop('sign','')
+        # if models.NotifyOrderModel.objects.filter(sign=received_sign).exists():
+        #     return Response({"return_code":"False","return_msg":"exists error"})
         sign=weixinpay.sign(data)
         if received_sign==sign:
+            return_code = data.get('return_code')
+            if return_code =='SUCCESS':
+                fee_type= data.get('fee_type')
+                cash_fee = data
             self.perform_create(serializer)
             return Response({"return_code":"SUCCESS","return_msg":"OK"})
         else:
