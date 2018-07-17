@@ -153,6 +153,9 @@ class StoreOrder(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
 
+    class Meta:
+        ordering=('update_time',)
+
 
 class SkuOrder(models.Model):
     store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,related_name='sku_orders',editable=False)
