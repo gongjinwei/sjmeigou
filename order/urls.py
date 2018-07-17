@@ -14,5 +14,7 @@ router.register('storeActivity',views.StoreActivityView,base_name='storeActivity
 router.register('balance',views.BalanceView,base_name='balance')
 router.register('receiveAddress',views.ReceiveAddressViewSets,base_name='receiveAddress')
 router.register('unifyOrder',views.UnifyOrderView,base_name='unifyOrder')
+router.register('initialPayment',views.InitialPaymentView,base_name='initialPayment')
+router.register('storeOrder',views.StoreOrderView,base_name='storeOrder')
 
 urlpatterns=router.urls

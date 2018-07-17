@@ -1,6 +1,6 @@
 import datetime, random, time
 from decimal import Decimal
-from django.db.models import F
+from django.db.models import F,Q
 
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
@@ -435,4 +435,20 @@ class UnifyOrderView(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class StoreOrderView(ModelViewSet):
+    queryset = models.StoreOrder.objects.all()
+    serializer_class = serializers.StoreOrderSerializer
+
+
+class InitialPaymentView(ListOnlyViewSet):
+    serializer_class = serializers.InitiatePaymentSerializer
+
+    def get_queryset(self):
+        order_no = self.request.query_params.get('order')
+        if self.request.user.is_authenticated:
+            return models.InitiatePayment.objects.filter(user=self.request.user,store_order_id=order_no,has_paid=False)
+        else:
+            return models.InitiatePayment.objects.none()
 
