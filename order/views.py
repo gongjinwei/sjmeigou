@@ -522,11 +522,9 @@ class StoreOrderView(ListDetailDeleteViewSet):
         if instance.state == 1 and instance.account > to_price and instance.store == self.request.user.stores:
 
             # 再次发起付款
-            ret = prepare_payment(instance.user, instance.unify_order.order_desc, to_price, instance.store_order_no,
-                                  order_type='store_order')
             instance.account = to_price
             instance.save()
-            return Response(ret)
+            return Response({'code': 1000, 'msg': '改价成功', "return_code": "SUCCESS"})
 
         else:
             return Response({'code': 4202, 'msg': '订单必须是待付款状态，且价格只能改低'})
