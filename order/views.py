@@ -518,7 +518,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = self.get_object()
-        to_price = int(serializer.validated_data.get('price'))
+        to_price = serializer.validated_data.get('price')
         if to_price>=0 and instance.state == 1 and instance.account > to_price and instance.store == self.request.user.stores:
 
             # 再次发起付款
