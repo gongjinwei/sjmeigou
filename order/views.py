@@ -1,9 +1,10 @@
 import datetime, random, time
 from decimal import Decimal
-from django.db.models import F,Q
+from django.db.models import F, Q
 
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 from django_redis import get_redis_connection
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -12,7 +13,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from . import serializers, models
 from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet,ListDetailDeleteViewSet
+from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
+    ListDetailDeleteViewSet
 from wxpay.views import weixinpay
 
 client = get_redis_connection()
@@ -310,7 +312,7 @@ def get_order_no(store_id):
     return ret
 
 
-def prepare_payment(user,body,account,order_no,order_type='unify_order'):
+def prepare_payment(user, body, account, order_no, order_type='unify_order'):
     res = weixinpay.unified_order(trade_type="JSAPI", openid=user.userinfo.openId, body=body,
                                   total_fee=int(account * 100), out_trade_no=order_no)
 
@@ -323,10 +325,10 @@ def prepare_payment(user,body,account,order_no,order_type='unify_order'):
             "package": "prepay_id=%s" % package,
             "signType": "MD5"
         }
-        if order_type=='unify_order':
-            data.update(paySign=weixinpay.sign(data), unify_order_id=order_no,user=user)
+        if order_type == 'unify_order':
+            data.update(paySign=weixinpay.sign(data), unify_order_id=order_no, user=user)
         else:
-            data.update(paySign=weixinpay.sign(data),store_order_id=order_no,user=user)
+            data.update(paySign=weixinpay.sign(data), store_order_id=order_no, user=user)
 
         models.InitiatePayment.objects.create(**data)
         data.pop('user')
@@ -350,12 +352,12 @@ class UnifyOrderView(CreateOnlyViewSet):
         body = serializer.validated_data.get('order_desc')
         order_no = get_order_no(0)
         order_num = 0
-        order_money =0
-        store_orders=serializer.validated_data.get('store_orders', [])
+        order_money = 0
+        store_orders = serializer.validated_data.get('store_orders', [])
         # 判断是否有店铺订单
         if not store_orders:
             # 验证价格大于0
-            order_money=price
+            order_money = price
             if not price:
                 return Response({'code': 4101, 'msg': '下单金额必须大于0', 'success': 'failure'})
 
@@ -371,16 +373,16 @@ class UnifyOrderView(CreateOnlyViewSet):
                 # 验证活动
                 activity_discount = 0
                 coupon_discount = 0
-                activity = data_st.get('activity',None)
-                get_coupon_data = data_st.get('coupon',None)
-                store_deliver_payment=data_st.get('deliver_payment',Decimal(0.00))
+                activity = data_st.get('activity', None)
+                get_coupon_data = data_st.get('coupon', None)
+                store_deliver_payment = data_st.get('deliver_payment', Decimal(0.00))
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'failure'})
                 now = datetime.datetime.now()
                 today = datetime.date.today()
 
                 store_num = sum([s['num'] for s in sku_data])
-                store_money = sum([s['num'] * s['sku'].price for s in sku_data])+store_deliver_payment
+                store_money = sum([s['num'] * s['sku'].price for s in sku_data]) + store_deliver_payment
                 skus = [s['sku'] for s in sku_data]
                 if activity and activity.store == store and activity.datetime_from <= now and activity.datetime_to >= now and activity.state == 0:
                     fit_sku = sku_data
@@ -402,26 +404,28 @@ class UnifyOrderView(CreateOnlyViewSet):
                     x, coupon_discount = coupon.algorithm(store_money)
 
                 store_order_no = get_order_no(store.id)
-                store_order_money = store_money-activity_discount-coupon_discount
-                order_num+=store_num
-                order_money+=store_order_money
-                data_st.update({'store_order_no':store_order_no,'account':store_order_money,'user':self.request.user})
+                store_order_money = store_money - activity_discount - coupon_discount
+                order_num += store_num
+                order_money += store_order_money
+                data_st.update(
+                    {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user})
 
                 # 准备下单
                 store_payment.append({
-                    "user":self.request.user,
-                    "body":body,
-                    "account":store_order_money,
-                    "order_no":store_order_no,
-                    "order_type":"store_order"
+                    "user": self.request.user,
+                    "body": body,
+                    "account": store_order_money,
+                    "order_no": store_order_no,
+                    "order_type": "store_order"
                 })
 
                 # 移除购物车
-                models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user,shopping_car__store=store,sku__in=skus).delete()
+                models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, shopping_car__store=store,
+                                                      sku__in=skus).delete()
 
         # 统一下单
         if order_money != price:
-            return Response({'code':4107,'msg':'下单价格不符','success': 'failure'})
+            return Response({'code': 4107, 'msg': '下单价格不符', 'success': 'failure'})
 
         account = order_money
         serializer.validated_data.update({
@@ -433,7 +437,7 @@ class UnifyOrderView(CreateOnlyViewSet):
 
         # 生成待付款信息
 
-        ret=prepare_payment(self.request.user,body,account,order_no)
+        ret = prepare_payment(self.request.user, body, account, order_no)
         for prepare in store_payment:
             prepare_payment(**prepare)
 
@@ -446,12 +450,12 @@ class UnifyOrderView(CreateOnlyViewSet):
 class StoreOrderView(ListDetailDeleteViewSet):
     serializer_class = serializers.StoreOrderSerializer
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('state','store_order_no')
+    filter_fields = ('state', 'store_order_no')
 
     def get_queryset(self):
-        op =self.request.query_params.get('op','')
+        op = self.request.query_params.get('op', '')
         if self.request.user.is_authenticated:
-            if op=='backend':
+            if op == 'backend':
                 return models.StoreOrder.objects.filter(store=self.request.user.stores)
             else:
                 return models.StoreOrder.objects.filter(user=self.request.user)
@@ -459,22 +463,49 @@ class StoreOrderView(ListDetailDeleteViewSet):
             return models.StoreOrder.objects.none()
 
     def perform_destroy(self, instance):
-        if instance.state==1 or instance.state==2:
+        if instance.state == 8:
             instance.delete()
-        elif instance.state==5:
-            instance.state=9
+        elif instance.state == 5:
+            instance.state = 9
             instance.save()
         else:
-            return Response('此状态无法删除订单',status=status.HTTP_400_BAD_REQUEST)
+            return Response('此状态无法删除订单', status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['post'], detail=False)
+    def state_change(self, request, serializer_class=serializers.StoreStateChangeSerializer):
+        serializer = serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        op = serializer.validated_data['op']
+        user = self.request.user
+        order = serializer.validated_data['store_order']
+
+        if op == 1 and order.user == user:
+            order.state = 4
+        elif op == 2 and order.user == user:
+            if order.state == 1:
+                order.state = 8
+            elif order == 2:
+                # 取消点我达订单,取消成功则更新状态
+                order.state = 8
+        elif op == 3 and order.store == user.stores:
+            # 平台进入退款操作，成功后更新状态
+            order.state = 6
+        elif op == 4 and order.store == user.stores:
+            # 填写不同意退款的理由
+            order.state = 3
+
+        order.save()
+
+        return Response('ok')
 
 
 class InitialPaymentView(ListOnlyViewSet):
     serializer_class = serializers.InitiatePaymentSerializer
 
     def get_queryset(self):
-        order_no = self.request.query_params.get('order','')
+        order_no = self.request.query_params.get('order', '')
         if self.request.user.is_authenticated:
-            return models.InitiatePayment.objects.filter(user=self.request.user,store_order_id=order_no,has_paid=False)
+            return models.InitiatePayment.objects.filter(user=self.request.user, store_order_id=order_no,
+                                                         has_paid=False)
         else:
             return models.InitiatePayment.objects.none()
-
