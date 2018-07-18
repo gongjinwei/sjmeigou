@@ -12,7 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from . import serializers, models
 from goods.models import SKU
-from tools.permissions import MerchantOrReadOnlyPermission
+from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet
 from wxpay.views import weixinpay
@@ -312,7 +312,7 @@ def get_order_no(store_id):
     return ret
 
 
-def prepare_payment(user, body, account, order_no, order_type='unify_order'):
+def prepare_payment(user, body, account, order_no, order_type=None):
     res = weixinpay.unified_order(trade_type="JSAPI", openid=user.userinfo.openId, body=body,
                                   total_fee=int(account * 100), out_trade_no=order_no)
 
@@ -325,13 +325,16 @@ def prepare_payment(user, body, account, order_no, order_type='unify_order'):
             "package": "prepay_id=%s" % package,
             "signType": "MD5"
         }
+
         if order_type == 'unify_order':
             data.update(paySign=weixinpay.sign(data), unify_order_id=order_no, user=user)
-        else:
+            models.InitiatePayment.objects.create(**data)
+            data.pop('user')
+        elif order_type =="store_order":
             data.update(paySign=weixinpay.sign(data), store_order_id=order_no, user=user)
+            models.InitiatePayment.objects.create(**data)
+            data.pop('user')
 
-        models.InitiatePayment.objects.create(**data)
-        data.pop('user')
         return data
     else:
         return res.get('return_msg')
@@ -480,34 +483,46 @@ class StoreOrderView(ListDetailDeleteViewSet):
         order = serializer.validated_data['store_order']
 
         if op == 1 and order.user == user:
-            if order.state==2 or order.state==3:
+            if order.state == 2 or order.state == 3:
                 order.state = 4
                 order.save()
-                return Response({'code':1000,'msg':'收获成功',"return_code":"SUCCESS"})
+                return Response({'code': 1000, 'msg': '收获成功', "return_code": "SUCCESS"})
             else:
-                return Response({'code':4201,'msg':'此状态无法收货',"return_code":"FAILURE"})
+                return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAILURE"})
         elif op == 2 and order.user == user:
             if order.state == 1:
                 order.state = 8
                 order.save()
-                return Response({'code': 1000, 'msg': '取消成功',"return_code":"SUCCESS"})
+                return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
             elif order.state == 2:
                 # 取消点我达订单,取消成功则更新状态
                 order.state = 8
                 order.save()
-                return Response({'code': 1000, 'msg': '取消成功',"return_code":"SUCCESS"})
-        elif op == 3 and order.store == user.stores and order.state==7:
+                return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
+        elif op == 3 and order.store == user.stores and order.state == 7:
             # 平台进入退款操作，成功后更新状态
             order.state = 6
             order.save()
-            return Response({'code': 1000, 'msg': '退款成功',"return_code":"SUCCESS"})
+            return Response({'code': 1000, 'msg': '退款成功', "return_code": "SUCCESS"})
 
-        return Response({'code': 4210, 'msg': '未知操作',"return_code":"FAILURE"})
+        return Response({'code': 4210, 'msg': '未知操作', "return_code": "FAILURE"})
 
-    @action(methods=['post'],detail=True,serializer_class=serializers.StoreStateChangeSerializer)
-    def change_price(self,request,pk=None):
+    @action(methods=['post'], detail=True, serializer_class=serializers.StorePriceChangeSerializer,
+            permission_classes=(MerchantPermission,))
+    def change_price(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         instance = self.get_object()
-        return Response(instance.account)
+        to_price = int(serializer.validated_data.get('price'))
+        if instance.state == 1 and instance.account > to_price and instance.store == self.request.user.stores:
+            instance.account = to_price
+            instance.save()
+            # 再次发起付款
+            ret=prepare_payment(instance.user,instance.unify_order.order_desc,to_price,instance.store_order_no,order_type='store_order')
+            return Response(ret)
+
+        else:
+            return Response({'code': 4202, 'msg': '订单必须是待付款状态，且价格只能改低'})
 
 
 class InitialPaymentView(ListOnlyViewSet):
