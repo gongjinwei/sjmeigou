@@ -183,8 +183,8 @@ class ReceiveAddress(models.Model):
 
 class InitiatePayment(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING)
-    unify_order = models.OneToOneField(to='UnifyOrder',on_delete=models.SET_NULL,null=True)
-    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.SET_NULL,null=True)
+    unify_order = models.OneToOneField(to='UnifyOrder',on_delete=models.CASCADE,null=True)
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,null=True)
     appId = models.CharField(max_length=100)
     timeStamp=models.CharField(max_length=30)
     nonceStr=models.CharField(max_length=40)

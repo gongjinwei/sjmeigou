@@ -467,6 +467,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
         else:
             return Response('此状态无法删除订单',status=status.HTTP_400_BAD_REQUEST)
 
+
 class InitialPaymentView(ListOnlyViewSet):
     serializer_class = serializers.InitiatePaymentSerializer
 
