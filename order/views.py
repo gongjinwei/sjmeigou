@@ -335,7 +335,7 @@ def prepare_payment(user,body,account,order_no,order_type='unify_order'):
         return res.get('return_msg')
 
 
-class UnifyOrderView(ModelViewSet):
+class UnifyOrderView(CreateOnlyViewSet):
     queryset = models.UnifyOrder.objects.all()
     serializer_class = serializers.UnifyOrderSerializer
 
@@ -367,6 +367,7 @@ class UnifyOrderView(ModelViewSet):
                 sku_data = data_st.get('sku_orders', [])
                 if not sku_data:
                     return Response({'code': 4105, 'msg': '必须添加店铺具体规格商品', 'success': 'failure'})
+
                 # 验证活动
                 activity_discount = 0
                 coupon_discount = 0
@@ -457,6 +458,14 @@ class StoreOrderView(ListDetailDeleteViewSet):
         else:
             return models.StoreOrder.objects.none()
 
+    def perform_destroy(self, instance):
+        if instance.state==1 or instance.state==2:
+            instance.delete()
+        elif instance.state==5:
+            instance.state=9
+            instance.save()
+        else:
+            return Response('此状态无法删除订单',status=status.HTTP_400_BAD_REQUEST)
 
 class InitialPaymentView(ListOnlyViewSet):
     serializer_class = serializers.InitiatePaymentSerializer

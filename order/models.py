@@ -137,7 +137,7 @@ class UnifyOrder(models.Model):
     paid_time = models.DateTimeField(editable=False, null=True)
     address = models.ForeignKey(to='ReceiveAddress',on_delete=models.SET_NULL,null=True)
     update_time = models.DateTimeField(auto_now=True)
-    state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成'),(6,'退款'),(7,'订单取消'),(8,'部分支付')),editable=False,default=1)
+    state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4,'待评价'),(5,'已完成'),(6,'退款成功'),(7,'待退款'),(8,'订单已取消'),(9,'已完成用户删除'),(10,'部分支付')),editable=False,default=1)
 
 
 class StoreOrder(models.Model):
@@ -149,7 +149,7 @@ class StoreOrder(models.Model):
     account = models.DecimalField(editable=False, decimal_places=2, max_digits=30)
     account_paid = models.DecimalField(editable=False, decimal_places=2, max_digits=30, default=Decimal(0.00))
     paid_time = models.DateTimeField(editable=False,null=True)
-    state = models.SmallIntegerField(choices=((1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '待评价'), (5, '已完成'),(6,'退款'),(7,'订单取消')),
+    state = models.SmallIntegerField(choices=((1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '待评价'), (5, '已完成'),(6,'退款成功'),(7,'待退款'),(8,'订单已取消'),(9,'已完成用户删除')),
                                      editable=False, default=1)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
     deliver_payment = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00))
