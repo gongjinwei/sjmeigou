@@ -12,7 +12,7 @@ from weixin.pay import WeixinPay
 
 from . import serializers,models
 from register.views import CustomerXMLRender,CustomerXMLParser
-from order.models import StoreOrder,UnifyOrder,JoinActivity
+from order.models import StoreOrder,UnifyOrder,JoinActivity,OrderTrade
 
 # Create your views here.
 mch_id = getattr(settings, "WEIXIN_MCH_ID")
@@ -52,27 +52,29 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                 out_trade_no = data.get('out_trade_no')
                 time_end = data.get('time_end')
                 paid_time = datetime.strptime(time_end,'%Y%m%d%H%M%S')
-                if out_trade_no.startswith('1000') and UnifyOrder.objects.filter(pk=out_trade_no).exists():
-                    order=UnifyOrder.objects.get(pk=out_trade_no)
-                    self.receive_fee(order,cash_fee,paid_time)
-                elif StoreOrder.objects.filter(pk=out_trade_no).exists():
-                    order=StoreOrder.objects.get(pk=out_trade_no)
-                    self.receive_fee(order, cash_fee, paid_time)
-                    # 减优惠券
-                    if order.coupon:
-                        order.coupon.has_num-=1
-                        order.coupon.save()
-                    # 参加活动一次
-                    if order.activity:
-                        join_act,created=JoinActivity.objects.get_or_create(defaults=dict(user=order.user,activity=order.activity,nums_join=1),user=order.user,activity=order.activity)
-                        if not created:
-                            join_act.nums_join+=1
-                            join_act.save()
-                    # 减库存
-                    if hasattr(order,'sku_orders'):
-                        for sku_data in order.sku_orders.all():
-                            sku_data.sku.stock-=sku_data.num
-                            sku_data.sku.save()
+                if OrderTrade.objects.filter(pk=out_trade_no).exists():
+                    order_trade=OrderTrade.objects.get(pk=out_trade_no)
+                    if order_trade.unify_order:
+                        order=order_trade.unify_order
+                        self.receive_fee(order,cash_fee,paid_time)
+                    elif order_trade.store_order:
+                        order=order_trade.store_order
+                        self.receive_fee(order, cash_fee, paid_time)
+                        # 减优惠券
+                        if order.coupon:
+                            order.coupon.has_num-=1
+                            order.coupon.save()
+                        # 参加活动一次
+                        if order.activity:
+                            join_act,created=JoinActivity.objects.get_or_create(defaults=dict(user=order.user,activity=order.activity,nums_join=1),user=order.user,activity=order.activity)
+                            if not created:
+                                join_act.nums_join+=1
+                                join_act.save()
+                        # 减库存
+                        if hasattr(order,'sku_orders'):
+                            for sku_data in order.sku_orders.all():
+                                sku_data.sku.stock-=sku_data.num
+                                sku_data.sku.save()
 
             self.perform_create(serializer)
             return Response({"return_code":"SUCCESS","return_msg":"OK"})
