@@ -480,20 +480,29 @@ class StoreOrderView(ListDetailDeleteViewSet):
         order = serializer.validated_data['store_order']
 
         if op == 1 and order.user == user:
-            order.state = 4
+            if order.state==2 or order.state==3:
+                order.state = 4
+                order.save()
+                return Response({'code':1000,'msg':'收获成功',"return_code":"SUCCESS"})
+            else:
+                return Response({'code':4201,'msg':'此状态无法收货',"return_code":"FAILURE"})
         elif op == 2 and order.user == user:
             if order.state == 1:
                 order.state = 8
-            elif order == 2:
+                order.save()
+                return Response({'code': 1000, 'msg': '取消成功',"return_code":"SUCCESS"})
+            elif order.state == 2:
                 # 取消点我达订单,取消成功则更新状态
                 order.state = 8
-        elif op == 3 and order.store == user.stores:
+                order.save()
+                return Response({'code': 1000, 'msg': '取消成功',"return_code":"SUCCESS"})
+        elif op == 3 and order.store == user.stores and order.state==7:
             # 平台进入退款操作，成功后更新状态
             order.state = 6
+            order.save()
+            return Response({'code': 1000, 'msg': '退款成功',"return_code":"SUCCESS"})
 
-        order.save()
-
-        return Response('ok')
+        return Response({'code': 4210, 'msg': '未知操作',"return_code":"FAILURE"})
 
 
 class InitialPaymentView(ListOnlyViewSet):
