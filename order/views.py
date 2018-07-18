@@ -313,8 +313,10 @@ def get_order_no(store_id):
 
 
 def prepare_payment(user, body, account, order_no, order_type=None):
+    order_trade = models.OrderTrade()
+    order_trade.trade_no = order_trade.trade_number
     res = weixinpay.unified_order(trade_type="JSAPI", openid=user.userinfo.openId, body=body,
-                                  total_fee=int(account * 100), out_trade_no=order_no)
+                                  total_fee=int(account * 100), out_trade_no=order_trade.trade_no)
 
     if res.get('return_code') == "SUCCESS":
         package = res.get('prepay_id')
@@ -325,15 +327,18 @@ def prepare_payment(user, body, account, order_no, order_type=None):
             "package": "prepay_id=%s" % package,
             "signType": "MD5"
         }
+        if order_type != 'unify_order' and order_type != "store_order":
+            return data
+        elif order_type == 'unify_order':
+            order_trade.unify_order = models.UnifyOrder.objects.get(pk=order_no)
 
-        if order_type == 'unify_order':
-            data.update(paySign=weixinpay.sign(data), unify_order_id=order_no, user=user)
-            models.InitiatePayment.objects.create(**data)
-            data.pop('user')
-        elif order_type =="store_order":
-            data.update(paySign=weixinpay.sign(data), store_order_id=order_no, user=user)
-            models.InitiatePayment.objects.update_or_create(defaults=data,store_order_id=order_no)
-            data.pop('user')
+        elif order_type == "store_order":
+            order_trade.store_order = models.StoreOrder.objects.get(pk=order_no)
+        order_trade.save()
+        data.update(paySign=weixinpay.sign(data), trade=order_trade, user=user)
+        models.InitiatePayment.objects.create(**data)
+        data.pop('user')
+        data.pop('trade')
 
         return data
     else:
@@ -349,7 +354,7 @@ class UnifyOrderView(CreateOnlyViewSet):
         serializer.is_valid(raise_exception=True)
         store_payment = []
         if not getattr(self.request.user, 'userinfo', None):
-            return Response({'code': 4102, 'msg': '此用户没有在小程序注册', 'success': 'failure'})
+            return Response({'code': 4102, 'msg': '此用户没有在小程序注册', 'success': 'FAIL'})
         price = serializer.validated_data.get('price', 0)
 
         body = serializer.validated_data.get('order_desc')
@@ -362,7 +367,7 @@ class UnifyOrderView(CreateOnlyViewSet):
             # 验证价格大于0
             order_money = price
             if not price:
-                return Response({'code': 4101, 'msg': '下单金额必须大于0', 'success': 'failure'})
+                return Response({'code': 4101, 'msg': '下单金额必须大于0', 'success': 'FAIL'})
 
         # 有店铺订单的情况下
         else:
@@ -371,7 +376,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                 store = data_st['store']
                 sku_data = data_st.get('sku_orders', [])
                 if not sku_data:
-                    return Response({'code': 4105, 'msg': '必须添加店铺具体规格商品', 'success': 'failure'})
+                    return Response({'code': 4105, 'msg': '必须添加店铺具体规格商品', 'success': 'FAIL'})
 
                 # 验证活动
                 activity_discount = 0
@@ -380,7 +385,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                 get_coupon_data = data_st.get('coupon', None)
                 store_deliver_payment = data_st.get('deliver_payment', Decimal(0.00))
                 if activity and get_coupon_data:
-                    return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'failure'})
+                    return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'FAIL'})
                 now = datetime.datetime.now()
                 today = datetime.date.today()
 
@@ -413,14 +418,14 @@ class UnifyOrderView(CreateOnlyViewSet):
                 data_st.update(
                     {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user})
 
-                # 准备下单
-                store_payment.append({
-                    "user": self.request.user,
-                    "body": body,
-                    "account": store_order_money,
-                    "order_no": store_order_no,
-                    "order_type": "store_order"
-                })
+                # # 准备下单
+                # store_payment.append({
+                #     "user": self.request.user,
+                #     "body": body,
+                #     "account": store_order_money,
+                #     "order_no": store_order_no,
+                #     "order_type": "store_order"
+                # })
 
                 # 移除购物车
                 models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, shopping_car__store=store,
@@ -428,7 +433,7 @@ class UnifyOrderView(CreateOnlyViewSet):
 
         # 统一下单
         if order_money != price:
-            return Response({'code': 4107, 'msg': '下单价格不符', 'success': 'failure'})
+            return Response({'code': 4107, 'msg': '下单价格不符', 'success': 'FAIL'})
 
         account = order_money
         serializer.validated_data.update({
@@ -438,11 +443,11 @@ class UnifyOrderView(CreateOnlyViewSet):
 
         self.perform_create(serializer)
 
-        # 生成待付款信息
+        # 生成总的待付款信息
 
-        ret = prepare_payment(self.request.user, body, account, order_no)
-        for prepare in store_payment:
-            prepare_payment(**prepare)
+        ret = prepare_payment(self.request.user, body, account, order_no, order_type='unify_order')
+        # for prepare in store_payment:
+        #     prepare_payment(**prepare)
 
         return Response(ret)
 
@@ -486,9 +491,9 @@ class StoreOrderView(ListDetailDeleteViewSet):
             if order.state == 2 or order.state == 3:
                 order.state = 4
                 order.save()
-                return Response({'code': 1000, 'msg': '收获成功', "return_code": "SUCCESS"})
+                return Response({'code': 1000, 'msg': '收货成功', "return_code": "SUCCESS"})
             else:
-                return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAILURE"})
+                return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAIL"})
         elif op == 2 and order.user == user:
             if order.state == 1:
                 order.state = 8
@@ -505,7 +510,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             order.save()
             return Response({'code': 1000, 'msg': '退款成功', "return_code": "SUCCESS"})
 
-        return Response({'code': 4210, 'msg': '未知操作', "return_code": "FAILURE"})
+        return Response({'code': 4210, 'msg': '未知操作', "return_code": "FAIL"})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.StorePriceChangeSerializer,
             permission_classes=(MerchantPermission,))
@@ -515,23 +520,24 @@ class StoreOrderView(ListDetailDeleteViewSet):
         instance = self.get_object()
         to_price = int(serializer.validated_data.get('price'))
         if instance.state == 1 and instance.account > to_price and instance.store == self.request.user.stores:
+
+            # 再次发起付款
+            ret = prepare_payment(instance.user, instance.unify_order.order_desc, to_price, instance.store_order_no,
+                                  order_type='store_order')
             instance.account = to_price
             instance.save()
-            # 再次发起付款
-            ret=prepare_payment(instance.user,instance.unify_order.order_desc,to_price,instance.store_order_no,order_type='store_order')
             return Response(ret)
 
         else:
             return Response({'code': 4202, 'msg': '订单必须是待付款状态，且价格只能改低'})
 
 
-class InitialPaymentView(ListOnlyViewSet):
-    serializer_class = serializers.InitiatePaymentSerializer
+class InitialPaymentView(CreateOnlyViewSet):
+    serializer_class = serializers.InitialTradeSerializer
 
-    def get_queryset(self):
-        order_no = self.request.query_params.get('order', '')
-        if self.request.user.is_authenticated:
-            return models.InitiatePayment.objects.filter(user=self.request.user, store_order_id=order_no,
-                                                         has_paid=False)
-        else:
-            return models.InitiatePayment.objects.none()
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order = serializer.validated_data['order']
+        ret=prepare_payment(order.user,order.unify_order.order_desc,order.account,order.store_order_no,order_type='store_order')
+        return Response(ret)

@@ -268,3 +268,12 @@ class StoreStateChangeSerializer(serializers.Serializer):
 
 class StorePriceChangeSerializer(serializers.Serializer):
     price = serializers.DecimalField(max_digits=30,decimal_places=2)
+
+
+class OrderTradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =models.OrderTrade
+        fields='__all__'
+
+class InitialTradeSerializer(serializers.Serializer):
+    order = serializers.PrimaryKeyRelatedField(queryset=models.StoreOrder.objects.filter(state=1))

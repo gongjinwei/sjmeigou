@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from decimal import Decimal
+from datetime import datetime
+import random
 
 
 # Create your models here.
@@ -182,9 +184,8 @@ class ReceiveAddress(models.Model):
 
 
 class InitiatePayment(models.Model):
+    trade=models.OneToOneField(to='OrderTrade',on_delete=models.CASCADE)
     user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING)
-    unify_order = models.OneToOneField(to='UnifyOrder',on_delete=models.CASCADE,null=True)
-    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,null=True)
     appId = models.CharField(max_length=100)
     timeStamp=models.CharField(max_length=30)
     nonceStr=models.CharField(max_length=40)
@@ -195,11 +196,26 @@ class InitiatePayment(models.Model):
     has_paid = models.BooleanField(default=False)
 
 
-class OrderComment(models.Model):
-    order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE)
+# class OrderComment(models.Model):
+#     order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE)
+#
+#     state=models.SmallIntegerField(choices=((0,'买家已评价，等待卖家评价'),(1,'卖家已评价，等待买家评价'),(2,'双方已评')))
 
-    state=models.SmallIntegerField(choices=((0,'买家已评价，等待卖家评价'),(1,'卖家已评价，等待买家评价'),(2,'双方已评')))
+class OrderTrade(models.Model):
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.DO_NOTHING,null=True)
+    unify_order = models.ForeignKey(to='UnifyOrder',on_delete=models.DO_NOTHING,null=True)
+    trade_no = models.CharField(primary_key=True,max_length=30)
+    paid_time=models.DateTimeField(null=True,editable=False)
+    create_time = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def trade_number(self):
+        now = datetime.now()
+        return datetime.strftime(now,'%Y%m%d%H%M%S%f')+str(random.randint(1000,9999))
 
+    def save(self, *args,**kwargs):
+        if not self.trade_no:
+            self.trade_no=self.trade_number
+        super().save(*args,**kwargs)
 
 
