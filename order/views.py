@@ -490,9 +490,6 @@ class StoreOrderView(ListDetailDeleteViewSet):
         elif op == 3 and order.store == user.stores:
             # 平台进入退款操作，成功后更新状态
             order.state = 6
-        elif op == 4 and order.store == user.stores:
-            # 填写不同意退款的理由
-            order.state = 3
 
         order.save()
 
