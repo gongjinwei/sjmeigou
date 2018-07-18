@@ -265,3 +265,6 @@ state_change=[1,2,3,7]
 class StoreStateChangeSerializer(serializers.Serializer):
     store_order = serializers.PrimaryKeyRelatedField(queryset=models.StoreOrder.objects.filter(state__in=state_change))
     op = serializers.ChoiceField(choices=((1,'确认收货'),(2,'取消订单'),(3,'同意退款')))
+
+class StorePriceChangeSerializer(serializers.Serializer):
+    price = serializers.DecimalField(max_digits=30,decimal_places=2)

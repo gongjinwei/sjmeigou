@@ -504,6 +504,11 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
         return Response({'code': 4210, 'msg': '未知操作',"return_code":"FAILURE"})
 
+    @action(methods=['post'],detail=True,serializer_class=serializers.StoreStateChangeSerializer)
+    def change_price(self,request,pk=None):
+        instance = self.get_object()
+        return Response(instance.account)
+
 
 class InitialPaymentView(ListOnlyViewSet):
     serializer_class = serializers.InitiatePaymentSerializer
