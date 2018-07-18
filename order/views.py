@@ -332,7 +332,7 @@ def prepare_payment(user, body, account, order_no, order_type=None):
             data.pop('user')
         elif order_type =="store_order":
             data.update(paySign=weixinpay.sign(data), store_order_id=order_no, user=user)
-            models.InitiatePayment.objects.create(**data)
+            models.InitiatePayment.objects.update_or_create(defaults=data,store_order_id=order_no)
             data.pop('user')
 
         return data
