@@ -10,7 +10,7 @@ from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
 
-from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets
+from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
 
 from guardian.shortcuts import assign_perm
@@ -318,4 +318,7 @@ class GoodsTypeView(ListDeleteViewSet):
 
         return obj
 
+class StoreSearchView(ListOnlyViewSet):
+    queryset = models.Stores.objects.filter(active_state=1)
+    serializer_class = serializers.StoreSearchSerializer
 

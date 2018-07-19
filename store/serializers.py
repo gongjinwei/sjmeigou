@@ -1,5 +1,7 @@
 # -*- coding:UTF-8 -*-
 from rest_framework import serializers
+from geopy.distance import VincentyDistance
+
 from . import models
 
 from goods.models import GoodDetail
@@ -102,5 +104,26 @@ class AddGoodsSerializer(serializers.Serializer):
     good_list=serializers.ListField(required=False)
     put_on_sale_list=serializers.ListField(required=False)
 
+
+class StoreSearchSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Stores
+        fields=('name','logo','receive_address','latitude','longitude')
+
+    def to_representation(self, instance):
+        ret=super().to_representation(instance)
+        request = self.context.get('request')
+        lat = request.query_params.get('lat')
+        lng = request.query_params.get('lng')
+        if lat and lng:
+            lat=float(lat)
+            lng=float(lng)
+            distance=round(VincentyDistance((lat, lng),(ret['latitude'], ret['longitude'])).kilometers, 1)
+
+            ret.update({
+                "distance": distance
+            })
+        return ret
 
 
