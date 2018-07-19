@@ -1,5 +1,8 @@
 # -*- coding:UTF-8 -*-
+import datetime
 from rest_framework import serializers
+from order.models import Coupon,StoreActivity
+from django.db.models import Q
 
 
 from . import models
@@ -106,6 +109,7 @@ class GoodDeliverSerializer(serializers.ModelSerializer):
         fields = ('server','server_name','deliver_name')
 
 
+
 class SKUColorSerializer(serializers.ModelSerializer):
     skus=SKUSerializer(many=True)
 
@@ -154,3 +158,30 @@ class GoodDetailSerializer(serializers.ModelSerializer):
                 models.SKU.objects.create(color=color,**sku)
 
         return instance
+
+
+class GoodSearchSerializer(serializers.Serializer):
+    master_graph=serializers.SerializerMethodField()
+    coupons = serializers.SerializerMethodField()
+    activities = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.GoodDetail
+        fields = ('title','master_graph','min_price','coupons','activities','store_addr')
+
+    def get_master_graph(self,obj):
+        return obj.master_graphs[0]
+
+    def get_coupons(self,obj):
+        store = obj.store
+        today = datetime.date.today()
+        coupon = Coupon.objects.filter(store=store,date_from__gte=today,date_to__lte=today,available_num__gt=0)
+        return [cou.act_name for cou in coupon]
+
+    def get_activities(self,obj):
+        store =obj.store
+        now = datetime.datetime.now()
+        valid_activities=StoreActivity.objects.filter(store=store,datetime_from__lte=now,datetime_to__gte=now,state=0)
+        good_activities=valid_activities.filter(Q(select_all=True)|Q(selected_goods__good=obj))
+
+        return [activity.act_name for activity in good_activities]

@@ -352,7 +352,6 @@ class UnifyOrderView(CreateOnlyViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        store_payment = []
         if not getattr(self.request.user, 'userinfo', None):
             return Response({'code': 4102, 'msg': '此用户没有在小程序注册', 'success': 'FAIL'})
         price = serializer.validated_data.get('price', 0)
@@ -377,7 +376,10 @@ class UnifyOrderView(CreateOnlyViewSet):
                 sku_data = data_st.get('sku_orders', [])
                 if not sku_data:
                     return Response({'code': 4105, 'msg': '必须添加店铺具体规格商品', 'success': 'FAIL'})
-
+                # 验证库存
+                has_no_stock=list(filter(lambda x:x['sku'].stock<x['num'],sku_data))
+                if has_no_stock:
+                    return Response({'code':4107,'msg':'库存不足', 'success': 'FAIL'})
                 # 验证活动
                 activity_discount = 0
                 coupon_discount = 0
@@ -418,15 +420,6 @@ class UnifyOrderView(CreateOnlyViewSet):
                 data_st.update(
                     {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user})
 
-                # # 准备下单
-                # store_payment.append({
-                #     "user": self.request.user,
-                #     "body": body,
-                #     "account": store_order_money,
-                #     "order_no": store_order_no,
-                #     "order_type": "store_order"
-                # })
-
                 # 移除购物车
                 models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, shopping_car__store=store,
                                                       sku__in=skus).delete()
@@ -446,8 +439,6 @@ class UnifyOrderView(CreateOnlyViewSet):
         # 生成总的待付款信息
 
         ret = prepare_payment(self.request.user, body, account, order_no, order_type='unify_order')
-        # for prepare in store_payment:
-        #     prepare_payment(**prepare)
 
         return Response(ret)
 

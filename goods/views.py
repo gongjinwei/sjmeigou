@@ -8,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from . import models, serializers
 from tools.permissions import MerchantOrReadOnlyPermission
+from tools.viewset import ListOnlyViewSet
 from store.models import GoodsType
 
 
@@ -162,6 +163,10 @@ class GoodDetailView(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)
+
+class GoodSearchView(ListOnlyViewSet):
+    serializer_class = serializers.GoodSearchSerializer
+    queryset = models.GoodDetail.objects.filter(state=0)
 
 
 
