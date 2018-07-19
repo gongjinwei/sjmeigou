@@ -5,6 +5,7 @@ from rest_framework.views import Response, status
 from rest_framework.decorators import action
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.query import EmptyQuerySet
 
 from . import models, serializers
 from tools.permissions import MerchantOrReadOnlyPermission
@@ -194,11 +195,11 @@ class SearchHistoryView(ListOnlyViewSet):
 
     def list(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
-            queryset=list(models.SearchHistory.objects.filter(store=self.request.user.stores))[:10]
-        else:
-            queryset= []
+            queryset=models.SearchHistory.objects.filter(store=self.request.user.stores)
+            if queryset is not EmptyQuerySet:
+                return Response(queryset.values_list('q',flat=True)[:10])
 
-        return queryset
+        return Response([])
 
 
 
