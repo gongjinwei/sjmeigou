@@ -166,7 +166,7 @@ class GoodSearchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.GoodDetail
-        fields = ('title','master_graph','min_price','coupons','activities','store')
+        fields = ('title','master_graph','min_price','coupons','activities','store','id')
 
     def get_master_graph(self,obj):
         if obj.master_graphs:
