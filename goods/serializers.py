@@ -175,7 +175,7 @@ class GoodSearchSerializer(serializers.ModelSerializer):
     def get_coupons(self,obj):
         store = obj.store
         today = datetime.date.today()
-        coupon = Coupon.objects.filter(store=store,date_from__gte=today,date_to__lte=today,available_num__gt=0)
+        coupon = Coupon.objects.filter(store=store,date_from__lte=today,date_to__gte=today,available_num__gt=0)
         return [cou.act_name for cou in coupon]
 
     def get_activities(self,obj):
