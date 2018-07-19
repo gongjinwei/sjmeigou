@@ -8,7 +8,7 @@ from django.db.models import Q
 from . import models
 from platforms.serializers import DeliverServiceSerializer
 from platforms.models import DeliverServices
-from shapely.geometry import Point
+from geopy.distance import VincentyDistance
 
 
 class SecondClassSerializer(serializers.ModelSerializer):
@@ -166,21 +166,21 @@ class GoodSearchSerializer(serializers.ModelSerializer):
     coupons = serializers.SerializerMethodField()
     activities = serializers.SerializerMethodField()
     store_lat = serializers.ReadOnlyField(source='store.latitude')
-    store_lon = serializers.ReadOnlyField(source='store.longitude')
+    store_lng = serializers.ReadOnlyField(source='store.longitude')
 
     class Meta:
         model = models.GoodDetail
-        fields = ('title','master_graph','min_price','coupons','activities','store','id','store_lon','store_lat')
+        fields = ('title','master_graph','min_price','coupons','activities','store','id','store_lng','store_lat')
 
     def to_representation(self, instance):
         ret=super().to_representation(instance)
         request = self.context.get('request')
         lat = request.query_params.get('lat')
-        lon = request.query_params.get('lon')
-        if lat and lon:
+        lng = request.query_params.get('lng')
+        if lat and lng:
             lat=float(lat)
-            lon=float(lon)
-            distance=round(Point(lon, lat).distance(Point(ret['store_lon'], ret['store_lat'])), 1)
+            lng=float(lng)
+            distance=round(VincentyDistance((lat, lng),(ret['store_lat'], ret['store_lng'])).kilometers, 1)
 
             ret.update({
                 "distance": distance
