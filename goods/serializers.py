@@ -185,3 +185,9 @@ class GoodSearchSerializer(serializers.ModelSerializer):
         good_activities=valid_activities.filter(Q(select_all=True)|Q(selected_goods__good=obj))
 
         return [activity.act_name for activity in good_activities]
+
+
+class SearchHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.SearchHistory
+        fields = '__all__'

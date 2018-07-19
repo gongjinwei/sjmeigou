@@ -234,3 +234,5 @@ class OrderTrade(models.Model):
         super().save(*args,**kwargs)
 
 
+
+

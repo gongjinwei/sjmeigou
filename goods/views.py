@@ -164,9 +164,42 @@ class GoodDetailView(ModelViewSet):
 
         return Response(serializer.data)
 
+
 class GoodSearchView(ListOnlyViewSet):
     serializer_class = serializers.GoodSearchSerializer
     queryset = models.GoodDetail.objects.filter(state=0)
+
+    def list(self, request, *args, **kwargs):
+        # 记录搜索历史
+        q= request.query_params.get('q','')
+        if q:
+            models.SearchHistory.objects.update_or_create(defaults={
+                'user':request.user,'q':q
+            },user=request.user,q=q)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class SearchHistoryView(ListOnlyViewSet):
+    serializer_class = serializers.SearchHistorySerializer
+    queryset = models.SearchHistory.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            queryset=models.SearchHistory.objects.filter(store=self.request.user.stores).values_list('q',flat=True)[:10]
+        else:
+            queryset= []
+
+        return queryset
+
 
 
 

@@ -161,3 +161,10 @@ class GoodDeliver(models.Model):
     server = models.ForeignKey(to='platforms.Delivers',on_delete=models.CASCADE)
 
 
+class SearchHistory(models.Model):
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE)
+    q= models.CharField(max_length=128)
+    update_time=models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering=('-update_time',)
