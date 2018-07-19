@@ -2,16 +2,15 @@ from django.shortcuts import render
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import Response, status
-from rest_framework.decorators import action
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+
 
 from . import models, serializers
 from tools.permissions import MerchantOrReadOnlyPermission
 from tools.viewset import ListOnlyViewSet
 from store.models import GoodsType
-
 
 # Create your views here.
 
@@ -173,17 +172,24 @@ class GoodSearchView(ListOnlyViewSet):
     def get_queryset(self):
         queryset = self.queryset
         q = self.request.query_params.get('q', '')
-        lat = self.request.query_params.get('lat','')
-        lon = self.request.query_params.get('lon','')
 
-        if q:
+        if q and self.request.user.is_authenticated:
             models.SearchHistory.objects.update_or_create(defaults={
                 'user': self.request.user, 'q': q
             }, user=self.request.user, q=q)
             queryset=queryset.filter(title__contains=q)
-        if lat and lon:
-            pass
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(sorted(filter(lambda x:x.get('distance',9999)<=5,serializer.data),key=lambda x:x.get('distance')))
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(sorted(filter(lambda x:x.get('distance',9999)<=5,serializer.data),key=lambda x:x.get('distance')))
 
 
 class SearchHistoryView(ListOnlyViewSet):

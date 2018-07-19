@@ -8,6 +8,8 @@ from django.db.models import Q
 from . import models
 from platforms.serializers import DeliverServiceSerializer
 from platforms.models import DeliverServices
+from shapely.geometry import Point
+
 
 class SecondClassSerializer(serializers.ModelSerializer):
     class Meta:
@@ -163,10 +165,27 @@ class GoodSearchSerializer(serializers.ModelSerializer):
     master_graph=serializers.SerializerMethodField()
     coupons = serializers.SerializerMethodField()
     activities = serializers.SerializerMethodField()
+    store_lat = serializers.ReadOnlyField(source='store.latitude')
+    store_lon = serializers.ReadOnlyField(source='store.longitude')
 
     class Meta:
         model = models.GoodDetail
-        fields = ('title','master_graph','min_price','coupons','activities','store','id')
+        fields = ('title','master_graph','min_price','coupons','activities','store','id','store_lon','store_lat')
+
+    def to_representation(self, instance):
+        ret=super().to_representation(instance)
+        request = self.context.get('request')
+        lat = request.query_params.get('lat')
+        lon = request.query_params.get('lon')
+        if lat and lon:
+            lat=float(lat)
+            lon=float(lon)
+            distance=round(Point(lon, lat).distance(Point(ret['store_lon'], ret['store_lat'])), 1)
+
+            ret.update({
+                "distance": distance
+            })
+        return ret
 
     def get_master_graph(self,obj):
         if obj.master_graphs:

@@ -7,7 +7,6 @@ from decimal import Decimal
 
 # Create your models here.
 
-
 store_deposit=1000
 
 
