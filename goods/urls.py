@@ -16,5 +16,6 @@ router.register('sizeGroupClass',views.SizeGroupClassView,base_name='sizeGroupCl
 router.register('itemsDesc',views.ItemsDescView,base_name='itemsDesc')
 router.register('goodDetail',views.GoodDetailView,base_name='goodDetail')
 router.register('goodSearch',views.GoodSearchView,base_name='goodSearch')
+router.register('SearchHistory',views.SearchHistoryView,base_name='goodSearchHistory')
 
 urlpatterns=router.urls
