@@ -145,7 +145,7 @@ class GoodDetail(models.Model):
     state=models.SmallIntegerField(default=0,choices=((0,'出售中'),(1,'仓库中'),(2,'已删除')),editable=False)
     item_desc=models.OneToOneField(to='ItemsGroupDesc',on_delete=models.CASCADE)
     good_type=models.ForeignKey(to='store.GoodsType',on_delete=models.SET_NULL,blank=True,null=True,related_name='goods')
-    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE,editable=False)
+    store=models.ForeignKey(to='store.Stores',on_delete=models.CASCADE,editable=False,related_name='goods')
     create_time=models.DateTimeField(auto_now_add=True,editable=False)
 
 

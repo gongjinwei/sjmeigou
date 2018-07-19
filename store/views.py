@@ -17,11 +17,12 @@ from guardian.shortcuts import assign_perm
 
 import requests, uuid
 
+
 # Create your views here.
 
 from . import serializers, models
 from index.models import Application
-from goods.models import GoodDetail
+from goods.models import GoodDetail,SearchHistory
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
@@ -321,4 +322,26 @@ class GoodsTypeView(ListDeleteViewSet):
 class StoreSearchView(ListOnlyViewSet):
     queryset = models.Stores.objects.filter(active_state=1)
     serializer_class = serializers.StoreSearchSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        q = self.request.query_params.get('q', '')
+
+        if q and self.request.user.is_authenticated:
+            SearchHistory.objects.update_or_create(defaults={
+                'user': self.request.user, 'q': q
+            }, user=self.request.user, q=q)
+            queryset=queryset.filter(name__contains=q)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(sorted(filter(lambda x:x.get('distance',0)<=5,serializer.data),key=lambda x:x.get('distance',0)))
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(sorted(filter(lambda x:x.get('distance',0)<=5,serializer.data),key=lambda x:x.get('distance',0)))
 
