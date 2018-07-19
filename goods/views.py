@@ -170,23 +170,15 @@ class GoodSearchView(ListOnlyViewSet):
     serializer_class = serializers.GoodSearchSerializer
     queryset = models.GoodDetail.objects.filter(state=0)
 
-    def list(self, request, *args, **kwargs):
-        # 记录搜索历史
-        q= request.query_params.get('q','')
+    def get_queryset(self):
+        queryset = self.queryset
+        q = self.request.query_params.get('q', '')
         if q:
             models.SearchHistory.objects.update_or_create(defaults={
-                'user':request.user,'q':q
-            },user=request.user,q=q)
-
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+                'user': self.request.user, 'q': q
+            }, user=self.request.user, q=q)
+            queryset=queryset.filter(title__contains=q)
+        return queryset
 
 
 class SearchHistoryView(ListOnlyViewSet):
