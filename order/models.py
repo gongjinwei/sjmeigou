@@ -51,6 +51,10 @@ class Coupon(models.Model):
             discount=self.discount
         return ('%s:满%s减%s' % (self.name,self.threshold_count,self.discount),discount)
 
+    @property
+    def act_name(self):
+        return '%s:满%s减%s' % (self.name,self.threshold_count,self.discount)
+
 
 class GetCoupon(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
@@ -112,6 +116,17 @@ class StoreActivity(models.Model):
             return ('%s:满%s减%s' % (self.activity_name, self.threshold_money, self.discount_money), discount)
 
         return ("不使用优惠", 0)
+
+    @property
+    def act_name(self):
+        strategy = self.store_activity_type.type_strategy
+        choice={
+            1:'%s:满%s件打%s折' % (self.activity_name, self.threshold_num, self.discount),
+            2:'%s:满%s打%s折' % (self.activity_name, self.threshold_money, self.discount),
+            3:'%s:满%s件减%s' % (self.activity_name, self.threshold_num, self.discount_money),
+            4:'%s:满%s减%s' % (self.activity_name, self.threshold_money, self.discount_money)
+        }
+        return choice.get(strategy,'')
 
 
 class JoinActivity(models.Model):
