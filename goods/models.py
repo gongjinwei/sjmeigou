@@ -128,6 +128,7 @@ class GoodDetail(models.Model):
     third_class=models.ForeignKey(to='ThirdClass',on_delete=models.DO_NOTHING,related_name='goodDetails')
     title=models.CharField(max_length=50)
     params = JSONField()
+    master_map = models.URLField(null=True)
     master_graphs = JSONField()
     master_video=models.URLField(null=True,blank=True)
     min_price = models.DecimalField(max_digits=20, decimal_places=2)
