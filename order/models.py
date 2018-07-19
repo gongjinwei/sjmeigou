@@ -121,10 +121,10 @@ class StoreActivity(models.Model):
     def act_name(self):
         strategy = self.store_activity_type.type_strategy
         choice={
-            1:'%s:满%s件打%s折' % (self.activity_name, self.threshold_num, self.discount),
-            2:'%s:满%s打%s折' % (self.activity_name, self.threshold_money, self.discount),
-            3:'%s:满%s件减%s' % (self.activity_name, self.threshold_num, self.discount_money),
-            4:'%s:满%s减%s' % (self.activity_name, self.threshold_money, self.discount_money)
+            1:'满%s件打%s折' % ( self.threshold_num, self.discount),
+            2:'满%s打%s折' % ( self.threshold_money, self.discount),
+            3:'满%s件减%s' % ( self.threshold_num, self.discount_money),
+            4:'满%s减%s' % (self.threshold_money, self.discount_money)
         }
         return choice.get(strategy,'')
 

@@ -109,7 +109,6 @@ class GoodDeliverSerializer(serializers.ModelSerializer):
         fields = ('server','server_name','deliver_name')
 
 
-
 class SKUColorSerializer(serializers.ModelSerializer):
     skus=SKUSerializer(many=True)
 
@@ -160,7 +159,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         return instance
 
 
-class GoodSearchSerializer(serializers.Serializer):
+class GoodSearchSerializer(serializers.ModelSerializer):
     master_graph=serializers.SerializerMethodField()
     coupons = serializers.SerializerMethodField()
     activities = serializers.SerializerMethodField()
