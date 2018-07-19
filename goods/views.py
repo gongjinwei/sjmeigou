@@ -5,7 +5,7 @@ from rest_framework.views import Response, status
 from rest_framework.decorators import action
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models.query import EmptyQuerySet
+from rest_framework.decorators import action
 
 from . import models, serializers
 from tools.permissions import MerchantOrReadOnlyPermission
@@ -173,11 +173,16 @@ class GoodSearchView(ListOnlyViewSet):
     def get_queryset(self):
         queryset = self.queryset
         q = self.request.query_params.get('q', '')
+        lat = self.request.query_params.get('lat','')
+        lon = self.request.query_params.get('lon','')
+
         if q:
             models.SearchHistory.objects.update_or_create(defaults={
                 'user': self.request.user, 'q': q
             }, user=self.request.user, q=q)
             queryset=queryset.filter(title__contains=q)
+        if lat and lon:
+            pass
         return queryset
 
 
@@ -193,6 +198,11 @@ class SearchHistoryView(ListOnlyViewSet):
 
         return Response(queryset)
 
+    @action(methods=['delete'],detail=False)
+    def del_history(self,request):
+        if self.request.user.is_authenticated:
+            models.SearchHistory.objects.filter(user=request.user).delete()
+        return Response('SUCCESS')
 
 
 
