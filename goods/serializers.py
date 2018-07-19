@@ -170,7 +170,8 @@ class GoodSearchSerializer(serializers.Serializer):
         fields = ('title','master_graph','min_price','coupons','activities','store_addr')
 
     def get_master_graph(self,obj):
-        return obj.master_graphs[0]
+        if obj.master_graphs:
+            return obj.master_graphs[0]
 
     def get_coupons(self,obj):
         store = obj.store
