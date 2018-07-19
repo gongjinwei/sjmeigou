@@ -327,11 +327,13 @@ class StoreSearchView(ListOnlyViewSet):
         queryset = self.queryset
         q = self.request.query_params.get('q', '')
 
-        if q and self.request.user.is_authenticated:
-            SearchHistory.objects.update_or_create(defaults={
-                'user': self.request.user, 'q': q
-            }, user=self.request.user, q=q)
-            queryset=queryset.filter(name__contains=q)
+        if q:
+            queryset = queryset.filter(name__contains=q)
+            if self.request.user.is_authenticated:
+                SearchHistory.objects.update_or_create(defaults={
+                    'user': self.request.user, 'q': q
+                }, user=self.request.user, q=q)
+
         return queryset
 
     def list(self, request, *args, **kwargs):
