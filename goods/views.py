@@ -195,7 +195,7 @@ class SearchHistoryView(ListOnlyViewSet):
 
     def list(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
-            queryset=models.SearchHistory.objects.filter(store=self.request.user.stores)
+            queryset=models.SearchHistory.objects.filter(user=self.request.user)
             if queryset is not EmptyQuerySet:
                 return Response(queryset.values_list('q',flat=True)[:10])
 
