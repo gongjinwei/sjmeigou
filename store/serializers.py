@@ -114,7 +114,7 @@ class StoreSearchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Stores
-        fields=('name','logo','receive_address','latitude','longitude','coupons','activities','goods_recommend')
+        fields=('name','logo','receive_address','latitude','longitude','coupons','activities','goods_recommend','take_off')
 
     def to_representation(self, instance):
         ret=super().to_representation(instance)
