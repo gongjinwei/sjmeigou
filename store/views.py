@@ -319,6 +319,7 @@ class GoodsTypeView(ListDeleteViewSet):
 
         return obj
 
+
 class StoreSearchView(ListOnlyViewSet):
     queryset = models.Stores.objects.filter(active_state=1)
     serializer_class = serializers.StoreSearchSerializer
@@ -326,6 +327,7 @@ class StoreSearchView(ListOnlyViewSet):
     def get_queryset(self):
         queryset = self.queryset
         q = self.request.query_params.get('q', '')
+        first_class = self.request.query_params.get('first_class','')
 
         if q:
             queryset = queryset.filter(name__contains=q)
@@ -334,6 +336,12 @@ class StoreSearchView(ListOnlyViewSet):
                     'user': self.request.user, 'q': q
                 }, user=self.request.user, q=q)
 
+        if first_class:
+            try:
+                first_class = int(first_class)
+                queryset = queryset.filter(goods__third_class__second_class__first_class_id=first_class)
+            except ValueError:
+                pass
         return queryset
 
     def list(self, request, *args, **kwargs):
