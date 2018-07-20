@@ -210,14 +210,15 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         request = self.context.get('request')
-        store_id = request.query_params.get('store', '')
-        if store_id and Stores.objects.filter(pk=store_id).exists():
-            store = Stores.objects.get(pk=store_id)
-            origin = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
-            destination = "%s,%s" % (store.longitude, store.latitude)
-            delivery, store_pay = get_deliver_pay(origin, destination)
-            ret.update({'delivery': delivery})
-        return ret
+        if request:
+            store_id = request.query_params.get('store', '')
+            if store_id and Stores.objects.filter(pk=store_id).exists():
+                store = Stores.objects.get(pk=store_id)
+                origin = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
+                destination = "%s,%s" % (store.longitude, store.latitude)
+                delivery, store_pay = get_deliver_pay(origin, destination)
+                ret.update({'delivery': delivery})
+            return ret
 
 
 class SkuOrderSerializer(serializers.ModelSerializer):
