@@ -8,6 +8,7 @@ from . import models
 from store.models import Stores
 
 from goods.models import SKU, GoodDeliver
+from tools.contrib import get_deliver_pay
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -198,13 +199,25 @@ class SkuDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = SKU
         fields = (
-        'price', 'stock', 'size_name', 'color_name', 'title', 'color_pic', 'id', 'good_id', 'deliver_services')
+            'price', 'stock', 'size_name', 'color_name', 'title', 'color_pic', 'id', 'good_id', 'deliver_services')
 
 
 class ReceiveAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ReceiveAddress
         fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        request = self.context.get('request')
+        store_id = request.query_params.get('store', '')
+        if store_id and Stores.objects.filter(pk=store_id).exists():
+            store = Stores.objects.get(pk=store_id)
+            origin = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
+            destination = "%s,%s" % (store.longitude, store.latitude)
+            delivery, store_pay = get_deliver_pay(origin, destination)
+            ret.update({'delivery': delivery})
+        return ret
 
 
 class SkuOrderSerializer(serializers.ModelSerializer):
@@ -216,7 +229,7 @@ class SkuOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.SkuOrder
-        fields = ('sku','num','title','color','size','price','color_pic')
+        fields = ('sku', 'num', 'title', 'color', 'size', 'price', 'color_pic')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
@@ -247,33 +260,36 @@ class UnifyOrderSerializer(serializers.ModelSerializer):
         store_data = validated_data.pop('store_orders', [])
         unify_order = self.Meta.model.objects.create(**validated_data)
         for store in store_data:
-            sku_data = store.pop('sku_orders',[])
-            store_order=models.StoreOrder.objects.create(unify_order=unify_order, **store)
+            sku_data = store.pop('sku_orders', [])
+            store_order = models.StoreOrder.objects.create(unify_order=unify_order, **store)
             for sku in sku_data:
                 models.SkuOrder.objects.create(store_order=store_order, **sku)
         return unify_order
 
 
 class InitiatePaymentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.InitiatePayment
-        fields='__all__'
+        fields = '__all__'
 
 
-state_change=[1,2,3,7]
+state_change = [1, 2, 3, 7]
+
+
 class StoreStateChangeSerializer(serializers.Serializer):
     store_order = serializers.PrimaryKeyRelatedField(queryset=models.StoreOrder.objects.filter(state__in=state_change))
-    op = serializers.ChoiceField(choices=((1,'确认收货'),(2,'取消订单'),(3,'同意退款')))
+    op = serializers.ChoiceField(choices=((1, '确认收货'), (2, '取消订单'), (3, '同意退款')))
+
 
 class StorePriceChangeSerializer(serializers.Serializer):
-    price = serializers.DecimalField(max_digits=30,decimal_places=2)
+    price = serializers.DecimalField(max_digits=30, decimal_places=2)
 
 
 class OrderTradeSerializer(serializers.ModelSerializer):
     class Meta:
-        model =models.OrderTrade
-        fields='__all__'
+        model = models.OrderTrade
+        fields = '__all__'
+
 
 class InitialTradeSerializer(serializers.Serializer):
     order = serializers.PrimaryKeyRelatedField(queryset=models.StoreOrder.objects.filter(state=1))

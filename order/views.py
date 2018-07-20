@@ -1,5 +1,6 @@
 import datetime, random, time
 from decimal import Decimal
+
 from django.db.models import F, Q
 
 from rest_framework.views import Response, status
@@ -15,6 +16,7 @@ from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet
+from tools.contrib import get_deliver_pay
 from wxpay.views import weixinpay
 
 client = get_redis_connection()
@@ -377,15 +379,30 @@ class UnifyOrderView(CreateOnlyViewSet):
                 if not sku_data:
                     return Response({'code': 4105, 'msg': '必须添加店铺具体规格商品', 'success': 'FAIL'})
                 # 验证库存
-                has_no_stock=list(filter(lambda x:x['sku'].stock<x['num'],sku_data))
+                has_no_stock = list(filter(lambda x: x['sku'].stock < x['num'], sku_data))
                 if has_no_stock:
-                    return Response({'code':4107,'msg':'库存不足', 'success': 'FAIL'})
+                    return Response({'code': 4107, 'msg': '库存不足', 'success': 'FAIL'})
                 # 验证活动
                 activity_discount = 0
                 coupon_discount = 0
                 activity = data_st.get('activity', None)
                 get_coupon_data = data_st.get('coupon', None)
-                store_deliver_payment = data_st.get('deliver_payment', Decimal(0.00))
+                deliver_server = data_st.get('goods.GoodDeliver', None)
+                store_deliver_payment = Decimal(0.00)
+                store_to_pay = Decimal(0.00)
+                if deliver_server:
+                    if hasattr(deliver_server, 'server'):
+                        # 选择了点我达
+                        if deliver_server.server.id == 2:
+                            address = serializer.validated_data.get('address', None)
+                            if not address:
+                                return Response({'code': 4108, 'msg': '必须选择地址', 'success': 'FAIL'})
+                            else:
+                                destination = '%s,%s' % (address.longitude, address.latitude)
+                                origin = '%s,%s' % (store.longitude, store.latitude)
+
+                                store_deliver_payment,store_to_pay=get_deliver_pay(origin,destination)
+
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'FAIL'})
                 now = datetime.datetime.now()
@@ -418,7 +435,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                 order_num += store_num
                 order_money += store_order_money
                 data_st.update(
-                    {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user})
+                    {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user,'store_to_pay':store_to_pay,'deliver_payment':store_deliver_payment})
 
                 # 移除购物车
                 models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, shopping_car__store=store,
@@ -442,8 +459,9 @@ class UnifyOrderView(CreateOnlyViewSet):
 
         return Response(ret)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+
+def perform_create(self, serializer):
+    serializer.save(user=self.request.user)
 
 
 class StoreOrderView(ListDetailDeleteViewSet):
@@ -511,7 +529,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
         serializer.is_valid(raise_exception=True)
         instance = self.get_object()
         to_price = serializer.validated_data.get('price')
-        if to_price>=0 and instance.state == 1 and instance.account > to_price and instance.store == self.request.user.stores:
+        if to_price >= 0 and instance.state == 1 and instance.account > to_price and instance.store == self.request.user.stores:
 
             # 再次发起付款
             instance.account = to_price
@@ -529,5 +547,6 @@ class InitialPaymentView(CreateOnlyViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order = serializer.validated_data['order']
-        ret=prepare_payment(order.user,order.unify_order.order_desc,order.account,order.store_order_no,order_type='store_order')
+        ret = prepare_payment(order.user, order.unify_order.order_desc, order.account, order.store_order_no,
+                              order_type='store_order')
         return Response(ret)

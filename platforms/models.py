@@ -20,6 +20,7 @@ class DeliverServices(models.Model):
         return self.server_name
 
 
+# 具体配送者，如点我达等
 class Delivers(models.Model):
     deliver_server=models.ForeignKey(to='DeliverServices',on_delete=models.CASCADE,related_name='delivers')
     name = models.CharField(max_length=20)
