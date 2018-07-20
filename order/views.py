@@ -482,6 +482,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             if order.state == 2 or order.state == 3:
                 order.state = 4
                 order.save()
+                # 商家将收到余额
                 return Response({'code': 1000, 'msg': '收货成功', "return_code": "SUCCESS"})
             else:
                 return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAIL"})

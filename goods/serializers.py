@@ -22,7 +22,7 @@ class FirstClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.FirstClass
-        fields = ('second_classes', 'first_class_name','cover_path')
+        fields = ('second_classes', 'first_class_name','cover_path','id')
 
 
 class SizeDescSerializer(serializers.ModelSerializer):
