@@ -211,13 +211,14 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         request = self.context.get('request')
         if request:
-            store_id = request.query_params.get('store', '')
-            if store_id and Stores.objects.filter(pk=store_id).exists():
-                store = Stores.objects.get(pk=store_id)
-                origin = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
-                destination = "%s,%s" % (store.longitude, store.latitude)
-                delivery, store_pay = get_deliver_pay(origin, destination)
-                ret.update({'delivery': delivery})
+            store_ids = request.query_params.get('stores', '')
+            for store_id in store_ids.spilt('|'):
+                if store_id and Stores.objects.filter(pk=store_id).exists():
+                    store = Stores.objects.get(pk=store_id)
+                    origin = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
+                    destination = "%s,%s" % (store.longitude, store.latitude)
+                    delivery, store_pay = get_deliver_pay(origin, destination)
+                    ret.update({'deliver_pay': delivery,'store_id':store_id})
         return ret
 
 
