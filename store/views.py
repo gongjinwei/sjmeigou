@@ -339,7 +339,7 @@ class StoreSearchView(ListOnlyViewSet):
         if first_class:
             try:
                 first_class = int(first_class)
-                queryset = queryset.filter(goods__third_class__second_class__first_class_id=first_class).distinct()
+                queryset = queryset.filter(goods__third_class__second_class__first_class_id=first_class).distinct('id')
             except ValueError:
                 pass
         return queryset
