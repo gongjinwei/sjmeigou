@@ -139,6 +139,13 @@ class GoodDetailView(ModelViewSet):
     filter_fields = ('title__contains', 'min_price__lte', 'min_price__gte','store','good_type')
     permission_classes = (MerchantOrReadOnlyPermission,)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def perform_create(self, serializer):
         good_type=serializer.validated_data.get('good_type',None)
         if good_type:
