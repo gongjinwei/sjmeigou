@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from django_redis import get_redis_connection
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.query import EmptyQuerySet
 
 # Create your views here.
 
@@ -194,6 +195,11 @@ class BalanceView(CreateOnlyViewSet):
         serializer.is_valid(raise_exception=True)
 
         stores = serializer.validated_data['stores']
+        receive_address = models.ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
+        if receive_address.exists():
+            origin = '%s,%s' % (receive_address[0].longitude, receive_address[0].latitude)
+        else:
+            origin=''
         ret = []
         for st in stores:
             store = st['store']
@@ -246,6 +252,9 @@ class BalanceView(CreateOnlyViewSet):
             op = request.query_params.get('op')
             sd = []
 
+            # 计算配送费用
+            destination = '%s,%s' %(store.longitude,store.latitude)
+
             if op != 'update':
                 # 附加SKU信息
                 for sk in sku_data:
@@ -263,12 +272,12 @@ class BalanceView(CreateOnlyViewSet):
                 'cost_num': cost_num,
                 'cost_money': cost_price,
                 'take_off': store.take_off,
-                'skus': sd
+                'skus': sd,
+                "deliver_pay":get_deliver_pay(origin,destination)[0] if origin else 0
             }})
 
         # 取出收货地址
 
-        receive_address = models.ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
         rec = {'stores': ret, 'receive_address': serializers.ReceiveAddressSerializer(receive_address, many=True).data}
 
         return Response(rec)
