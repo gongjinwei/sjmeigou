@@ -218,7 +218,7 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
                 destination = "%s,%s" % (store.longitude, store.latitude)
                 delivery, store_pay = get_deliver_pay(origin, destination)
                 ret.update({'delivery': delivery})
-            return ret
+        return ret
 
 
 class SkuOrderSerializer(serializers.ModelSerializer):
