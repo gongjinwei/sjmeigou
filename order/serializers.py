@@ -219,7 +219,7 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
                         store_id=int(store_id)
                     except ValueError:
                         continue
-                    if Stores.objects.filter(pk=int(store_id)).exists():
+                    if Stores.objects.filter(pk=store_id).exists():
                         store = Stores.objects.get(pk=store_id)
                         destination = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
                         origin = "%s,%s" % (store.longitude, store.latitude)

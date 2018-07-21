@@ -14,7 +14,8 @@ def get_deliver_pay(origin,destination):
                                                                                                        gd_key)
         res = requests.get(url)
         # 返回米
-        meters = res.json()['data']['paths'][0]['distance']
+        paths = res.json()['data']['paths']
+        meters=min(paths,key=lambda x:x['distance'])['distance']
         kilometers=math.ceil(meters/1000)
         if kilometers<=1:
             ret=(1,1.5)
