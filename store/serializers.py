@@ -114,7 +114,7 @@ class StoreSearchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Stores
-        fields=('name','logo','receive_address','latitude','longitude','coupons','activities','goods_recommend','take_off')
+        fields=('name','logo','receive_address','latitude','longitude','coupons','activities','goods_recommend','take_off','id')
 
     def to_representation(self, instance):
         ret=super().to_representation(instance)
@@ -143,6 +143,7 @@ class StoreSearchSerializer(serializers.ModelSerializer):
         return [activity.act_name for activity in valid_activities]
 
     def get_goods_recommend(self,obj):
-        return obj.goods.values('title','master_graphs','min_price')
+        if obj.goods.values('title','master_graphs','min_price'):
+            return obj.goods.values('title','master_graphs','min_price')[:3]
 
 
