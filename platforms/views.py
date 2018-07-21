@@ -19,10 +19,17 @@ class CheckApplicationViewSets(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         application = serializer.validated_data['application']
         if application.application_status == 1:
-            app_status=serializer.validated_data['apply_status']
+            app_status = serializer.validated_data['apply_status']
             application.application_status = app_status
-            if app_status==3:
-                pass
+            if app_status == 3:
+                if not models.CodeWarehouse.objects.filter(application=application).exists():
+                    code = get_random_string()
+                    while models.CodeWarehouse.objects.filter(code=code).exists():
+                        code = get_random_string()
+                    models.CodeWarehouse.objects.create(application=application, code=code, use_state=0,
+                                                        active_user=request.user)
+                    # 发送短信给用户
+                    application.application_status = 5
             application.save()
         else:
             return Response('该状态无法被更改', status=status.HTTP_400_BAD_REQUEST)
@@ -44,22 +51,3 @@ class DeliversViewSets(ModelViewSet):
 class DeliverServicesViewSets(ModelViewSet):
     queryset = models.DeliverServices.objects.all()
     serializer_class = serializers.DeliverServiceSerializer
-
-
-class GenerateCodeView(CreateOnlyViewSet):
-    """
-        人工生成验证码
-    """
-    queryset = models.CodeWarehouse.objects.all()
-    serializer_class = serializers.GenerateCodeSerializer
-    permission_classes = (IsAdminUser,)
-
-    def perform_create(self, serializer):
-        code = get_random_string()
-        while models.CodeWarehouse.objects.filter(code=code).exists():
-            code = get_random_string()
-        data = {
-            'code': code,
-            'use_state': 0
-        }
-        serializer.save(**data)
