@@ -27,3 +27,5 @@ class DeliverServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.DeliverServices
         fields = '__all__'
+
+

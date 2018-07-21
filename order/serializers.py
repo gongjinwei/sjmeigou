@@ -212,7 +212,7 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request:
             store_ids = request.query_params.get('stores', '')
-            for store_id in store_ids.spilt('|'):
+            for store_id in store_ids.split('|'):
                 if store_id and Stores.objects.filter(pk=store_id).exists():
                     store = Stores.objects.get(pk=store_id)
                     origin = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))

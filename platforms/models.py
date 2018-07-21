@@ -1,3 +1,5 @@
+import datetime,random
+
 from django.db import models
 
 # Create your models here.
@@ -34,7 +36,7 @@ class StoreActivityType(models.Model):
 
 
 class KeepAccounts(models.Model):
-    account_no = models.CharField(max_length=30,primary_key=True)
+    keep_account_no = models.CharField(max_length=30,primary_key=True)
     account_time=models.DateTimeField(auto_now_add=True)
     voucher = models.SmallIntegerField(choices=((1,'收'),(2,'付'),(3,'转'),(4,'记')))
     currency = models.CharField(max_length=20,default='CNY')
@@ -44,8 +46,14 @@ class KeepAccounts(models.Model):
     settlement_method=models.CharField(max_length=30,default='微信支付')
     account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING)
 
+    def save(self, *args,**kwargs):
+        if self.keep_account_no:
+            self.keep_account_no=datetime.datetime.strftime(datetime.datetime.now(),'%Y%m%d%H%M%S%f')+str(random.randint(10,100))
+        super().save(*args,**kwargs)
+
 
 class Account(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE,null=True)
+    store = models.ForeignKey(to='store.Stores',on_delete=models.SET_NULL,null=True)
     user_type = models.IntegerField(choices=((1, '平台'), (2, '用户'), (3, '商户'), (4, '平台物流账号'),(5,'商户物流账号')))
     bank_balance = models.IntegerField(help_text='账户余额（分）',default=0)
