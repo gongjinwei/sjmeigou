@@ -213,6 +213,7 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
         if request:
             store_ids = request.query_params.get('stores', '')
             if store_ids:
+                ret['deliver_pays']=[]
                 for store_id in store_ids.split('|'):
                     try:
                         store_id=int(store_id)
@@ -223,7 +224,7 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
                         origin = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
                         destination = "%s,%s" % (store.longitude, store.latitude)
                         delivery, store_pay = get_deliver_pay(origin, destination)
-                        ret.update({'deliver_pay': delivery,'store_id':store_id})
+                        ret['deliver_pays'].append({"deliver_pay":delivery,'store_id':store_id})
         return ret
 
 
