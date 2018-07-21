@@ -197,9 +197,9 @@ class BalanceView(CreateOnlyViewSet):
         stores = serializer.validated_data['stores']
         receive_address = models.ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
         if receive_address.exists():
-            origin = '%s,%s' % (receive_address[0].longitude, receive_address[0].latitude)
+            destination = '%s,%s' % (receive_address[0].longitude, receive_address[0].latitude)
         else:
-            origin=''
+            destination=''
         ret = []
         for st in stores:
             store = st['store']
@@ -253,7 +253,7 @@ class BalanceView(CreateOnlyViewSet):
             sd = []
 
             # 计算配送费用
-            destination = '%s,%s' %(store.longitude,store.latitude)
+            origin = '%s,%s' %(store.longitude,store.latitude)
 
             if op != 'update':
                 # 附加SKU信息
