@@ -466,7 +466,7 @@ class UnifyOrderView(CreateOnlyViewSet):
 
         ret = prepare_payment(self.request.user, body, account, order_no, order_type='unify_order')
 
-        return Response(ret)
+        return Response({"code":1000,'msg':'下单成功',"data":ret})
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
