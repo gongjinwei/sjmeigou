@@ -66,11 +66,11 @@ class FirstPropertySerializer(serializers.ModelSerializer):
     # third_class_name=serializers.ReadOnlyField(source='third_class.third_class_name')
     # second_class_name=serializers.ReadOnlyField(source='third_class.second_class.second_class_name')
     secondProperties = SecondPropertySerializer(read_only=True, many=True)
-    relate_deliver = serializers.SerializerMethodField()
+    delivers = serializers.SerializerMethodField()
 
     class Meta:
         model = models.FirstProperty
-        fields = ('id', 'first_property_name', 'third_class', 'secondProperties','relate_deliver')
+        fields = ('id', 'first_property_name', 'third_class', 'secondProperties','delivers')
         # fields=('id','first_property_name','third_class','third_class_name','second_class_name','secondProperties')
 
     def get_delivers(self,obj):
