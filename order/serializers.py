@@ -192,7 +192,7 @@ class SkuDetailSerializer(serializers.ModelSerializer):
         delivers = GoodDeliver.objects.filter(good_detail=obj.color.good_detail)
         ret = []
         for de in delivers:
-            ret.append({'id': de.id, 'deliver': de.server.name, 'server': de.server,
+            ret.append({'id': de.id, 'deliver': de.server.name, 'server': de.server.id,
                         'server_name': de.server.deliver_server.server_name})
         return ret
 
