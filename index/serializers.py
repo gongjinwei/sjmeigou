@@ -25,6 +25,7 @@ class StoreImageSerializer(serializers.ModelSerializer):
 class ApplicationSerializer(serializers.ModelSerializer):
     store_images=StoreImageSerializer(many=True)
     status_name = serializers.ReadOnlyField(source='get_application_status_display')
+    active_code = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Application
@@ -38,5 +39,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
             models.StoreImage.objects.create(**store_image,application=application)
 
         return application
+
+    def get_active_code(self,obj):
+        if hasattr(obj,'codewarehouse'):
+            return obj.codewarehouse.code
 
 
