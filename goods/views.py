@@ -5,6 +5,7 @@ from rest_framework.views import Response, status
 from django_filters import FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 
 
 from . import models, serializers
@@ -175,6 +176,7 @@ class GoodDetailView(ModelViewSet):
 class GoodSearchView(ListOnlyViewSet):
     serializer_class = serializers.GoodSearchSerializer
     queryset = models.GoodDetail.objects.filter(state=0)
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         queryset = self.queryset

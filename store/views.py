@@ -1,6 +1,6 @@
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser,AllowAny
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 
@@ -323,6 +323,7 @@ class GoodsTypeView(ListDeleteViewSet):
 class StoreSearchView(ListOnlyViewSet):
     queryset = models.Stores.objects.filter(active_state=1)
     serializer_class = serializers.StoreSearchSerializer
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         queryset = self.queryset
