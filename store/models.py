@@ -10,15 +10,6 @@ from decimal import Decimal
 store_deposit=1000
 
 
-class CodeWarehouse(models.Model):
-    application=models.OneToOneField(to=Application,on_delete=models.DO_NOTHING)
-    code=models.CharField(max_length=16,editable=False,unique=True)
-    use_state=models.SmallIntegerField(choices=((0,'未使用'),(1,'已使用')),editable=False)
-    active_user=models.ForeignKey(to=User,editable=False,null=True,blank=True,on_delete=models.SET_NULL)
-    active_time=models.DateTimeField(auto_now=True,editable=False)
-    create_time=models.DateTimeField(auto_now_add=True,editable=False)
-
-
 class Stores(models.Model):
     info=models.OneToOneField(to=Application,on_delete=models.CASCADE)
     active_code=models.CharField(max_length=20,default='')

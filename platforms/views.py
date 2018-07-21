@@ -1,9 +1,13 @@
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAdminUser
+
+from django.utils.crypto import get_random_string
 
 # Create your views here.
 
 from . import serializers, models
+from tools.viewset import CreateOnlyViewSet
 
 
 class CheckApplicationViewSets(ModelViewSet):
@@ -15,7 +19,10 @@ class CheckApplicationViewSets(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         application = serializer.validated_data['application']
         if application.application_status == 1:
-            application.application_status = serializer.validated_data['apply_status']
+            app_status=serializer.validated_data['apply_status']
+            application.application_status = app_status
+            if app_status==3:
+                pass
             application.save()
         else:
             return Response('该状态无法被更改', status=status.HTTP_400_BAD_REQUEST)
@@ -37,3 +44,22 @@ class DeliversViewSets(ModelViewSet):
 class DeliverServicesViewSets(ModelViewSet):
     queryset = models.DeliverServices.objects.all()
     serializer_class = serializers.DeliverServiceSerializer
+
+
+class GenerateCodeView(CreateOnlyViewSet):
+    """
+        人工生成验证码
+    """
+    queryset = models.CodeWarehouse.objects.all()
+    serializer_class = serializers.GenerateCodeSerializer
+    permission_classes = (IsAdminUser,)
+
+    def perform_create(self, serializer):
+        code = get_random_string()
+        while models.CodeWarehouse.objects.filter(code=code).exists():
+            code = get_random_string()
+        data = {
+            'code': code,
+            'use_state': 0
+        }
+        serializer.save(**data)

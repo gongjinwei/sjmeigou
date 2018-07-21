@@ -15,6 +15,7 @@ from tools.permissions import MerchantOrReadOnlyPermission
 
 from guardian.shortcuts import assign_perm
 
+
 import requests, uuid
 
 
@@ -23,28 +24,10 @@ import requests, uuid
 from . import serializers, models
 from index.models import Application
 from goods.models import GoodDetail,SearchHistory
+from platforms.models import CodeWarehouse
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
-
-
-class GenerateCodeView(CreateOnlyViewSet):
-    """
-        人工生成验证码
-    """
-    queryset = models.CodeWarehouse.objects.all()
-    serializer_class = serializers.GenerateCodeSerializer
-    permission_classes = (IsAdminUser,)
-
-    def perform_create(self, serializer):
-        code = get_random_string()
-        while models.CodeWarehouse.objects.filter(code=code).exists():
-            code = get_random_string()
-        data = {
-            'code': code,
-            'use_state': 0
-        }
-        serializer.save(**data)
 
 
 class StoresViewSets(ModelViewSet):
@@ -61,7 +44,7 @@ class StoresViewSets(ModelViewSet):
         if application.application_status != 5:
             return Response('你的申请未通过,请通过后进行再验证', status=status.HTTP_400_BAD_REQUEST)
 
-        if models.CodeWarehouse.objects.filter(code=code, use_state=0).exists():
+        if CodeWarehouse.objects.filter(code=code, use_state=0).exists():
 
             # 默认填写店铺名，收获地址
             serializer.validated_data.update({
@@ -96,24 +79,6 @@ class StoresViewSets(ModelViewSet):
             return models.Stores.objects.filter(user=self.request.user)
 
         return models.Stores.objects.none()
-
-
-class StatusChangeView(CreateOnlyViewSet):
-    """
-        临时修改申请状态
-    """
-    serializer_class = serializers.StatusChangeSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        obj = Application.objects.filter(application_id=serializer.validated_data['application_id'])
-        if obj.exists():
-            obj.update(application_status=serializer.validated_data['application_status'])
-
-            return Response('success')
-        else:
-            return Response('Not exists', status=status.HTTP_400_BAD_REQUEST)
 
 
 class DepositView(ModelViewSet):

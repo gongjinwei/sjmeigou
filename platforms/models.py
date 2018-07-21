@@ -10,7 +10,7 @@ from index.models import Application
 class CheckApplication(models.Model):
     application=models.ForeignKey(to=Application,on_delete=models.CASCADE)
     checker=models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
-    apply_status=models.SmallIntegerField(choices=((2,'打款验证中'),(4,'审核不通过')))
+    apply_status=models.SmallIntegerField(choices=((2,'打款验证中'),(3,'审核通过'),(4,'审核不通过')))
     opinion=models.CharField(max_length=255,help_text='审核意见')
     check_time=models.DateTimeField(auto_now=True,editable=False)
 
@@ -57,3 +57,12 @@ class Account(models.Model):
     store = models.ForeignKey(to='store.Stores',on_delete=models.SET_NULL,null=True)
     user_type = models.IntegerField(choices=((1, '平台'), (2, '用户'), (3, '商户'), (4, '平台物流账号'),(5,'商户物流账号')))
     bank_balance = models.IntegerField(help_text='账户余额（分）',default=0)
+
+
+class CodeWarehouse(models.Model):
+    application=models.OneToOneField(to=Application,on_delete=models.DO_NOTHING)
+    code=models.CharField(max_length=16,editable=False,unique=True)
+    use_state=models.SmallIntegerField(choices=((0,'未使用'),(1,'已使用')),editable=False)
+    active_user=models.ForeignKey(to=User,editable=False,null=True,blank=True,on_delete=models.SET_NULL)
+    active_time=models.DateTimeField(auto_now=True,editable=False)
+    create_time=models.DateTimeField(auto_now_add=True,editable=False)

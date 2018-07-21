@@ -8,12 +8,6 @@ from . import models
 from goods.models import GoodDetail
 from order.models import Coupon,StoreActivity
 
-class GenerateCodeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.CodeWarehouse
-        fields = '__all__'
-
 
 class StoresSerializer(serializers.ModelSerializer):
     active_code=serializers.CharField(write_only=True)
@@ -21,11 +15,6 @@ class StoresSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Stores
         fields='__all__'
-
-
-class StatusChangeSerializer(serializers.Serializer):
-    application_status=serializers.ChoiceField(choices=[1,2,3,4,5,6])
-    application_id=serializers.CharField(max_length=20)
 
 
 class DepositSerializer(serializers.ModelSerializer):
@@ -122,13 +111,16 @@ class StoreSearchSerializer(serializers.ModelSerializer):
         lat = request.query_params.get('lat')
         lng = request.query_params.get('lng')
         if lat and lng:
-            lat=float(lat)
-            lng=float(lng)
-            distance=round(VincentyDistance((lat, lng),(ret['latitude'], ret['longitude'])).kilometers, 1)
+            try:
+                lat=float(lat)
+                lng=float(lng)
+                distance=round(VincentyDistance((lat, lng),(ret['latitude'], ret['longitude'])).kilometers, 1)
 
-            ret.update({
-                "distance": distance
-            })
+                ret.update({
+                    "distance": distance
+                })
+            except ValueError:
+                pass
         return ret
 
     def get_coupons(self,obj):

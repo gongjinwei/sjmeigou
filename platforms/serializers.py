@@ -28,4 +28,9 @@ class DeliverServiceSerializer(serializers.ModelSerializer):
         model = models.DeliverServices
         fields = '__all__'
 
-# class
+
+class GenerateCodeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.CodeWarehouse
+        fields = '__all__'

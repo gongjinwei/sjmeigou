@@ -9,5 +9,6 @@ router.register('checkApplication',views.CheckApplicationViewSets,base_name='che
 router.register('storeActivityType',views.StoreActivityViewSets,base_name='storeActivityType')
 router.register('delivers',views.DeliversViewSets,base_name='delivers')
 router.register('deliverServices',views.DeliverServicesViewSets,base_name='deliverServices')
+router.register('generateCode',views.GenerateCodeView,base_name='generateCode')
 
 urlpatterns=router.urls
