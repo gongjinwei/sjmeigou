@@ -28,4 +28,4 @@ class DeliverServiceSerializer(serializers.ModelSerializer):
         model = models.DeliverServices
         fields = '__all__'
 
-
+# class
