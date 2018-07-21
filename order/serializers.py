@@ -212,8 +212,8 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request:
             store_ids = request.query_params.get('stores', '')
-            for store_id in store_ids.split('|'):
-                if store_id:
+            if store_ids:
+                for store_id in store_ids.split('|'):
                     try:
                         store_id=int(store_id)
                     except ValueError:
