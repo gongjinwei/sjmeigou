@@ -273,7 +273,7 @@ class BalanceView(CreateOnlyViewSet):
                 'cost_money': cost_price,
                 'take_off': store.take_off,
                 'skus': sd,
-                "deliver_pay":get_deliver_pay(origin,destination)[0] if origin else 0
+                "deliver_pay":get_deliver_pay(origin,destination)[0] if origin and destination else 0
             }})
 
         # 取出收货地址
