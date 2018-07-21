@@ -396,7 +396,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                 coupon_discount = 0
                 activity = data_st.get('activity', None)
                 get_coupon_data = data_st.get('coupon', None)
-                deliver_server = data_st.get('goods.GoodDeliver', None)
+                deliver_server = data_st.get('deliver_server', None)
                 store_deliver_payment = Decimal(0.00)
                 store_to_pay = Decimal(0.00)
                 if deliver_server:
