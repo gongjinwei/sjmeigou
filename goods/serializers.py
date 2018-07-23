@@ -178,13 +178,17 @@ class GoodSearchSerializer(serializers.ModelSerializer):
         lat = request.query_params.get('lat')
         lng = request.query_params.get('lng')
         if lat and lng:
-            lat=float(lat)
-            lng=float(lng)
-            distance=round(VincentyDistance((lat, lng),(ret['store_lat'], ret['store_lng'])).kilometers, 1)
+            try:
+                lat=float(lat)
+                lng=float(lng)
 
-            ret.update({
-                "distance": distance
-            })
+                distance=round(VincentyDistance((lat, lng),(ret['store_lat'], ret['store_lng'])).kilometers, 1)
+
+                ret.update({
+                    "distance": distance
+                })
+            except ValueError:
+                pass
         return ret
 
     def get_master_graph(self,obj):
