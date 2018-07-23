@@ -249,11 +249,9 @@ class BalanceView(CreateOnlyViewSet):
                         ac.append({'id': coupon.id, 'activity': x, 'reduction_money': y, 'item_num': cost_num,
                                    'items_money': cost_price, 'type': 'coupon'})
 
-            op = request.query_params.get('op')
+            op = request.query_params.get('op','')
+            # sku信息收集
             sd = []
-
-            # 计算配送费用
-            origin = '%s,%s' %(store.longitude,store.latitude)
 
             if op != 'update':
                 # 附加SKU信息
@@ -262,6 +260,9 @@ class BalanceView(CreateOnlyViewSet):
                     ser_ = ser.data
                     ser_.update({'num': sk['num']})
                     sd.append(ser_)
+
+            # 计算配送费用
+            origin = '%s,%s' % (store.longitude, store.latitude)
 
             # 附加店铺信息
             ret.append({'store': {

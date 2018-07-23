@@ -44,6 +44,8 @@ class ApplicationViewSets(ModelViewSet):
     queryset = models.Application.objects.all()
 
     def perform_create(self, serializer):
+        if models.Application.objects.filter(application_user=self.request.user).exists():
+            return Response({'code':2001,'msg':'你的信息已提交，请不要重复申请'})
         serializer.save(application_user=self.request.user)
 
     def get_queryset(self):

@@ -64,6 +64,7 @@ class ShoppingCarSerializer(serializers.ModelSerializer):
         ret = []
         for activity in activities:
             car_item = car_items
+
             if activity.select_all == False:
                 select_goods = activity.selected_goods.values_list('good', flat=True)
                 car_item = car_item.filter(sku__color__good_detail__in=select_goods)

@@ -1,5 +1,6 @@
 import datetime,random
 
+from decimal import Decimal
 from django.db import models
 
 # Create your models here.
@@ -37,10 +38,10 @@ class StoreActivityType(models.Model):
 
 class KeepAccounts(models.Model):
     keep_account_no = models.CharField(max_length=30,primary_key=True)
-    account_time=models.DateTimeField(auto_now_add=True)
+    account_time = models.DateTimeField(auto_now_add=True)
     voucher = models.SmallIntegerField(choices=((1,'收'),(2,'付'),(3,'转'),(4,'记')))
     currency = models.CharField(max_length=20,default='CNY')
-    money =models.PositiveIntegerField(help_text='发生金额（分）')
+    money = models.PositiveIntegerField(help_text='发生金额（分）')
     remark = models.CharField(max_length=255)
     intercourse_business=models.ForeignKey(to='order.StoreOrder',null=True,on_delete=models.DO_NOTHING)
     settlement_method=models.CharField(max_length=30,default='微信支付')
@@ -56,7 +57,18 @@ class Account(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE,null=True)
     store = models.ForeignKey(to='store.Stores',on_delete=models.SET_NULL,null=True)
     user_type = models.IntegerField(choices=((1, '平台'), (2, '用户'), (3, '商户'), (4, '平台物流账号'),(5,'商户物流账号')))
-    bank_balance = models.IntegerField(help_text='账户余额（分）',default=0)
+    bank_balance = models.DecimalField(help_text='账户余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2)
+    receivable_balance = models.DecimalField(help_text='应收余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2)
+    payable_balance = models.DecimalField(help_text='应付余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2)
+
+
+class AccountRecharge(models.Model):
+    recharge_money = models.DecimalField(help_text='充值金额')
+    recharge_type = models.SmallIntegerField(help_text='充值类型',choices=((1,'商家物流充值'),(2,'平台物流充值')))
+    recharge_desc = models.CharField(help_text='充值描述')
+    account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING)
+    recharge_time = models.DateTimeField(auto_now_add=True)
+
 
 
 class CodeWarehouse(models.Model):
