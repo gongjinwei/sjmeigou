@@ -29,12 +29,15 @@ class CheckApplicationViewSets(ModelViewSet):
                                                         active_user=request.user)
                     # 发送短信给用户
                     app_status = 5
-                models.Application.objects.filter(pk=application.id).update(application_status=app_status)
+                models.Application.objects.filter(pk=application.application_id).update(application_status=app_status)
         else:
             return Response('该状态无法被更改', status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.save(checker=self.request.user)
 
 
 class StoreActivityViewSets(ModelViewSet):
