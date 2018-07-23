@@ -23,6 +23,7 @@ from qcloudsms_py.httpclient import HTTPError
 
 from . import serializers, models
 from tools import viewset
+from platforms.models import Account
 
 # Create your views here.
 
@@ -117,13 +118,16 @@ class CheckView(viewset.CreateOnlyViewSet):
             userId = serializer.validated_data['userId']
 
             if models.UserInfo.objects.filter(id=userId).exists():
-                # 创建或获取用户
+                # 创建或获取用户,并关联微信号
                 userInfo = models.UserInfo.objects.get(pk=userId)
                 user, created = User.objects.get_or_create(defaults={'username': userId}, username=userId)
                 userInfo.user = user
                 user.set_password(mobile)
                 user.save()
                 userInfo.save()
+
+                # 建立注册账号的余额账号
+                Account.objects.get_or_create(defaults={'user':user,'store':None,'account_type':2},user=user,account_type=2)
 
                 # 生成token
                 payload = jwt_payload_handler(user)

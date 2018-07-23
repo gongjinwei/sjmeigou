@@ -56,19 +56,21 @@ class KeepAccounts(models.Model):
 class Account(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE,null=True)
     store = models.ForeignKey(to='store.Stores',on_delete=models.SET_NULL,null=True)
-    user_type = models.IntegerField(choices=((1, '平台'), (2, '用户'), (3, '商户'), (4, '平台物流账号'),(5,'商户物流账号')))
-    bank_balance = models.DecimalField(help_text='账户余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2)
-    receivable_balance = models.DecimalField(help_text='应收余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2)
-    payable_balance = models.DecimalField(help_text='应付余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2)
+    account_type = models.IntegerField(choices=((1, '平台'), (2, '用户'), (3, '商户'), (4, '平台物流账号'),(5,'商户物流账号')))
+    bank_balance = models.DecimalField(help_text='账户余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2,editable=False)
+    receivable_balance = models.DecimalField(help_text='应收余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2,editable=False)
+    payable_balance = models.DecimalField(help_text='应付余额（元）',default=Decimal(0.00),max_digits=30,decimal_places=2,editable=False)
+
+    class Meta:
+        unique_together=('user','store','account_type')
 
 
 class AccountRecharge(models.Model):
-    recharge_money = models.DecimalField(help_text='充值金额')
+    recharge_money = models.DecimalField(help_text='充值金额(元）',max_digits=30,decimal_places=2)
     recharge_type = models.SmallIntegerField(help_text='充值类型',choices=((1,'商家物流充值'),(2,'平台物流充值')))
-    recharge_desc = models.CharField(help_text='充值描述')
+    recharge_desc = models.CharField(help_text='充值描述',max_length=30)
     account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING)
     recharge_time = models.DateTimeField(auto_now_add=True)
-
 
 
 class CodeWarehouse(models.Model):
