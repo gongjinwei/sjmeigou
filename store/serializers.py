@@ -40,7 +40,7 @@ class StoreInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Stores
-        fields=('id','business_hour_from','business_hour_to','logo','active_state','create_time','name','receive_address','longitude','latitude','store_phone','store_images')
+        fields=('id','business_hour_from','business_hour_to','logo','active_state','create_time','name','receive_address','longitude','latitude','store_phone','store_images','take_off')
 
 
 class EnterpriseQualificationSerializer(serializers.ModelSerializer):
