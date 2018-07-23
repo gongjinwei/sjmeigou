@@ -39,6 +39,14 @@ class CheckApplicationViewSets(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(checker=self.request.user)
 
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            queryset=self.queryset
+        elif self.request.user.is_authenticated:
+            queryset=self.queryset.filter(application__application_user=self.request.user)
+        else:
+            queryset=models.CheckApplication.objects.none()
+        return queryset
 
 class StoreActivityViewSets(ModelViewSet):
     queryset = models.StoreActivityType.objects.all()
