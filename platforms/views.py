@@ -20,7 +20,6 @@ class CheckApplicationViewSets(ModelViewSet):
         application = serializer.validated_data['application']
         if application.application_status == 1:
             app_status = serializer.validated_data['apply_status']
-            application.application_status = app_status
             if app_status == 3:
                 if not models.CodeWarehouse.objects.filter(application=application).exists():
                     code = get_random_string()
@@ -29,8 +28,8 @@ class CheckApplicationViewSets(ModelViewSet):
                     models.CodeWarehouse.objects.create(application=application, code=code, use_state=0,
                                                         active_user=request.user)
                     # 发送短信给用户
-                    application.application_status = 5
-            application.save()
+                    app_status = 5
+                models.Application.objects.filter(pk=application.id).update(application_status=app_status)
         else:
             return Response('该状态无法被更改', status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)

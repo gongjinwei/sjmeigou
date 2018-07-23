@@ -2,8 +2,12 @@
 
 from rest_framework import serializers
 from . import models
+from index.models import Application
+
 
 class CheckApplicationSerializer(serializers.ModelSerializer):
+    application = serializers.PrimaryKeyRelatedField(queryset=Application.objects.filter(application_status=1))
+
     class Meta:
         model = models.CheckApplication
         fields = '__all__'
