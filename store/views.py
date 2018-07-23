@@ -4,7 +4,6 @@ from rest_framework.permissions import IsAdminUser,AllowAny
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 
-from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,7 +23,7 @@ import requests, uuid
 from . import serializers, models
 from index.models import Application
 from goods.models import GoodDetail,SearchHistory
-from platforms.models import CodeWarehouse
+from platforms.models import CodeWarehouse,Account
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
@@ -43,6 +42,8 @@ class StoresViewSets(ModelViewSet):
         application = serializer.validated_data['info']
         if application.application_status != 5:
             return Response('你的申请未通过,请通过后进行再验证', status=status.HTTP_400_BAD_REQUEST)
+        if models.Stores.objects.filter(user=request.user,active_state=1).exists():
+            return Response('你已经验证过了',status=status.HTTP_400_BAD_REQUEST)
 
         if CodeWarehouse.objects.filter(code=code, use_state=0).exists():
 
@@ -54,6 +55,7 @@ class StoresViewSets(ModelViewSet):
                 "latitude":application.latitude
             })
             self.perform_create(serializer)
+            # 更新激活码状态
             application.codewarehouse.use_state = 1
             application.codewarehouse.active_user = request.user
             application.codewarehouse.save()
@@ -62,6 +64,11 @@ class StoresViewSets(ModelViewSet):
             # 将申请用户加入权限组
 
             assign_perm('store.change_stores', request.user, request.user.stores)
+
+            # 为店铺创建余额账号和物流账号
+            Account.objects.create(store=request.user.stores,account_type=3)
+
+            Account.objects.create(store=request.user.stores,account_type=5)
 
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
