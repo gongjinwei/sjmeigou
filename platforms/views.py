@@ -84,6 +84,15 @@ class AccountRechargeViewSets(ModelViewSet):
         ret=prepare_payment(request.user,recharge.recharge_desc,recharge.recharge_money,recharge.id,'recharge')
         return Response(ret, status=status.HTTP_201_CREATED)
 
+    def get_queryset(self):
+        queryset = self.queryset
+        if not (self.request.user.is_authenticated and hasattr(self.request.user,'stores')):
+            return queryset.none()
+        elif self.queryset.is_staff:
+            return queryset
+        else:
+            return queryset.filter(account__store=self.request.user.stores)
+
 
 class AccountViewSets(ModelViewSet):
     queryset = models.Account.objects.all()

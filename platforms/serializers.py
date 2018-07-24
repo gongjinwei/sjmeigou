@@ -46,7 +46,8 @@ class AccountRechargeSerializer(serializers.ModelSerializer):
         model = models.AccountRecharge
         fields = '__all__'
 
+
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Account
-        fields = '__all__'
+        fields = ('id','account_type','bank_balance')
