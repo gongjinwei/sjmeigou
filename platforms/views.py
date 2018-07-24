@@ -88,7 +88,7 @@ class AccountRechargeViewSets(ModelViewSet):
         queryset = self.queryset
         if not (self.request.user.is_authenticated and hasattr(self.request.user,'stores')):
             return queryset.none()
-        elif self.queryset.is_staff:
+        elif self.request.user.is_staff:
             return queryset
         else:
             return queryset.filter(account__store=self.request.user.stores)
