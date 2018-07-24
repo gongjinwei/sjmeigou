@@ -135,7 +135,7 @@ class StoreSearchSerializer(serializers.ModelSerializer):
         return [activity.act_name for activity in valid_activities]
 
     def get_goods_recommend(self,obj):
-        if obj.goods.values('title','master_graphs','min_price'):
-            return obj.goods.values('title','master_graphs','min_price')[:3]
+        if obj.goods.values('title','master_graphs','min_price','id'):
+            return obj.goods.values('title','master_graphs','min_price','id')[:3]
 
 

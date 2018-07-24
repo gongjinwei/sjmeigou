@@ -8,7 +8,7 @@ from django.utils.crypto import get_random_string
 
 from . import serializers, models
 from tools.viewset import CreateOnlyViewSet
-from order.models import InitiatePayment
+from order.views import prepare_payment
 
 
 class CheckApplicationViewSets(ModelViewSet):
@@ -68,6 +68,16 @@ class DeliverServicesViewSets(ModelViewSet):
 class AccountRechargeViewSets(ModelViewSet):
     queryset = models.AccountRecharge.objects.all()
     serializer_class = serializers.AccountRechargeSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        recharge_type=serializer.validated_data['recharge_type']
+        if recharge_type ==1 and hasattr(request.user,'stores') and models.Account.objects.filter(user=None,store=request.user.stores,account_type=3).exists():
+            account = models.Account.objects.get(user=None,store=request.user.stores,account_type=3)
+        recharge=serializer.save()
+        ret=prepare_payment(request.user,recharge.recharge_desc,recharge.recharge_money,recharge.id,'recharge')
+        return Response(ret, status=status.HTTP_201_CREATED)
 
 
 class AccountViewSets(ModelViewSet):

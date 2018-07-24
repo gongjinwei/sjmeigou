@@ -19,6 +19,7 @@ from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyVi
     ListDetailDeleteViewSet
 from tools.contrib import get_deliver_pay
 from wxpay.views import weixinpay
+from platforms.models import AccountRecharge
 
 client = get_redis_connection()
 
@@ -346,6 +347,8 @@ def prepare_payment(user, body, account, order_no, order_type=None):
 
         elif order_type == "store_order":
             order_trade.store_order = models.StoreOrder.objects.get(pk=order_no)
+        elif order_type == "recharge":
+            order_trade.recharge=AccountRecharge.objects.get(pk=order_no)
         order_trade.save()
         data.update(paySign=weixinpay.sign(data), trade=order_trade, user=user)
         models.InitiatePayment.objects.create(**data)
