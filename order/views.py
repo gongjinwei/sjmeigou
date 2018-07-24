@@ -414,15 +414,15 @@ class UnifyOrderView(CreateOnlyViewSet):
                 # 计算物流费用
                 if deliver_server:
                     if hasattr(deliver_server, 'server'):
-                        # 验证商户物流账号余额
-                        store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store,
-                                                                                       account_type=5)
-
-                        if store_delivery_charge.bank_balance < Decimal(20.00):
-                            return Response({'code':4109,'msg':'商户没有足够物流费用错误','success': 'FAIL'})
 
                         # 选择了点我达
                         if deliver_server.server.id == 2:
+                            # 验证商户物流账号余额
+                            store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store,
+                                                                                           account_type=5)
+
+                            if store_delivery_charge.bank_balance < Decimal(20.00):
+                                return Response({'code': 4109, 'msg': '商户没有足够物流费用错误', 'success': 'FAIL'})
 
                             address = serializer.validated_data.get('address', None)
                             if not address:
