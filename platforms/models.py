@@ -48,9 +48,13 @@ class KeepAccounts(models.Model):
     settlement_method=models.CharField(max_length=30,default='微信支付')
     account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING)
 
+    @staticmethod
+    def account_no():
+        return datetime.datetime.strftime(datetime.datetime.now(),'%Y%m%d%H%M%S%f')+str(random.randint(10,100))
+
     def save(self, *args,**kwargs):
         if self.keep_account_no:
-            self.keep_account_no=datetime.datetime.strftime(datetime.datetime.now(),'%Y%m%d%H%M%S%f')+str(random.randint(10,100))
+            self.keep_account_no=self.account_no()
         super().save(*args,**kwargs)
 
 
