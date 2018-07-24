@@ -328,6 +328,15 @@ def get_order_no(store_id):
 def prepare_payment(user, body, account, order_no, order_type=None):
     order_trade = models.OrderTrade()
     order_trade.trade_no = order_trade.trade_number
+    if order_type == 'unify_order':
+        order_trade.unify_order = models.UnifyOrder.objects.get(pk=order_no)
+
+    elif order_type == "store_order":
+        order_trade.store_order = models.StoreOrder.objects.get(pk=order_no)
+
+    elif order_type == "recharge":
+        order_trade.recharge = AccountRecharge.objects.get(pk=order_no)
+
     res = weixinpay.unified_order(trade_type="JSAPI", openid=user.userinfo.openId, body=body,
                                   total_fee=int(account * 100), out_trade_no=order_trade.trade_no)
 
@@ -340,15 +349,7 @@ def prepare_payment(user, body, account, order_no, order_type=None):
             "package": "prepay_id=%s" % package,
             "signType": "MD5"
         }
-        if order_type != 'unify_order' and order_type != "store_order":
-            return data
-        elif order_type == 'unify_order':
-            order_trade.unify_order = models.UnifyOrder.objects.get(pk=order_no)
 
-        elif order_type == "store_order":
-            order_trade.store_order = models.StoreOrder.objects.get(pk=order_no)
-        elif order_type == "recharge":
-            order_trade.recharge=AccountRecharge.objects.get(pk=order_no)
         order_trade.save()
         data.update(paySign=weixinpay.sign(data), trade=order_trade, user=user)
         models.InitiatePayment.objects.create(**data)
