@@ -5,7 +5,7 @@ from decimal import Decimal
 from datetime import datetime
 import random
 
-
+from platforms.models import AccountRecharge
 # Create your models here.
 
 
@@ -220,6 +220,7 @@ class InitiatePayment(models.Model):
 class OrderTrade(models.Model):
     store_order = models.ForeignKey(to='StoreOrder',on_delete=models.DO_NOTHING,null=True)
     unify_order = models.ForeignKey(to='UnifyOrder',on_delete=models.DO_NOTHING,null=True)
+    recharge_no = models.ForeignKey(to=AccountRecharge,on_delete=models.DO_NOTHING,null=True)
     trade_no = models.CharField(primary_key=True,max_length=30)
     paid_time=models.DateTimeField(null=True,editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
