@@ -54,6 +54,9 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                 paid_time = datetime.strptime(time_end,'%Y%m%d%H%M%S')
                 if OrderTrade.objects.filter(pk=out_trade_no).exists():
                     order_trade=OrderTrade.objects.get(pk=out_trade_no)
+                    order_trade.paid_time=paid_time
+                    order_trade.paid_money=Decimal(cash_fee)
+                    order_trade.save()
                     if order_trade.unify_order:
                         order=order_trade.unify_order
                         self.receive_fee(order,cash_fee,paid_time)
@@ -78,7 +81,8 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                     elif order_trade.recharge:
                         recharge = order_trade.recharge
                         recharge.recharge_result=True
-                        recharge.account.bank_balance+=cash_fee
+                        # 余额增加
+                        recharge.account.bank_balance+=Decimal(cash_fee)
                         recharge.account.save()
                         recharge.save()
 

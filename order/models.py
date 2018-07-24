@@ -223,6 +223,7 @@ class OrderTrade(models.Model):
     recharge = models.ForeignKey(to=AccountRecharge,on_delete=models.DO_NOTHING,null=True)
     trade_no = models.CharField(primary_key=True,max_length=30)
     paid_time=models.DateTimeField(null=True,editable=False)
+    paid_money = models.DecimalField(default=Decimal(0.00),max_digits=30,decimal_places=2,editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
 
     @property
