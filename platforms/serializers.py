@@ -38,3 +38,15 @@ class GenerateCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CodeWarehouse
         fields = '__all__'
+
+
+class AccountRechargeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.AccountRecharge
+        fields = '__all__'
+
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Account
+        fields = '__all__'
