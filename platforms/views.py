@@ -9,6 +9,7 @@ from django.utils.crypto import get_random_string
 from . import serializers, models
 from tools.viewset import CreateOnlyViewSet
 from order.views import prepare_payment
+from store.models import Stores
 
 
 class CheckApplicationViewSets(ModelViewSet):
@@ -75,7 +76,7 @@ class AccountRechargeViewSets(ModelViewSet):
         recharge_type=serializer.validated_data['recharge_type']
         if recharge_type ==1 and hasattr(request.user,'stores') and models.Account.objects.filter(user=None,store=request.user.stores,account_type=3).exists():
             account = models.Account.objects.get(user=None,store=request.user.stores,account_type=3)
-        if recharge_type ==2 and request.user.is_staff:
+        elif recharge_type ==2 and request.user.is_staff:
             account = models.Account.objects.get(user=None,store=None,account_type=4)
         else:
             return Response('你无此充值权限',status=status.HTTP_400_BAD_REQUEST)
@@ -87,3 +88,19 @@ class AccountRechargeViewSets(ModelViewSet):
 class AccountViewSets(ModelViewSet):
     queryset = models.Account.objects.all()
     serializer_class = serializers.AccountSerializer
+
+    def get_queryset(self):
+        queryset=self.queryset
+        store_id = self.request.query_params.get('store','')
+        if store_id:
+            try:
+                store_id=int(store_id)
+                if Stores.objects.filter(pk=store_id).exists():
+                    store = Stores.objects.get(pk=store_id)
+                    return queryset.filter(store=store)
+            except ValueError:
+                pass
+        elif self.request.user.is_staff:
+            return queryset
+        else:
+            return queryset.filter(user=self.request.user)
