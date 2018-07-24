@@ -51,3 +51,9 @@ class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Account
         fields = ('id','account_type','bank_balance')
+
+
+class KeepAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.KeepAccounts
+        fields = '__all__'

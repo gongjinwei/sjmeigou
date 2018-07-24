@@ -13,7 +13,8 @@ from weixin.pay import WeixinPay
 from . import serializers,models
 from register.views import CustomerXMLRender,CustomerXMLParser
 from order.models import JoinActivity,OrderTrade
-from platforms.models import Account,KeepAccounts
+from platforms.models import Account
+from platforms.serializers import KeepAccountSerializer
 
 # Create your views here.
 mch_id = getattr(settings, "WEIXIN_MCH_ID")
@@ -98,13 +99,17 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                         recharge.account.bank_balance+=Decimal(cash_fee)
                         platform_account.bank_balance+=Decimal(cash_fee)
                         # 记录平台收入一笔
-                        keep_account=KeepAccounts()
-                        keep_account.voucher=1
-                        keep_account.money =cash_fee*100
-                        keep_account.remark = '%s充值收入' % recharge.account.get_account_type_display()
-                        keep_account.intercourse_business2=recharge
-                        keep_account.account = recharge.account
-                        keep_account.save()
+
+                        keep_data={
+                            "voucher":1,
+                            "money":cash_fee*100,
+                            "remark":'%s充值收入' % recharge.account.get_account_type_display(),
+                            "intercourse_business2":recharge,
+                            'account':recharge.account
+                        }
+                        keep_serializer=KeepAccountSerializer(data=keep_data)
+                        keep_serializer.is_valid(raise_exception=True)
+                        keep_serializer.save()
                         recharge.account.save()
                         recharge.save()
 
