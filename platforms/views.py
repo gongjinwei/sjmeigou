@@ -75,7 +75,11 @@ class AccountRechargeViewSets(ModelViewSet):
         recharge_type=serializer.validated_data['recharge_type']
         if recharge_type ==1 and hasattr(request.user,'stores') and models.Account.objects.filter(user=None,store=request.user.stores,account_type=3).exists():
             account = models.Account.objects.get(user=None,store=request.user.stores,account_type=3)
-        recharge=serializer.save()
+        if recharge_type ==2 and request.user.is_staff:
+            account = models.Account.objects.get(user=None,store=None,account_type=4)
+        else:
+            return Response('你无此充值权限',status=status.HTTP_400_BAD_REQUEST)
+        recharge=serializer.save(account=account)
         ret=prepare_payment(request.user,recharge.recharge_desc,recharge.recharge_money,recharge.id,'recharge')
         return Response(ret, status=status.HTTP_201_CREATED)
 

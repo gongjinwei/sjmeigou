@@ -69,7 +69,7 @@ class AccountRecharge(models.Model):
     recharge_money = models.DecimalField(help_text='充值金额(元）',max_digits=30,decimal_places=2)
     recharge_type = models.SmallIntegerField(help_text='充值类型',choices=((1,'商家物流充值'),(2,'平台物流充值')))
     recharge_desc = models.CharField(help_text='充值描述',max_length=30)
-    account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING)
+    account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING,editable=False)
     recharge_time = models.DateTimeField(auto_now_add=True)
 
 
