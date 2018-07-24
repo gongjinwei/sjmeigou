@@ -93,6 +93,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                     elif order_trade.recharge:
                         recharge = order_trade.recharge
                         recharge.recharge_result=True
+                        recharge.paid_money=Decimal(cash_fee)
                         # 余额增加且平台账户增加收入
                         recharge.account.bank_balance+=Decimal(cash_fee)
                         platform_account.bank_balance+=Decimal(cash_fee)

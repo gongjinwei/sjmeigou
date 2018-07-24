@@ -73,6 +73,7 @@ class AccountRecharge(models.Model):
     account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING,editable=False)
     recharge_time = models.DateTimeField(auto_now_add=True)
     recharge_result = models.BooleanField(default=False,editable=False)
+    paid_money = models.DecimalField(max_digits=30,decimal_places=2,editable=False,default=Decimal(0.00))
 
 
 class CodeWarehouse(models.Model):
