@@ -12,7 +12,8 @@ from weixin.pay import WeixinPay
 
 from . import serializers,models
 from register.views import CustomerXMLRender,CustomerXMLParser
-from order.models import StoreOrder,UnifyOrder,JoinActivity,OrderTrade
+from order.models import JoinActivity,OrderTrade
+from platforms.models import Account,KeepAccounts
 
 # Create your views here.
 mch_id = getattr(settings, "WEIXIN_MCH_ID")
@@ -47,19 +48,28 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         if received_sign==sign:
             return_code = data.get('return_code')
             fee_type = data.get('fee_type')
+            # 取平台账号
+            platform_account,created=Account.objects.get_or_create(user=None,store=None,account_type=1)
+
             if return_code =='SUCCESS' and fee_type=='CNY':
                 cash_fee = data.get('cash_fee',0)/100
                 out_trade_no = data.get('out_trade_no')
                 time_end = data.get('time_end')
                 paid_time = datetime.strptime(time_end,'%Y%m%d%H%M%S')
                 if OrderTrade.objects.filter(pk=out_trade_no).exists():
+
+                    # 把交易时间与交易金额写入交易中
                     order_trade=OrderTrade.objects.get(pk=out_trade_no)
                     order_trade.paid_time=paid_time
                     order_trade.paid_money=Decimal(cash_fee)
                     order_trade.save()
+
+                    # 处理平台付款
                     if order_trade.unify_order:
                         order=order_trade.unify_order
                         self.receive_fee(order,cash_fee,paid_time)
+
+                    # 处理店铺单
                     elif order_trade.store_order:
                         order=order_trade.store_order
                         self.receive_fee(order, cash_fee, paid_time)
@@ -78,11 +88,22 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                             for sku_data in order.sku_orders.all():
                                 sku_data.sku.stock-=sku_data.num
                                 sku_data.sku.save()
+
+                    # 处理充值
                     elif order_trade.recharge:
                         recharge = order_trade.recharge
                         recharge.recharge_result=True
-                        # 余额增加
+                        # 余额增加且平台账户增加收入
                         recharge.account.bank_balance+=Decimal(cash_fee)
+                        platform_account.bank_balance+=Decimal(cash_fee)
+                        # 记录平台收入一笔
+                        keep_account=KeepAccounts()
+                        keep_account.voucher=1
+                        keep_account.money =cash_fee*100
+                        keep_account.remark = '充值收入'
+                        keep_account.intercourse_business2=recharge
+                        keep_account.account = recharge.account
+                        keep_account.save()
                         recharge.account.save()
                         recharge.save()
 

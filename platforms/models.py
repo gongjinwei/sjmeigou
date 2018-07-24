@@ -44,6 +44,7 @@ class KeepAccounts(models.Model):
     money = models.PositiveIntegerField(help_text='发生金额（分）')
     remark = models.CharField(max_length=255)
     intercourse_business=models.ForeignKey(to='order.StoreOrder',null=True,on_delete=models.DO_NOTHING)
+    intercourse_business2 = models.ForeignKey(to='AccountRecharge',null=True,on_delete=models.DO_NOTHING)
     settlement_method=models.CharField(max_length=30,default='微信支付')
     account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING)
 
