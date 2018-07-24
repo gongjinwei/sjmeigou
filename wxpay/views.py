@@ -104,8 +104,8 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                             "voucher":1,
                             "money":cash_fee*100,
                             "remark":'%s充值收入' % recharge.account.get_account_type_display(),
-                            "intercourse_business2":recharge,
-                            'account':recharge.account
+                            "intercourse_business2":recharge.id,
+                            'account':recharge.account.id
                         }
                         keep_serializer=KeepAccountSerializer(data=keep_data)
                         keep_serializer.is_valid(raise_exception=True)
