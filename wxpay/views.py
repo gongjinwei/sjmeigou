@@ -101,7 +101,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                         keep_account=KeepAccounts()
                         keep_account.voucher=1
                         keep_account.money =cash_fee*100
-                        keep_account.remark = '充值收入'
+                        keep_account.remark = '%s充值收入' % recharge.account.get_account_type_display()
                         keep_account.intercourse_business2=recharge
                         keep_account.account = recharge.account
                         keep_account.save()
