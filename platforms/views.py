@@ -74,10 +74,10 @@ class AccountRechargeViewSets(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         recharge_type=serializer.validated_data['recharge_type']
-        if recharge_type ==1 and hasattr(request.user,'stores') and models.Account.objects.filter(user=None,store=request.user.stores,account_type=4).exists():
-            account = models.Account.objects.get(user=None,store=request.user.stores,account_type=4)
+        if recharge_type ==1 and hasattr(request.user,'stores'):
+            account,created = models.Account.objects.get_or_create(user=None,store=request.user.stores,account_type=5)
         elif recharge_type ==2 and request.user.is_staff:
-            account = models.Account.objects.get(user=None,store=None,account_type=4)
+            account,created = models.Account.objects.get_or_create(user=None,store=None,account_type=4)
         else:
             return Response('你无此充值权限',status=status.HTTP_400_BAD_REQUEST)
         recharge=serializer.save(account=account)
