@@ -98,6 +98,8 @@ class AccountViewSets(ModelViewSet):
                 if Stores.objects.filter(pk=store_id).exists():
                     store = Stores.objects.get(pk=store_id)
                     return queryset.filter(store=store)
+                else:
+                    return queryset.none()
             except ValueError:
                 return queryset.none()
         elif self.request.user.is_staff:
