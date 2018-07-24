@@ -99,7 +99,7 @@ class AccountViewSets(ModelViewSet):
                     store = Stores.objects.get(pk=store_id)
                     return queryset.filter(store=store)
             except ValueError:
-                pass
+                return queryset.none()
         elif self.request.user.is_staff:
             return queryset
         else:
