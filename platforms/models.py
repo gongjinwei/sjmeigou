@@ -71,7 +71,7 @@ class AccountRecharge(models.Model):
     recharge_desc = models.CharField(help_text='充值描述',max_length=30)
     account = models.ForeignKey(to='Account',on_delete=models.DO_NOTHING,editable=False)
     recharge_time = models.DateTimeField(auto_now_add=True)
-    recharge_result = models.BooleanField(default=False)
+    recharge_result = models.BooleanField(default=False,editable=False)
 
 
 class CodeWarehouse(models.Model):

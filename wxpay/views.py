@@ -75,6 +75,12 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                             for sku_data in order.sku_orders.all():
                                 sku_data.sku.stock-=sku_data.num
                                 sku_data.sku.save()
+                    elif order_trade.recharge:
+                        recharge = order_trade.recharge
+                        recharge.recharge_result=True
+                        recharge.account.bank_balance+=cash_fee
+                        recharge.account.save()
+                        recharge.save()
 
             self.perform_create(serializer)
             return Response({"return_code":"SUCCESS","return_msg":"OK"})
