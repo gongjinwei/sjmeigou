@@ -19,7 +19,7 @@ from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyVi
     ListDetailDeleteViewSet
 from tools.contrib import get_deliver_pay
 from wxpay.views import weixinpay
-from platforms.models import AccountRecharge
+from platforms.models import AccountRecharge, Account
 
 client = get_redis_connection()
 
@@ -200,7 +200,7 @@ class BalanceView(CreateOnlyViewSet):
         if receive_address.exists():
             destination = '%s,%s' % (receive_address[0].longitude, receive_address[0].latitude)
         else:
-            destination=''
+            destination = ''
         ret = []
         for st in stores:
             store = st['store']
@@ -250,7 +250,7 @@ class BalanceView(CreateOnlyViewSet):
                         ac.append({'id': coupon.id, 'activity': x, 'reduction_money': y, 'item_num': cost_num,
                                    'items_money': cost_price, 'type': 'coupon'})
 
-            op = request.query_params.get('op','')
+            op = request.query_params.get('op', '')
             # sku信息收集
             sd = []
 
@@ -265,6 +265,10 @@ class BalanceView(CreateOnlyViewSet):
             # 计算配送费用
             origin = '%s,%s' % (store.longitude, store.latitude)
 
+            delivery_pay, store_to_pay = get_deliver_pay(origin, destination) if origin and destination else (0, 0)
+            store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store, account_type=5)
+
+            has_enough_delivery = store_delivery_charge.bank_balance >= Decimal(20.00)
             # 附加店铺信息
             ret.append({'store': {
                 'id': store.id,
@@ -275,7 +279,8 @@ class BalanceView(CreateOnlyViewSet):
                 'cost_money': cost_price,
                 'take_off': store.take_off,
                 'skus': sd,
-                "deliver_pay":get_deliver_pay(origin,destination)[0] if origin and destination else 0
+                "deliver_pay": delivery_pay,
+                'has_enough_delivery': has_enough_delivery
             }})
 
         # 取出收货地址
@@ -396,6 +401,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                 has_no_stock = list(filter(lambda x: x['sku'].stock < x['num'], sku_data))
                 if has_no_stock:
                     return Response({'code': 4107, 'msg': '库存不足', 'success': 'FAIL'})
+
                 # 验证活动
                 activity_discount = 0
                 coupon_discount = 0
@@ -404,10 +410,20 @@ class UnifyOrderView(CreateOnlyViewSet):
                 deliver_server = data_st.get('deliver_server', None)
                 store_deliver_payment = Decimal(0.00)
                 store_to_pay = Decimal(0.00)
+
+                # 计算物流费用
                 if deliver_server:
                     if hasattr(deliver_server, 'server'):
+                        # 验证商户物流账号余额
+                        store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store,
+                                                                                       account_type=5)
+
+                        if store_delivery_charge.bank_balance < Decimal(20.00):
+                            return Response({'code':4109,'msg':'商户没有足够物流费用错误','success': 'FAIL'})
+
                         # 选择了点我达
                         if deliver_server.server.id == 2:
+
                             address = serializer.validated_data.get('address', None)
                             if not address:
                                 return Response({'code': 4108, 'msg': '必须选择地址', 'success': 'FAIL'})
@@ -415,7 +431,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                                 destination = '%s,%s' % (address.longitude, address.latitude)
                                 origin = '%s,%s' % (store.longitude, store.latitude)
 
-                                store_deliver_payment,store_to_pay=get_deliver_pay(origin,destination)
+                                store_deliver_payment, store_to_pay = get_deliver_pay(origin, destination)
 
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'FAIL'})
@@ -449,7 +465,8 @@ class UnifyOrderView(CreateOnlyViewSet):
                 order_num += store_num
                 order_money += store_order_money
                 data_st.update(
-                    {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user,'store_to_pay':store_to_pay,'deliver_payment':store_deliver_payment})
+                    {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user,
+                     'store_to_pay': store_to_pay, 'deliver_payment': store_deliver_payment})
 
                 # 移除购物车
                 models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, shopping_car__store=store,
@@ -471,7 +488,7 @@ class UnifyOrderView(CreateOnlyViewSet):
 
         ret = prepare_payment(self.request.user, body, account, order_no, order_type='unify_order')
 
-        return Response({"code":1000,'msg':'下单成功',"data":ret})
+        return Response({"code": 1000, 'msg': '下单成功', "data": ret})
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
