@@ -120,9 +120,11 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         if order.account <= order.account_paid:
             order.state=2
 
-            # 发物流订单
+            # 处理合并支付
             if hasattr(order, 'store_orders'):
+
                 order.store_orders.update(account_paid=F('account'),state=2)
+        # 处理店铺订单
         if hasattr(order,'unify_order'):
             relate_order=order.unify_order
             relate_order.account_paid+=Decimal(cash_fee)

@@ -67,7 +67,7 @@ class DeliverServicesViewSets(ModelViewSet):
 
 
 class AccountRechargeViewSets(ModelViewSet):
-    queryset = models.AccountRecharge.objects.all()
+    queryset = models.AccountRecharge.objects.filter(recharge_result=True)
     serializer_class = serializers.AccountRechargeSerializer
 
     def create(self, request, *args, **kwargs):
