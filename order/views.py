@@ -581,8 +581,20 @@ class StoreOrderView(ListDetailDeleteViewSet):
     def check_rider(self,request,pk=None):
         dwd_order=models.DwdOrder.objects.get(store_order_id=pk)
         ret=dwd.order_rider_position(pk,dwd_order.rider_code)
-        dwd_order_serializer=serializers.DwdRiderSerializer(instance=dwd_order)
-        ret.update(dwd_order_serializer.data)
+        # 只有骑手位置正确返回时才返回相应结果
+        if ret.get("errorCode",'') =="0":
+            dwd_order_serializer=serializers.DwdRiderSerializer(instance=dwd_order)
+            ret.update(dwd_order_serializer.data)
+            ori_dis={
+                "seller_lat":dwd_order.store_order.store.latitude,
+                "seller_lng":dwd_order.store_order.store.longitude,
+                "seller_name":dwd_order.store_order.store.name,
+                "seller_logo":dwd_order.store_order.logo,
+                "seller_contract":dwd_order.store_order.store.store_phone,
+                "receiver_lat":dwd_order.store_order.unify_order.address.latitude,
+                "receiver_lng":dwd_order.store_order.unify_order.address.longitude
+            }
+            ret.update(ori_dis)
         return Response(ret)
 
 
