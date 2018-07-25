@@ -7,7 +7,6 @@ from rest_framework.permissions import AllowAny
 
 # Create your views here.
 from . import models, serializers
-from order.serializers import DwdOrderSerializer
 from order.models import DwdOrder
 
 secret = getattr(settings, 'DWD_SECRET')
@@ -32,7 +31,7 @@ class OrderCallbackViewSets(ModelViewSet):
         sign_data.pop('sig')
         my_sig = sign(sign_data)
         if sig == my_sig:
-            store_order_id=serializer.validated_data['order_original_id']
+            store_order=serializer.validated_data['order_original_id']
             data={
                 "store_order":serializer.validated_data['order_original_id'],
                 "dwd_status":serializer.validated_data['order_status'],
@@ -41,7 +40,7 @@ class OrderCallbackViewSets(ModelViewSet):
                 'rider_code':serializer.validated_data['rider_code'],
                 'rider_mobile':serializer.validated_data['rider_mobile']
             }
-            DwdOrder.objects.update_or_create(defaults=data,store_order_id=store_order_id)
+            DwdOrder.objects.update_or_create(defaults=data,store_order=store_order)
             self.perform_create(serializer)
             return Response({'success': True}, status=status.HTTP_200_OK)
         else:
