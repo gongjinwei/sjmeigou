@@ -32,7 +32,7 @@ class OrderCallbackViewSets(ModelViewSet):
         my_sig = sign(sign_data)
         if sig == my_sig:
             store_order_id=serializer.validated_data['order_original_id']
-            store_order,created=DwdOrder.objects.get_or_create(store_order_id=store_order_id)
+            dwd_store_order,created=DwdOrder.objects.get_or_create(store_order_id=store_order_id)
             dwd_status = serializer.validated_data['order_status']
             data = {
                 "dwd_status": dwd_status,
@@ -41,13 +41,19 @@ class OrderCallbackViewSets(ModelViewSet):
                 'rider_code': serializer.validated_data.get('rider_code', None),
                 'rider_mobile': serializer.validated_data.get('rider_mobile', None)
             }
+            if dwd_status=='15':
+                dwd_store_order.store_order.state=3
+                dwd_store_order.store_order.save()
+            elif dwd_status == '100':
+                dwd_store_order.store_order.state=4
+                dwd_store_order.store_order.save()
             if not created:
                 # 状态码只允许改大
-                if store_order.dwd_status and int(store_order.dwd_status)< int(dwd_status):
-                    store_order.__dict__.update(data)
+                if dwd_store_order.dwd_status and int(dwd_store_order.dwd_status)< int(dwd_status):
+                    dwd_store_order.__dict__.update(data)
             else:
-                store_order.__dict__.update(data)
-            store_order.save()
+                dwd_store_order.__dict__.update(data)
+            dwd_store_order.save()
             self.perform_create(serializer)
             return Response({'success': True}, status=status.HTTP_200_OK)
         else:
