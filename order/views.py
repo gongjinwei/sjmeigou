@@ -579,6 +579,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'],detail=True)
     def check_rider(self,request,pk=None):
+        if not models.DwdOrder.objects.filter(store_order_id=pk).exists():
+            return Response({'errorCode':'3001','msg':'该物流单不存在'})
         dwd_order=models.DwdOrder.objects.get(store_order_id=pk)
         ret=dwd.order_rider_position(pk,dwd_order.rider_code)
         # 只有骑手位置正确返回时才返回相应结果
