@@ -214,18 +214,19 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
         if request:
             store_ids = request.query_params.get('stores', '')
             if store_ids:
-                ret['deliver_pays']=[]
+                ret['deliver_pays'] = []
                 for store_id in store_ids.split('|'):
                     try:
-                        store_id=int(store_id)
+                        store_id = int(store_id)
                     except ValueError:
                         continue
                     if Stores.objects.filter(pk=store_id).exists():
                         store = Stores.objects.get(pk=store_id)
                         destination = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
                         origin = "%s,%s" % (store.longitude, store.latitude)
-                        delivery, store_pay = get_deliver_pay(origin, destination)
-                        ret['deliver_pays'].append({"deliver_pay":delivery,'store_id':store_id})
+                        delivery, store_pay, deliver_distance = get_deliver_pay(origin, destination)
+                        ret['deliver_pays'].append(
+                            {"deliver_pay": delivery, 'store_id': store_id, 'deliver_distance': deliver_distance})
         return ret
 
 
@@ -246,7 +247,7 @@ class DwdOrderInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.DwdOrder
-        fields = ('dwd_status','status_name')
+        fields = ('dwd_status', 'status_name')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
@@ -324,4 +325,4 @@ class DwdRiderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.DwdOrder
-        fields=('dwd_status','rider_name','rider_mobile','status_name')
+        fields = ('dwd_status', 'rider_name', 'rider_mobile', 'status_name')
