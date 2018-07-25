@@ -170,6 +170,7 @@ class StoreOrder(models.Model):
                                      editable=False, default=1)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
     deliver_payment = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00),editable=False)
+    deliver_distance = models.FloatField(help_text='配送距离',null=True,editable=False)
     store_to_pay = models.DecimalField(max_digits=30,decimal_places=2,default=Decimal(0.00),editable=False)
     user_message = models.CharField(max_length=255, default='', blank=True)
     update_time = models.DateTimeField(auto_now=True)

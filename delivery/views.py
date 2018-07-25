@@ -46,9 +46,7 @@ class OrderCallbackViewSets(ModelViewSet):
             if dwd_status == 15:
                 dwd_store_order.store_order.state = 3
                 dwd_store_order.store_order.save()
-            elif dwd_status == 100:
-                dwd_store_order.store_order.state = 4
-                dwd_store_order.store_order.save()
+
             if not created:
                 # 状态码只允许改大
                 if dwd_store_order.dwd_status and dwd_store_order.dwd_status < dwd_status:

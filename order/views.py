@@ -265,7 +265,7 @@ class BalanceView(CreateOnlyViewSet):
             # 计算配送费用
             origin = '%s,%s' % (store.longitude, store.latitude)
 
-            delivery_pay, store_to_pay = get_deliver_pay(origin, destination) if origin and destination else (0, 0)
+            delivery_pay, store_to_pay,deliver_distance = get_deliver_pay(origin, destination) if origin and destination else (0, 0,None)
             store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store, account_type=5)
 
             has_enough_delivery = store_delivery_charge.bank_balance >= Decimal(20.00)
@@ -280,7 +280,8 @@ class BalanceView(CreateOnlyViewSet):
                 'take_off': store.take_off,
                 'skus': sd,
                 "deliver_pay": delivery_pay,
-                'has_enough_delivery': has_enough_delivery
+                'has_enough_delivery': has_enough_delivery,
+                'deliver_distance':deliver_distance
             }})
 
         # 取出收货地址
@@ -410,6 +411,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                 deliver_server = data_st.get('deliver_server', None)
                 store_deliver_payment = Decimal(0.00)
                 store_to_pay = Decimal(0.00)
+                deliver_distance=None
 
                 # 计算物流费用
                 if deliver_server:
@@ -431,7 +433,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                                 destination = '%s,%s' % (address.longitude, address.latitude)
                                 origin = '%s,%s' % (store.longitude, store.latitude)
 
-                                store_deliver_payment, store_to_pay = get_deliver_pay(origin, destination)
+                                store_deliver_payment, store_to_pay,deliver_distance = get_deliver_pay(origin, destination)
 
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'FAIL'})
@@ -466,7 +468,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                 order_money += store_order_money
                 data_st.update(
                     {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user,
-                     'store_to_pay': store_to_pay, 'deliver_payment': store_deliver_payment})
+                     'store_to_pay': store_to_pay, 'deliver_payment': store_deliver_payment,'deliver_distance':deliver_distance})
 
                 # 移除购物车
                 models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, shopping_car__store=store,
@@ -571,7 +573,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'],detail=True)
     def check_delivery(self,request,pk=None):
-        dwd.order_fetch_test(pk)
+        # dwd.order_fetch_test(pk)
         ret=dwd.order_get(pk)
         return Response(ret)
 

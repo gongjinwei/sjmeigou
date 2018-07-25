@@ -18,9 +18,9 @@ def get_deliver_pay(origin,destination):
         meters=min(paths,key=lambda x:x['distance'])['distance']
         kilometers=math.ceil(meters/1000)
         if kilometers<=1:
-            ret=(1,1.5)
+            ret=(1,1.5,meters)
         else:
             plat_to_pay=(2+kilometers)/2
-            ret=(kilometers,plat_to_pay)
+            ret=(kilometers,plat_to_pay,meters)
         cache.set('%s:%s' % (origin, destination),ret,timeout=24*3600*7)
     return ret
