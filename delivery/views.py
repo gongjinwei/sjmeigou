@@ -53,6 +53,8 @@ class OrderCallbackViewSets(ModelViewSet):
                 # 状态码只允许改大
                 if dwd_store_order.dwd_status and int(dwd_store_order.dwd_status) < int(dwd_status):
                     dwd_store_order.__dict__.update(data)
+                elif not dwd_store_order.dwd_status:
+                    dwd_store_order.__dict__.update(data)
             else:
                 dwd_store_order.__dict__.update(data)
             dwd_store_order.save()
