@@ -31,22 +31,17 @@ class OrderCallbackViewSets(ModelViewSet):
         sign_data.pop('sig')
         my_sig = sign(sign_data)
         if sig == my_sig:
-            with open('dwd.txt','a') as fp:
-                json.dump(request.data,fp)
             store_order_id=serializer.validated_data['order_original_id']
             data={
-                "store_order_id":serializer.validated_data['order_original_id'],
-                "dwd_status":serializer.validated_data['order_status'],
-                'cancel_reason':serializer.validated_data['cancel_reason'],
-                'rider_name':serializer.validated_data['rider_name'],
-                'rider_code':serializer.validated_data['rider_code'],
-                'rider_mobile':serializer.validated_data['rider_mobile']
+                "store_order_id":store_order_id,
+                "dwd_status":serializer.validated_data.get('order_status',None),
+                'cancel_reason':serializer.validated_data.get('cancel_reason',None),
+                'rider_name':serializer.validated_data.get('rider_name',None),
+                'rider_code':serializer.validated_data.get('rider_code',None),
+                'rider_mobile':serializer.validated_data.get('rider_mobile',None)
             }
             DwdOrder.objects.update_or_create(defaults=data,store_order_id=store_order_id)
             self.perform_create(serializer)
             return Response({'success': True}, status=status.HTTP_200_OK)
         else:
             return Response({'success': False, 'errmsg': '签名不一致%s' % sig})
-
-    def update(self, request, *args, **kwargs):
-        pass

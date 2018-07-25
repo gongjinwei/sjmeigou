@@ -571,7 +571,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'],detail=True)
     def check_deliver(self,request,pk=None):
-        dwd.order_fetch_test(pk)
+        dwd.order_finish_test(pk)
         ret=dwd.order_get(pk)
         return Response(ret)
 
