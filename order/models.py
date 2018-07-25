@@ -244,6 +244,8 @@ class DwdOrder(models.Model):
     rider_code=models.CharField(max_length=20,null=True)
     rider_mobile = models.CharField(max_length=12,null=True)
     cancel_reason = models.CharField(max_length=100,null=True)
+    dwd_order_id=models.CharField(max_length=50,null=True)
+    dwd_order_distance=models.IntegerField(null=True)
 
 
 

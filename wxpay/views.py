@@ -6,13 +6,13 @@ from decimal import Decimal
 from datetime import datetime
 from django.db.models import F
 
-from tools import viewset,dianwoda
+from tools import viewset, dianwoda
 
 from weixin.pay import WeixinPay
 
 from . import serializers, models
 from register.views import CustomerXMLRender, CustomerXMLParser
-from order.models import JoinActivity, OrderTrade
+from order.models import JoinActivity, OrderTrade, DwdOrder
 from platforms.models import Account, KeepAccounts
 from platforms.serializers import KeepAccountSerializer
 
@@ -24,13 +24,13 @@ mch_key_file = getattr(settings, "WEIXIN_MCH_KEY_FILE")
 mch_cert_file = getattr(settings, "WEIXIN_MCH_CERT_FILE")
 app_id = getattr(settings, "APPID")
 app_secret = getattr(settings, "APPSECRET")
-DWD_SECRET=getattr(settings,'DWD_SECRET')
-DWD_APPKEY=getattr(settings,'DWD_APPKEY')
-DWD_TEST_URL=getattr(settings,'DWD_TEST_URL')
-DWD_ORIGINAL_URL=getattr(settings,'DWD_ORIGINAL_URL')
+DWD_SECRET = getattr(settings, 'DWD_SECRET')
+DWD_APPKEY = getattr(settings, 'DWD_APPKEY')
+DWD_TEST_URL = getattr(settings, 'DWD_TEST_URL')
+DWD_ORIGINAL_URL = getattr(settings, 'DWD_ORIGINAL_URL')
 
 weixinpay = WeixinPay(app_id, mch_id, mch_key, notify_url)
-dwd = dianwoda.DianWoDa(DWD_APPKEY,DWD_SECRET,DWD_TEST_URL)
+dwd = dianwoda.DianWoDa(DWD_APPKEY, DWD_SECRET, DWD_TEST_URL)
 
 
 class NotifyOrderView(viewset.CreateOnlyViewSet):
@@ -125,7 +125,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         else:
             return Response({"return_code": "False", "return_msg": "sign error"})
 
-    def receive_fee(self,order, cash_fee, paid_time, plat_account):
+    def receive_fee(self, order, cash_fee, paid_time, plat_account):
         order.account_paid = cash_fee
 
         order.paid_time = paid_time
@@ -135,10 +135,10 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             # 处理合并支付成功
             if hasattr(order, 'store_orders'):
 
-                order.store_orders.update(account_paid=F('account'), state=2,paid_time=paid_time)
+                order.store_orders.update(account_paid=F('account'), state=2, paid_time=paid_time)
                 # 下物流单
                 for store_o in order.store_orders:
-                    self.order_deliver_server(store_o,plat_account)
+                    self.order_deliver_server(store_o, plat_account)
             else:
                 # 没有店铺订单，平台收入增加
                 plat_account.bank_balance += cash_fee
@@ -158,7 +158,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         # 处理店铺单独付款订单-平台连锁单
         if hasattr(order, 'unify_order'):
             # 下物流单
-            self.order_deliver_server(order,plat_account)
+            self.order_deliver_server(order, plat_account)
 
             relate_order = order.unify_order
             relate_order.account_paid += cash_fee
@@ -169,24 +169,24 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
 
         order.save()
 
-    def order_deliver_server(self,store_order,plat_account):
+    def order_deliver_server(self, store_order, plat_account):
         if store_order.store_to_pay > Decimal(0.00):
             # 取出店铺物流账户,分别作余额扣减
-            store_account=Account.objects.get(user=None,store=store_order.store,account_type=5)
-            plat_account.bank_balance-=store_order.deliver_payment
-            store_account.bank_balance-=store_order.store_to_pay
+            store_account = Account.objects.get(user=None, store=store_order.store, account_type=5)
+            plat_account.bank_balance -= store_order.deliver_payment
+            store_account.bank_balance -= store_order.store_to_pay
 
             self.send_store_deliver(store_order)
             # 发起物流单
 
-    def send_store_deliver(self,store_order):
+    def send_store_deliver(self, store_order):
         store = store_order.store
-        receive_address=store_order.unify_order.address
+        receive_address = store_order.unify_order.address
         tmp_json = {
             'order_original_id': store_order.store_order_no,
-            'order_create_time': int(store_order.paid_time.timestamp()*1000),
+            'order_create_time': int(store_order.paid_time.timestamp() * 1000),
             'order_remark': '',
-            'order_price': int(store_order.account_paid*100),
+            'order_price': int(store_order.account_paid * 100),
             'cargo_weight': 0,
             'cargo_num': 1,
             'city_code': '330100',
@@ -198,9 +198,9 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             'seller_lng': store.longitude,
             'consignee_name': receive_address.contact,
             'consignee_mobile': receive_address.phone,
-            'consignee_address': receive_address.address+receive_address.room_no,
-            'consignee_lat': round(receive_address.latitude,6),
-            'consignee_lng': round(receive_address.longitude,6),
+            'consignee_address': receive_address.address + receive_address.room_no,
+            'consignee_lat': round(receive_address.latitude, 6),
+            'consignee_lng': round(receive_address.longitude, 6),
             'money_rider_needpaid': 0,
             'money_rider_prepaid': 0,
             'money_rider_charge': 0,
@@ -208,7 +208,9 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             'delivery_fee_from_seller': 0
         }
 
-        ret=dwd.order_send(tmp_json)
-        if ret.get('errorCode','') =='0':
-            dwd_order_id=ret['result']['dwd_order_id']
-            dwd_order_distance=ret['result']['distance']
+        ret = dwd.order_send(tmp_json)
+        if ret.get('errorCode', '') == '0':
+            dwd_order_id = ret['result']['dwd_order_id']
+            dwd_order_distance = ret['result']['distance']
+            DwdOrder.objects.create(store_order=store_order, dwd_order_id=dwd_order_id,
+                                    dwd_order_distance=dwd_order_distance)
