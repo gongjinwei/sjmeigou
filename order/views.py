@@ -591,7 +591,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
                 "seller_lat":dwd_order.store_order.store.latitude,
                 "seller_lng":dwd_order.store_order.store.longitude,
                 "seller_name":dwd_order.store_order.store.name,
-                "seller_logo":dwd_order.store_order.logo,
+                "seller_logo":dwd_order.store_order.store.logo,
                 "seller_contract":dwd_order.store_order.store.store_phone,
                 "receiver_lat":dwd_order.store_order.unify_order.address.latitude,
                 "receiver_lng":dwd_order.store_order.unify_order.address.longitude
