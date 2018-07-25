@@ -154,7 +154,7 @@ class UnifyOrder(models.Model):
     paid_time = models.DateTimeField(editable=False, null=True)
     address = models.ForeignKey(to='ReceiveAddress',on_delete=models.SET_NULL,null=True)
     update_time = models.DateTimeField(auto_now=True)
-    state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'待收货'),(4, '已完成待评价'), (5, '交易完成'),(6,'退款成功'),(7,'待退款'),(8,'订单已取消'),(9,'已完成用户删除'),(10,'部分支付')),editable=False,default=1)
+    state=models.SmallIntegerField(choices=((1,'待付款'),(2,'待发货'),(3,'配送中'),(4, '配送完成待评价'), (5, '交易完成'),(6,'退款成功'),(7,'待退款'),(8,'订单已取消'),(9,'已完成用户删除'),(10,'部分支付')),editable=False,default=1)
 
 
 class StoreOrder(models.Model):

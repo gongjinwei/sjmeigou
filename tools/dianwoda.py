@@ -84,7 +84,7 @@ class DianWoDa:
     def order_rider_position(self, order_original_id, rider_code):
         url_postfix = '/api/v3/order-rider-position.json'
         r = self._send_prepare(url_postfix, order_original_id=order_original_id, rider_code=rider_code)
-        print(r)
+        return r
 
     # 查询订单应收商家费用
 

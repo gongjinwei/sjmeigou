@@ -571,8 +571,14 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'],detail=True)
     def check_deliver(self,request,pk=None):
-        dwd.order_finish_test(pk)
+        # dwd.order_accept_test(pk)
         ret=dwd.order_get(pk)
+        return Response(ret)
+
+    @action(methods=['get'],detail=True)
+    def check_rider(self,request,pk=None):
+        rider_code=models.DwdOrder.objects.get(store_order_id=pk).rider_code
+        ret=dwd.order_rider_position(pk,rider_code)
         return Response(ret)
 
 

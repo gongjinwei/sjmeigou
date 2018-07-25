@@ -1,4 +1,4 @@
-import hashlib,json
+import hashlib, json
 
 from django.conf import settings
 from rest_framework.viewsets import ModelViewSet
@@ -27,12 +27,12 @@ class OrderCallbackViewSets(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         sig = serializer.validated_data.get('sig')
-        sign_data=serializer.validated_data.copy()
+        sign_data = serializer.validated_data.copy()
         sign_data.pop('sig')
         my_sig = sign(sign_data)
         if sig == my_sig:
-            store_order_id=serializer.validated_data['order_original_id']
-            dwd_store_order,created=DwdOrder.objects.get_or_create(store_order_id=store_order_id)
+            store_order_id = serializer.validated_data['order_original_id']
+            dwd_store_order, created = DwdOrder.objects.get_or_create(store_order_id=store_order_id)
             dwd_status = serializer.validated_data['order_status']
             data = {
                 "dwd_status": dwd_status,
@@ -41,15 +41,17 @@ class OrderCallbackViewSets(ModelViewSet):
                 'rider_code': serializer.validated_data.get('rider_code', None),
                 'rider_mobile': serializer.validated_data.get('rider_mobile', None)
             }
-            if dwd_status=='15':
-                dwd_store_order.store_order.state=3
+
+            # 做相应订单状态变更
+            if dwd_status == '15':
+                dwd_store_order.store_order.state = 3
                 dwd_store_order.store_order.save()
             elif dwd_status == '100':
-                dwd_store_order.store_order.state=4
+                dwd_store_order.store_order.state = 4
                 dwd_store_order.store_order.save()
             if not created:
                 # 状态码只允许改大
-                if dwd_store_order.dwd_status and int(dwd_store_order.dwd_status)< int(dwd_status):
+                if dwd_store_order.dwd_status and int(dwd_store_order.dwd_status) < int(dwd_status):
                     dwd_store_order.__dict__.update(data)
             else:
                 dwd_store_order.__dict__.update(data)
