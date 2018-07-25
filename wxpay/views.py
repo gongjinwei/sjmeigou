@@ -171,11 +171,12 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
 
     def order_deliver_server(self, store_order, plat_account):
         if store_order.store_to_pay > Decimal(0.00):
-            # 取出店铺物流账户,分别作余额扣减
+            # 取出店铺物流账户,分别作余额扣减和记录
             store_account = Account.objects.get(user=None, store=store_order.store, account_type=5)
             plat_account.bank_balance -= store_order.deliver_payment
             store_account.bank_balance -= store_order.store_to_pay
-
+            store_account.save()
+            plat_account.save()
             self.send_store_deliver(store_order)
             # 发起物流单
 

@@ -18,7 +18,7 @@ from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet
 from tools.contrib import get_deliver_pay
-from wxpay.views import weixinpay,dwd
+from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
 
 client = get_redis_connection()
@@ -265,7 +265,9 @@ class BalanceView(CreateOnlyViewSet):
             # 计算配送费用
             origin = '%s,%s' % (store.longitude, store.latitude)
 
-            delivery_pay, store_to_pay,deliver_distance = get_deliver_pay(origin, destination) if origin and destination else (0, 0,None)
+            delivery_pay, store_to_pay, deliver_distance = get_deliver_pay(origin,
+                                                                           destination) if origin and destination else (
+            0, 0, None)
             store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store, account_type=5)
 
             has_enough_delivery = store_delivery_charge.bank_balance >= Decimal(20.00)
@@ -281,7 +283,7 @@ class BalanceView(CreateOnlyViewSet):
                 'skus': sd,
                 "deliver_pay": delivery_pay,
                 'has_enough_delivery': has_enough_delivery,
-                'deliver_distance':deliver_distance
+                'deliver_distance': deliver_distance
             }})
 
         # 取出收货地址
@@ -411,7 +413,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                 deliver_server = data_st.get('deliver_server', None)
                 store_deliver_payment = Decimal(0.00)
                 store_to_pay = Decimal(0.00)
-                deliver_distance=None
+                deliver_distance = None
 
                 # 计算物流费用
                 if deliver_server:
@@ -433,7 +435,8 @@ class UnifyOrderView(CreateOnlyViewSet):
                                 destination = '%s,%s' % (address.longitude, address.latitude)
                                 origin = '%s,%s' % (store.longitude, store.latitude)
 
-                                store_deliver_payment, store_to_pay,deliver_distance = get_deliver_pay(origin, destination)
+                                store_deliver_payment, store_to_pay, deliver_distance = get_deliver_pay(origin,
+                                                                                                        destination)
 
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'FAIL'})
@@ -468,7 +471,8 @@ class UnifyOrderView(CreateOnlyViewSet):
                 order_money += store_order_money
                 data_st.update(
                     {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user,
-                     'store_to_pay': store_to_pay, 'deliver_payment': store_deliver_payment,'deliver_distance':deliver_distance})
+                     'store_to_pay': store_to_pay, 'deliver_payment': store_deliver_payment,
+                     'deliver_distance': deliver_distance})
 
                 # 移除购物车
                 models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, shopping_car__store=store,
@@ -571,39 +575,39 @@ class StoreOrderView(ListDetailDeleteViewSet):
         else:
             return Response({'code': 4202, 'msg': '订单必须是待付款状态，且价格只能改低'})
 
-    @action(methods=['get'],detail=True)
-    def check_delivery(self,request,pk=None):
-        te = request.query_params.get('test','')
-        te_option ={
-            'accept':'order_accept_test',
-            'arrive':'order_arrive_test',
-            'fetch':"order_fetch_test",
-            "finish":'order_finish_test'
+    @action(methods=['get'], detail=True)
+    def check_delivery(self, request, pk=None):
+        te = request.query_params.get('test', '')
+        te_option = {
+            'accept': 'order_accept_test',
+            'arrive': 'order_arrive_test',
+            'fetch': "order_fetch_test",
+            "finish": 'order_finish_test'
         }
-        if te and te_option.get(te,'') and hasattr(dwd,te_option.get(te)):
-            getattr(dwd,te_option.get(te))()
-        ret=dwd.order_get(pk)
+        if te and te_option.get(te, '') and hasattr(dwd, te_option.get(te)):
+            getattr(dwd, te_option.get(te))()
+        ret = dwd.order_get(pk)
         return Response(ret)
 
-    @action(methods=['get'],detail=True)
-    def check_rider(self,request,pk=None):
-        store_order=self.get_object()
+    @action(methods=['get'], detail=True)
+    def check_rider(self, request, pk=None):
+        store_order = self.get_object()
         if not models.DwdOrder.objects.filter(store_order=store_order).exists():
-            return Response({'errorCode':'3001','msg':'该物流单不存在'})
-        dwd_order=models.DwdOrder.objects.get(store_order=store_order)
-        ret=dwd.order_rider_position(pk,dwd_order.rider_code)
+            return Response({'errorCode': '3001', 'msg': '该物流单不存在'})
+        dwd_order = models.DwdOrder.objects.get(store_order=store_order)
+        ret = dwd.order_rider_position(pk, dwd_order.rider_code)
         # 只有骑手位置正确返回时才返回相应结果
-        if ret.get("errorCode",'') =="0":
-            dwd_order_serializer=serializers.DwdRiderSerializer(instance=dwd_order)
+        if ret.get("errorCode", '') == "0":
+            dwd_order_serializer = serializers.DwdRiderSerializer(instance=dwd_order)
             ret.update(dwd_order_serializer.data)
-            ori_dis={
-                "seller_lat":store_order.store.latitude,
-                "seller_lng":store_order.store.longitude,
-                "seller_name":store_order.store.name,
-                "seller_logo":store_order.store.logo,
-                "seller_contract":store_order.store.store_phone,
-                "receiver_lat":store_order.unify_order.address.latitude,
-                "receiver_lng":store_order.unify_order.address.longitude
+            ori_dis = {
+                "seller_lat": store_order.store.latitude,
+                "seller_lng": store_order.store.longitude,
+                "seller_name": store_order.store.name,
+                "seller_logo": store_order.store.logo,
+                "seller_contract": store_order.store.store_phone,
+                "receiver_lat": store_order.unify_order.address.latitude,
+                "receiver_lng": store_order.unify_order.address.longitude
             }
             ret.update(ori_dis)
         return Response(ret)
