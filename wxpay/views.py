@@ -189,7 +189,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             'order_price': int(store_order.account_paid*100),
             'cargo_weight': 0,
             'cargo_num': 1,
-            'city_code': '330700',
+            'city_code': '330100',
             'seller_id': str(store.id),
             'seller_name': store.info.contract_name,
             'seller_mobile': store.info.contract_mobile,
@@ -209,6 +209,6 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         }
 
         ret=dwd.order_send(tmp_json)
-        if ret.errorCode =='0':
+        if ret.get('errorCode','') =='0':
             dwd_order_id=ret['result']['dwd_order_id']
             dwd_order_distance=ret['result']['distance']

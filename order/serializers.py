@@ -302,3 +302,9 @@ class OrderTradeSerializer(serializers.ModelSerializer):
 
 class InitialTradeSerializer(serializers.Serializer):
     order = serializers.PrimaryKeyRelatedField(queryset=models.StoreOrder.objects.filter(state=1))
+
+
+class DwdOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.DwdOrder
+        fields = '__all__'
