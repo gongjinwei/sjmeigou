@@ -308,3 +308,11 @@ class DwdOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.DwdOrder
         fields = '__all__'
+
+
+class DwdRiderSerializer(serializers.ModelSerializer):
+    status_name = serializers.ReadOnlyField(source='get_dwd_status_display')
+
+    class Meta:
+        model = models.DwdOrder
+        fields=('dwd_status','rider_name','rider_mobile','status_name')

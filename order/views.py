@@ -571,14 +571,16 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'],detail=True)
     def check_delivery(self,request,pk=None):
-        dwd.order_fetch_test(pk)
+        # dwd.order_finish_test(pk)
         ret=dwd.order_get(pk)
         return Response(ret)
 
     @action(methods=['get'],detail=True)
     def check_rider(self,request,pk=None):
-        rider_code=models.DwdOrder.objects.get(store_order_id=pk).rider_code
-        ret=dwd.order_rider_position(pk,rider_code)
+        dwd_order=models.DwdOrder.objects.get(store_order_id=pk)
+        ret=dwd.order_rider_position(pk,dwd_order.rider_code)
+        dwd_order_serializer=serializers.DwdRiderSerializer(instance=dwd_order)
+        ret.update(dwd_order_serializer.data)
         return Response(ret)
 
 
