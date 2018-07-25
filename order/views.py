@@ -573,29 +573,37 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'],detail=True)
     def check_delivery(self,request,pk=None):
-        # dwd.order_fetch_test(pk)
+        te = request.query_params.get('test','')
+        te_option ={
+            'accept':'order_accept_test',
+            'arrive':'order_arrive_test',
+            'fetch':"order_fetch_test",
+            "finish":'order_finish_test'
+        }
+        if te and te_option.get(te,'') and hasattr(dwd,te_option.get(te)):
+            getattr(dwd,te_option.get(te))()
         ret=dwd.order_get(pk)
         return Response(ret)
 
     @action(methods=['get'],detail=True)
     def check_rider(self,request,pk=None):
-        self.get_object()
-        if not models.DwdOrder.objects.filter(store_order_id=pk).exists():
+        store_order=self.get_object()
+        if not models.DwdOrder.objects.filter(store_order=store_order).exists():
             return Response({'errorCode':'3001','msg':'该物流单不存在'})
-        dwd_order=models.DwdOrder.objects.get(store_order_id=pk)
+        dwd_order=models.DwdOrder.objects.get(store_order=store_order)
         ret=dwd.order_rider_position(pk,dwd_order.rider_code)
         # 只有骑手位置正确返回时才返回相应结果
         if ret.get("errorCode",'') =="0":
             dwd_order_serializer=serializers.DwdRiderSerializer(instance=dwd_order)
             ret.update(dwd_order_serializer.data)
             ori_dis={
-                "seller_lat":dwd_order.store_order.store.latitude,
-                "seller_lng":dwd_order.store_order.store.longitude,
-                "seller_name":dwd_order.store_order.store.name,
-                "seller_logo":dwd_order.store_order.store.logo,
-                "seller_contract":dwd_order.store_order.store.store_phone,
-                "receiver_lat":dwd_order.store_order.unify_order.address.latitude,
-                "receiver_lng":dwd_order.store_order.unify_order.address.longitude
+                "seller_lat":store_order.store.latitude,
+                "seller_lng":store_order.store.longitude,
+                "seller_name":store_order.store.name,
+                "seller_logo":store_order.store.logo,
+                "seller_contract":store_order.store.store_phone,
+                "receiver_lat":store_order.unify_order.address.latitude,
+                "receiver_lng":store_order.unify_order.address.longitude
             }
             ret.update(ori_dis)
         return Response(ret)
