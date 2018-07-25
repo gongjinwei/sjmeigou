@@ -31,16 +31,16 @@ class OrderCallbackViewSets(ModelViewSet):
         sign_data.pop('sig')
         my_sig = sign(sign_data)
         if sig == my_sig:
-            store_order=serializer.validated_data['order_original_id']
+            store_order_id=serializer.validated_data['order_original_id']
             data={
-                "store_order":serializer.validated_data['order_original_id'],
+                "store_order_id":serializer.validated_data['order_original_id'],
                 "dwd_status":serializer.validated_data['order_status'],
                 'cancel_reason':serializer.validated_data['cancel_reason'],
                 'rider_name':serializer.validated_data['rider_name'],
                 'rider_code':serializer.validated_data['rider_code'],
                 'rider_mobile':serializer.validated_data['rider_mobile']
             }
-            DwdOrder.objects.update_or_create(defaults=data,store_order=store_order)
+            DwdOrder.objects.update_or_create(defaults=data,store_order_id=store_order_id)
             self.perform_create(serializer)
             return Response({'success': True}, status=status.HTTP_200_OK)
         else:
