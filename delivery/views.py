@@ -1,4 +1,4 @@
-import hashlib
+import hashlib,json
 
 from django.conf import settings
 from rest_framework.viewsets import ModelViewSet
@@ -31,6 +31,8 @@ class OrderCallbackViewSets(ModelViewSet):
         sign_data.pop('sig')
         my_sig = sign(sign_data)
         if sig == my_sig:
+            with open('dwd.txt','a') as fp:
+                json.dump(request.data,fp)
             store_order_id=serializer.validated_data['order_original_id']
             data={
                 "store_order_id":serializer.validated_data['order_original_id'],
