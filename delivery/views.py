@@ -43,15 +43,15 @@ class OrderCallbackViewSets(ModelViewSet):
             }
 
             # 做相应订单状态变更
-            if dwd_status == '15':
+            if dwd_status == 15:
                 dwd_store_order.store_order.state = 3
                 dwd_store_order.store_order.save()
-            elif dwd_status == '100':
+            elif dwd_status == 100:
                 dwd_store_order.store_order.state = 4
                 dwd_store_order.store_order.save()
             if not created:
                 # 状态码只允许改大
-                if dwd_store_order.dwd_status and int(dwd_store_order.dwd_status) < int(dwd_status):
+                if dwd_store_order.dwd_status and dwd_store_order.dwd_status < dwd_status:
                     dwd_store_order.__dict__.update(data)
                 elif not dwd_store_order.dwd_status:
                     dwd_store_order.__dict__.update(data)
