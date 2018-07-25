@@ -241,10 +241,19 @@ class SkuOrderSerializer(serializers.ModelSerializer):
         fields = ('sku', 'num', 'title', 'color', 'size', 'price', 'color_pic')
 
 
+class DwdOrderInfoSerializer(serializers.ModelSerializer):
+    status_name = serializers.ReadOnlyField(source='get_dwd_status_display')
+
+    class Meta:
+        model = models.DwdOrder
+        fields = ('dwd_status','status_name')
+
+
 class StoreOrderSerializer(serializers.ModelSerializer):
     sku_orders = SkuOrderSerializer(many=True, required=False)
     logo = serializers.ReadOnlyField(source='store.logo')
     store_name = serializers.ReadOnlyField(source='store.name')
+    dwd_order_info = DwdOrderInfoSerializer(read_only=True)
 
     class Meta:
         model = models.StoreOrder
