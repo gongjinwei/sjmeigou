@@ -570,8 +570,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
             return Response({'code': 4202, 'msg': '订单必须是待付款状态，且价格只能改低'})
 
     @action(methods=['get'],detail=True)
-    def check_deliver(self,request,pk=None):
-        # dwd.order_accept_test(pk)
+    def check_delivery(self,request,pk=None):
+        dwd.order_fetch_test(pk)
         ret=dwd.order_get(pk)
         return Response(ret)
 
