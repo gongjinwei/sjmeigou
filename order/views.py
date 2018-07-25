@@ -571,8 +571,6 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'],detail=True)
     def check_deliver(self,request,pk=None):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         ret=dwd.order_get(pk)
         return Response(ret)
 
