@@ -139,3 +139,6 @@ class StoreSearchSerializer(serializers.ModelSerializer):
             return obj.goods.values('title','master_graphs','min_price','id')[:3]
 
 
+
+
+

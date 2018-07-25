@@ -18,7 +18,7 @@ from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet
 from tools.contrib import get_deliver_pay
-from wxpay.views import weixinpay
+from wxpay.views import weixinpay,dwd
 from platforms.models import AccountRecharge, Account
 
 client = get_redis_connection()
@@ -568,6 +568,13 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
         else:
             return Response({'code': 4202, 'msg': '订单必须是待付款状态，且价格只能改低'})
+
+    @action(methods=['get'],detail=True)
+    def check_deliver(self,request,pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ret=dwd.order_get(pk)
+        return Response(ret)
 
 
 class InitialPaymentView(CreateOnlyViewSet):
