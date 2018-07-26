@@ -349,7 +349,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         order = validated_data.pop('order')
         image_data = validated_data.pop('images')
-        image_ids = [image.id for image in image_data]
+        image_ids = [image['image'].id for image in image_data]
         request = self.context.get('request')
         user = request.user
         op = request.query_params.get('op', '')
