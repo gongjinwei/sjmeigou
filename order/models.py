@@ -182,12 +182,12 @@ class StoreOrder(models.Model):
 
 class SkuOrder(models.Model):
     store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,related_name='sku_orders',editable=False)
-    sku=models.ForeignKey(to='goods.SKU',on_delete=models.DO_NOTHING)
+    sku=models.ForeignKey(to='goods.SKU',on_delete=models.CASCADE)
     num=models.IntegerField()
 
 
 class ReceiveAddress(models.Model):
-    user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING,editable=False)
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
     contact=models.CharField(max_length=100)
     call = models.IntegerField(choices=((0,"先生"),(1,"女士")),null=True)
     phone = models.CharField(max_length=12)
@@ -202,7 +202,7 @@ class ReceiveAddress(models.Model):
 
 class InitiatePayment(models.Model):
     trade=models.OneToOneField(to='OrderTrade',on_delete=models.CASCADE)
-    user = models.ForeignKey(to=User,on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE)
     appId = models.CharField(max_length=100)
     timeStamp=models.CharField(max_length=30)
     nonceStr=models.CharField(max_length=40)
@@ -219,9 +219,9 @@ class InitiatePayment(models.Model):
 #     state=models.SmallIntegerField(choices=((0,'买家已评价，等待卖家评价'),(1,'卖家已评价，等待买家评价'),(2,'双方已评')))
 
 class OrderTrade(models.Model):
-    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.DO_NOTHING,null=True)
-    unify_order = models.ForeignKey(to='UnifyOrder',on_delete=models.DO_NOTHING,null=True)
-    recharge = models.ForeignKey(to=AccountRecharge,on_delete=models.DO_NOTHING,null=True)
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,null=True)
+    unify_order = models.ForeignKey(to='UnifyOrder',on_delete=models.CASCADE,null=True)
+    recharge = models.ForeignKey(to=AccountRecharge,on_delete=models.CASCADE,null=True)
     trade_no = models.CharField(primary_key=True,max_length=30)
     paid_time=models.DateTimeField(null=True,editable=False)
     paid_money = models.DecimalField(default=Decimal(0.00),max_digits=30,decimal_places=2,editable=False)
