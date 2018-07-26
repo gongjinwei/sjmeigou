@@ -340,7 +340,7 @@ class ImageCommentSerializer(serializers.Serializer):
 
 
 class CommentContentSerializer(serializers.ModelSerializer):
-    images = ImageCommentSerializer(many=True)
+    comment_images = ImageCommentSerializer(many=True)
 
     class Meta:
         model = models.CommentContent
@@ -348,7 +348,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         order = validated_data.pop('order')
-        image_data = validated_data.pop('images')
+        image_data = validated_data.pop('comment_images')
         image_ids = [image['image'].id for image in image_data]
         request = self.context.get('request')
         user = request.user
