@@ -336,7 +336,7 @@ class CommentImageSerializer(serializers.ModelSerializer):
 
 
 class ImageCommentSerializer(serializers.Serializer):
-    image_id = serializers.PrimaryKeyRelatedField(queryset=models.CommentImage.objects.all())
+    image = serializers.PrimaryKeyRelatedField(queryset=models.CommentImage.objects.all())
 
 
 class CommentContentSerializer(serializers.ModelSerializer):

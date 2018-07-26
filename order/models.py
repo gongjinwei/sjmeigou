@@ -223,7 +223,7 @@ class CommentContent(models.Model):
     is_buyer_comment=models.BooleanField(default=True,editable=False)
     comment = models.CharField(max_length=255)
     score = models.SmallIntegerField(choices=((1, '很差'), (2, '一般'), (3, '满意'), (4, '非常满意'), (5, '完美')))
-    comment_time=models.DateTimeField()
+    comment_time=models.DateTimeField(auto_now_add=True)
 
 
 class CommentImage(models.Model):
