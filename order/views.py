@@ -612,6 +612,21 @@ class StoreOrderView(ListDetailDeleteViewSet):
             ret.update(ori_dis)
         return Response(ret)
 
+    @action(methods=['post'],detail=True,serializer_class=serializers.CommentImageSerializer)
+    def add_comment_image(self,request,pk=None):
+        store_order = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(store_order=store_order,user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['post'], detail=True, serializer_class=serializers.CommentContentSerializer)
+    def add_comment(self,request,pk=None):
+        store_order = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(order=store_order)
+
 
 class InitialPaymentView(CreateOnlyViewSet):
     serializer_class = serializers.InitialTradeSerializer

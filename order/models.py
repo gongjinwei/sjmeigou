@@ -215,15 +215,23 @@ class InitiatePayment(models.Model):
 
 class OrderComment(models.Model):
     order = models.OneToOneField(to='StoreOrder',on_delete=models.CASCADE)
-    state=models.SmallIntegerField(choices=((0,'买家已评价'),(1,'卖家已评价'),(2,'双方已评')),editable=False)
+    state=models.SmallIntegerField(choices=((0,'未评价'),(1,'买家已评价'),(2,'卖家已评价'),(3,'双方已评')),editable=False,default=0)
 
 
 class CommentContent(models.Model):
     order_comment=models.ForeignKey(to='OrderComment',on_delete=models.CASCADE,related_name='comment_contents')
-    is_buyer_comment=models.BooleanField(default=True)
+    is_buyer_comment=models.BooleanField(default=True,editable=False)
     comment = models.CharField(max_length=255)
     score = models.SmallIntegerField(choices=((1, '很差'), (2, '一般'), (3, '满意'), (4, '非常满意'), (5, '完美')))
     comment_time=models.DateTimeField()
+
+
+class CommentImage(models.Model):
+    user = models.ForeignKey(to=User,on_delete=models.SET_NULL,null=True)
+    store_order=models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,related_name='comment_images',editable=False)
+    comment_content=models.ForeignKey(to='CommentContent',on_delete=models.CASCADE,null=True)
+    image=models.ImageField(upload_to='sjmeigou/order/comment/%Y%m%d/')
+    add_time = models.DateTimeField(auto_now_add=True)
 
 
 class OrderTrade(models.Model):

@@ -327,3 +327,55 @@ class DwdRiderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.DwdOrder
         fields = ('dwd_status', 'rider_name', 'rider_mobile', 'status_name')
+
+
+class CommentImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CommentImage
+        fields = '__all__'
+
+
+class ImageCommentSerializer(serializers.Serializer):
+    image_id = serializers.PrimaryKeyRelatedField(queryset=models.CommentImage.objects.all())
+
+
+class CommentContentSerializer(serializers.ModelSerializer):
+    images = ImageCommentSerializer(many=True)
+
+    class Meta:
+        model = models.CommentContent
+        fields = '__all__'
+
+    def create(self, validated_data):
+        order = validated_data.pop('order')
+        image_data = validated_data.pop('images')
+        request = self.context.get('request')
+        user = request.user
+        op = request.query_params.get('op', '')
+        order_comment, created = models.OrderComment.objects.get_or_create(defaults={"order": order}, order=order)
+        if order.user == user and op != 'backend':
+            validated_data.update({
+                "order_comment":order_comment,
+                "is_buyer_comment":True
+            })
+
+            if order_comment.state == 0:
+                order_comment.state = 1
+            elif order_comment.state == 2:
+                order_comment.state = 3
+        else:
+            validated_data.update({
+                "order_comment": order_comment,
+                "is_buyer_comment": False
+            })
+
+            if order_comment.state == 0:
+                order_comment.state = 2
+            elif order_comment.state ==1:
+                order_comment.state =3
+        order_comment.save()
+        instance, created = self.Meta.model.objects.create(**validated_data)
+
+        models.CommentImage.objects.filter(store_order=order,id__in=image_data).update(comment_content=instance)
+
+        return instance
