@@ -380,9 +380,10 @@ class CommentContentSerializer(serializers.ModelSerializer):
             elif order_comment.state == 1:
                 order_comment.state = 3
         order_comment.save()
-        instance,created = models.CommentContent.objects.get_or_create(default=validated_data,
-                                                               order_comment=validated_data['order_comment'],
-                                                               is_buyer_comment=validated_data['is_buyer_comment'])
+        instance, created = models.CommentContent.objects.get_or_create(defaults=validated_data,
+                                                                        order_comment=validated_data['order_comment'],
+                                                                        is_buyer_comment=validated_data[
+                                                                            'is_buyer_comment'])
 
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(comment_content=instance)
 
