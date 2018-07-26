@@ -255,6 +255,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     logo = serializers.ReadOnlyField(source='store.logo')
     store_name = serializers.ReadOnlyField(source='store.name')
     dwd_order_info = DwdOrderInfoSerializer(read_only=True)
+    delivery_name = serializers.ReadOnlyField(source='deliver_server.server.name')
 
     class Meta:
         model = models.StoreOrder

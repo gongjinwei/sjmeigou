@@ -213,10 +213,18 @@ class InitiatePayment(models.Model):
     has_paid = models.BooleanField(default=False)
 
 
-# class OrderComment(models.Model):
-#     order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE)
-#
-#     state=models.SmallIntegerField(choices=((0,'买家已评价，等待卖家评价'),(1,'卖家已评价，等待买家评价'),(2,'双方已评')))
+class OrderComment(models.Model):
+    order = models.OneToOneField(to='StoreOrder',on_delete=models.CASCADE)
+    state=models.SmallIntegerField(choices=((0,'买家已评价'),(1,'卖家已评价'),(2,'双方已评')),editable=False)
+    buyer_comment=models.OneToOneField(to='CommentContent')
+    seller_comment = models.OneToOneField(to='CommentContent')
+
+
+class CommentContent(models.Model):
+    comment = models.CharField(max_length=255)
+    score = models.SmallIntegerField(choices=((1, '很差'), (2, '一般'), (3, '满意'), (4, '非常满意'), (5, '完美')))
+    comment_time=models.DateTimeField()
+
 
 class OrderTrade(models.Model):
     store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,null=True)

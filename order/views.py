@@ -623,3 +623,5 @@ class InitialPaymentView(CreateOnlyViewSet):
         ret = prepare_payment(order.user, order.unify_order.order_desc, order.account, order.store_order_no,
                               order_type='store_order')
         return Response(ret)
+
+
