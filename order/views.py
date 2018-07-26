@@ -622,9 +622,9 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['post'], detail=True, serializer_class=serializers.CommentContentSerializer)
     def add_comment(self,request,pk=None):
-        store_order = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        store_order = self.get_object()
         serializer.save(order=store_order)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

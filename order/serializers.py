@@ -349,6 +349,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         order = validated_data.pop('order')
         image_data = validated_data.pop('images')
+        image_ids = [image.id for image in image_data]
         request = self.context.get('request')
         user = request.user
         op = request.query_params.get('op', '')
@@ -376,6 +377,6 @@ class CommentContentSerializer(serializers.ModelSerializer):
         order_comment.save()
         instance, created = self.Meta.model.objects.create(**validated_data)
 
-        models.CommentImage.objects.filter(store_order=order,id__in=image_data).update(comment_content=instance)
+        models.CommentImage.objects.filter(store_order=order,id__in=image_ids).update(comment_content=instance)
 
         return instance
