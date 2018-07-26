@@ -330,10 +330,9 @@ class DwdRiderSerializer(serializers.ModelSerializer):
 
 
 class CommentImageSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.CommentImage
-        fields = ('id','image')
+        fields = ('id', 'image')
 
 
 def check_image_id(value):
@@ -362,8 +361,8 @@ class CommentContentSerializer(serializers.ModelSerializer):
         order_comment, created = models.OrderComment.objects.get_or_create(defaults={"order": order}, order=order)
         if order.user == user and op != 'backend':
             validated_data.update({
-                "order_comment":order_comment,
-                "is_buyer_comment":True
+                "order_comment": order_comment,
+                "is_buyer_comment": True
             })
 
             if order_comment.state == 0:
@@ -378,11 +377,13 @@ class CommentContentSerializer(serializers.ModelSerializer):
 
             if order_comment.state == 0:
                 order_comment.state = 2
-            elif order_comment.state ==1:
-                order_comment.state =3
+            elif order_comment.state == 1:
+                order_comment.state = 3
         order_comment.save()
-        instance = models.CommentContent.objects.create(**validated_data)
+        instance = models.CommentContent.objects.get_or_create(default=validated_data,
+                                                               order_comment=validated_data['order_comment'],
+                                                               is_buyer_comment=validated_data['is_buyer_comment'])
 
-        models.CommentImage.objects.filter(store_order=order,id__in=image_ids).update(comment_content=instance)
+        models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(comment_content=instance)
 
         return instance
