@@ -216,8 +216,8 @@ class InitiatePayment(models.Model):
 class OrderComment(models.Model):
     order = models.OneToOneField(to='StoreOrder',on_delete=models.CASCADE)
     state=models.SmallIntegerField(choices=((0,'买家已评价'),(1,'卖家已评价'),(2,'双方已评')),editable=False)
-    buyer_comment=models.OneToOneField(to='CommentContent')
-    seller_comment = models.OneToOneField(to='CommentContent')
+    buyer_comment=models.OneToOneField(to='CommentContent',on_delete=models.CASCADE)
+    seller_comment = models.OneToOneField(to='CommentContent',on_delete=models.CASCADE)
 
 
 class CommentContent(models.Model):
