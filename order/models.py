@@ -219,7 +219,7 @@ class OrderComment(models.Model):
 
 
 class CommentContent(models.Model):
-    order_comment=models.ForeignKey(to='OrderComment',on_delete=models.CASCADE,related_name='comment_contents')
+    order_comment=models.ForeignKey(to='OrderComment',on_delete=models.CASCADE,related_name='comment_contents',editable=False)
     is_buyer_comment=models.BooleanField(default=True,editable=False)
     comment = models.CharField(max_length=255)
     score = models.SmallIntegerField(choices=((1, '很差'), (2, '一般'), (3, '满意'), (4, '非常满意'), (5, '完美')))
@@ -227,9 +227,9 @@ class CommentContent(models.Model):
 
 
 class CommentImage(models.Model):
-    user = models.ForeignKey(to=User,on_delete=models.SET_NULL,null=True)
+    user = models.ForeignKey(to=User,on_delete=models.SET_NULL,null=True,editable=False)
     store_order=models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,related_name='comment_images',editable=False)
-    comment_content=models.ForeignKey(to='CommentContent',on_delete=models.CASCADE,null=True)
+    comment_content=models.ForeignKey(to='CommentContent',on_delete=models.CASCADE,null=True,editable=False)
     image=models.ImageField(upload_to='sjmeigou/order/comment/%Y%m%d/')
     add_time = models.DateTimeField(auto_now_add=True)
 

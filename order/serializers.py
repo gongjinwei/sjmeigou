@@ -332,7 +332,7 @@ class DwdRiderSerializer(serializers.ModelSerializer):
 class CommentImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CommentImage
-        fields = '__all__'
+        fields = ('id','image')
 
 
 class ImageCommentSerializer(serializers.Serializer):
