@@ -231,6 +231,7 @@ class CommentContent(models.Model):
     order_comment = models.ForeignKey(to='OrderComment', on_delete=models.CASCADE, related_name='comment_contents',
                                       editable=False)
     is_buyer_comment = models.BooleanField(default=True, editable=False)
+    is_anonymous = models.BooleanField(default=False)
     comment = models.CharField(max_length=255)
     score = models.SmallIntegerField(choices=((1, '很差'), (2, '一般'), (3, '满意'), (4, '非常满意'), (5, '完美')))
     comment_time = models.DateTimeField(auto_now_add=True)
