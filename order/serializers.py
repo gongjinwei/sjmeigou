@@ -375,7 +375,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
             elif order_comment.state ==1:
                 order_comment.state =3
         order_comment.save()
-        instance, created = self.Meta.model.objects.create(**validated_data)
+        instance = models.CommentContent.objects.create(**validated_data)
 
         models.CommentImage.objects.filter(store_order=order,id__in=image_ids).update(comment_content=instance)
 
