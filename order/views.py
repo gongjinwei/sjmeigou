@@ -626,7 +626,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
         serializer.is_valid(raise_exception=True)
         store_order = self.get_object()
         serializer.save(order=store_order)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
 
 
 class InitialPaymentView(CreateOnlyViewSet):
