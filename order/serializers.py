@@ -330,13 +330,19 @@ class DwdRiderSerializer(serializers.ModelSerializer):
 
 
 class CommentImageSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = models.CommentImage
         fields = ('id','image')
 
 
+def check_image_id(value):
+    if not models.CommentImage.objects.filter(pk=value).exists():
+        raise serializers.ValidationError('id不存在')
+
+
 class ImageCommentSerializer(serializers.Serializer):
-    image = serializers.PrimaryKeyRelatedField(queryset=models.CommentImage.objects.all())
+    image = serializers.IntegerField(validators=[check_image_id])
 
 
 class CommentContentSerializer(serializers.ModelSerializer):
@@ -349,7 +355,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         order = validated_data.pop('order')
         image_data = validated_data.pop('comment_images')
-        image_ids = [image['image'].id for image in image_data]
+        image_ids = [image['image'] for image in image_data]
         request = self.context.get('request')
         user = request.user
         op = request.query_params.get('op', '')
