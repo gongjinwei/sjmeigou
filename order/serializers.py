@@ -369,6 +369,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
                 order_comment.state = 1
             elif order_comment.state == 2:
                 order_comment.state = 3
+                order.state = 5
         else:
             validated_data.update({
                 "order_comment": order_comment,
@@ -379,6 +380,8 @@ class CommentContentSerializer(serializers.ModelSerializer):
                 order_comment.state = 2
             elif order_comment.state == 1:
                 order_comment.state = 3
+                order.state = 5
+        order.save()
         order_comment.save()
         instance, created = models.CommentContent.objects.get_or_create(defaults=validated_data,
                                                                         order_comment=validated_data['order_comment'],
