@@ -345,8 +345,24 @@ class ImageCommentSerializer(serializers.Serializer):
     image = serializers.IntegerField(validators=[check_image_id])
 
 
+class DwdOrderCommentSerializer(serializers.ModelSerializer):
+    satisfied_reasons=serializers.PrimaryKeyRelatedField(queryset=DeliveryReason.objects.all(),many=True)
+
+    class Meta:
+        model = models.DwdOrderComment
+        fields = '__all__'
+
+    def create(self, validated_data):
+        sats = validated_data.pop('satisfied_reasons',[])
+        instance = self.Meta.model.objects.create(**validated_data)
+        for sat in sats:
+            instance.satisfied_reasons.add(sat)
+        return instance
+
+
 class CommentContentSerializer(serializers.ModelSerializer):
     comment_images = ImageCommentSerializer(many=True)
+    dwd_order_comment = DwdOrderCommentSerializer(allow_null=True)
 
     class Meta:
         model = models.CommentContent
@@ -391,19 +407,4 @@ class CommentContentSerializer(serializers.ModelSerializer):
 
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(comment_content=instance)
 
-        return instance
-
-
-class DwdOrderCommentSerializer(serializers.ModelSerializer):
-    satisfied_reasons=serializers.PrimaryKeyRelatedField(queryset=DeliveryReason.objects.all(),many=True)
-
-    class Meta:
-        model = models.DwdOrderComment
-        fields = '__all__'
-
-    def create(self, validated_data):
-        sats = validated_data.pop('satisfied_reasons',[])
-        instance = self.Meta.model.objects.create(**validated_data)
-        for sat in sats:
-            instance.satisfied_reasons.add(sat)
         return instance
