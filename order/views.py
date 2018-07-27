@@ -629,12 +629,23 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get','post'], detail=True, serializer_class=serializers.CommentContentSerializer)
     def add_comment(self,request,pk=None):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         store_order = self.get_object()
         if request.method =='GET':
-            return Response('ok')
+            ret={}
+            dwd_order = getattr(store_order,'dwd_order_info',None)
+            if dwd_order:
+                ret['dwd_order']={
+                    "rider_name":dwd_order.rider_name,
+                    "arrive_time":dwd_order.arrive_time
+                }
+            ret['store']={
+                'logo':store_order.store.logo,
+                'name':store_order.store.name
+            }
+            return Response(ret)
         elif request.method == 'POST':
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             if store_order.state !=4:
                 return Response({"code":4203,"msg":'该状态不能被评价',"success":"FAIL"})
             op = request.query_params.get('op','')
