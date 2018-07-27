@@ -585,7 +585,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             "finish": 'order_finish_test'
         }
         if te and te_option.get(te, '') and hasattr(dwd, te_option.get(te)):
-            getattr(dwd, te_option.get(te))()
+            getattr(dwd, te_option.get(te))(pk)
         ret = dwd.order_get(pk)
         return Response(ret)
 

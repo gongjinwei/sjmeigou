@@ -58,6 +58,8 @@ class OrderCallbackViewSets(ModelViewSet):
                 # 状态码只允许改大
                 if dwd_store_order.dwd_status and dwd_store_order.dwd_status < dwd_status:
                     dwd_store_order.__dict__.update(data)
+                if dwd_store_order.dwd_status and dwd_store_order.dwd_status > dwd_status:
+                    return Response({'success': False, 'errmsg': '状态错误'})
                 elif not dwd_store_order.dwd_status:
                     dwd_store_order.__dict__.update(data)
             else:

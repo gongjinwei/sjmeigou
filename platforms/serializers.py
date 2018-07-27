@@ -57,3 +57,9 @@ class KeepAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.KeepAccounts
         fields = '__all__'
+
+
+class DeliverReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.DeliveryReason
+        fields = '__all__'

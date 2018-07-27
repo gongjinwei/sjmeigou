@@ -87,3 +87,8 @@ class CodeWarehouse(models.Model):
     active_user=models.ForeignKey(to=User,editable=False,null=True,blank=True,on_delete=models.SET_NULL)
     active_time=models.DateTimeField(auto_now=True)
     create_time=models.DateTimeField(auto_now_add=True)
+
+
+class DeliveryReason(models.Model):
+    reason = models.CharField(max_length=50)
+    reason_type = models.SmallIntegerField(choices=((1,'满意'),(2,'不满意')))

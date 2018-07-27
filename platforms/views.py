@@ -115,3 +115,8 @@ class AccountViewSets(ModelViewSet):
             return queryset
         else:
             return queryset.filter(user=self.request.user)
+
+
+class DeliveryReasonView(ModelViewSet):
+    queryset = models.DeliveryReason.objects.all()
+    serializer_class = serializers.DeliverReasonSerializer

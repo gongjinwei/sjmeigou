@@ -9,6 +9,7 @@ from store.models import Stores
 
 from goods.models import SKU, GoodDeliver
 from tools.contrib import get_deliver_pay
+from platforms.models import DeliveryReason
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -391,3 +392,11 @@ class CommentContentSerializer(serializers.ModelSerializer):
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(comment_content=instance)
 
         return instance
+
+
+class DwdOrderCommentSerializer(serializers.ModelSerializer):
+    satisfied_reasons=serializers.PrimaryKeyRelatedField(queryset=DeliveryReason.objects.all(),many=True)
+
+    class Meta:
+        model = models.DwdOrderComment
+        fields = '__all__'

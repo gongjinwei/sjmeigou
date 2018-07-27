@@ -11,5 +11,6 @@ router.register('delivers',views.DeliversViewSets,base_name='delivers')
 router.register('deliverServices',views.DeliverServicesViewSets,base_name='deliverServices')
 router.register('account',views.AccountViewSets,base_name='account')
 router.register('accountRecharge',views.AccountRechargeViewSets,base_name='accountRecharge')
+router.register('deliveryReason',views.DeliveryReasonView,base_name='deliveryReason')
 
 urlpatterns=router.urls

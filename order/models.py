@@ -278,3 +278,9 @@ class DwdOrder(models.Model):
     cancel_reason = models.CharField(max_length=100, null=True)
     dwd_order_id = models.CharField(max_length=50, null=True)
     dwd_order_distance = models.IntegerField(null=True)
+
+
+class DwdOrderComment(models.Model):
+    is_satisfied = models.BooleanField(default=True)
+    satisfied_reasons=models.ManyToManyField(to='platforms.DeliveryReason',on_delete=models.SET_NULL,null=True)
+    comment_time = models.DateTimeField(auto_now_add=True)
