@@ -633,16 +633,21 @@ class StoreOrderView(ListDetailDeleteViewSet):
         if request.method =='GET':
             ret={}
             dwd_order = getattr(store_order,'dwd_order_info',None)
-            if dwd_order or request.query_params.get('op','') !='backend':
+            if dwd_order and request.query_params.get('op','') !='backend':
                 ret['dwd_order']={
                     'id':dwd_order.id,
                     "rider_name":dwd_order.rider_name,
                     "arrive_time":dwd_order.arrive_time
                 }
-            ret['store']={
-                'logo':store_order.store.logo,
-                'name':store_order.store.name
-            }
+                ret['commentator']={
+                    'logo':store_order.store.logo,
+                    'name':store_order.store.name
+                }
+            elif request.query_params.get('op','') =='backend':
+                ret['commentator']={
+                    'logo':store_order.user.userinfo.avatarUrl,
+                    'name':store_order.user.userinfo.nickName
+                }
             return Response(ret)
         elif request.method == 'POST':
             serializer = self.get_serializer(data=request.data)
