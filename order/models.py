@@ -281,7 +281,8 @@ class DwdOrder(models.Model):
 
 
 class DwdOrderComment(models.Model):
-    dwd_order=models.OneToOneField(to='DwdOrder',on_delete=models.CASCADE,related_name='dwd_order_comment')
+    dwd_order=models.OneToOneField(to='DwdOrder',on_delete=models.CASCADE,related_name='dwd_order_comment',editable=False)
     is_satisfied = models.BooleanField(default=True)
     satisfied_reasons=models.ManyToManyField(to='platforms.DeliveryReason')
     comment_time = models.DateTimeField(auto_now_add=True)
+    has_comment=models.BooleanField(default=False,editable=False)

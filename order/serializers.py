@@ -371,6 +371,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         order = validated_data.pop('order')
         image_data = validated_data.pop('comment_images')
+        dwd_order_comment_data=validated_data.pop('dwd_order_comment',None)
         image_ids = [image['image'] for image in image_data]
         request = self.context.get('request')
         user = request.user
@@ -406,5 +407,11 @@ class CommentContentSerializer(serializers.ModelSerializer):
                                                                             'is_buyer_comment'])
 
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(comment_content=instance)
+
+        # 判断是否有点我达订单且妥投
+        if dwd_order_comment_data and models.DwdOrder.objects.filter(store_order=order,dwd_status=100).exists():
+            dwd_order = models.DwdOrder.objects.get(store_order=order,dwd_status=100)
+            dwd_order_comment_data.update({"has_comment":True,"dwd_order":dwd_order})
+            DwdOrderCommentSerializer().create(dwd_order_comment_data)
 
         return instance

@@ -92,3 +92,9 @@ class CodeWarehouse(models.Model):
 class DeliveryReason(models.Model):
     reason = models.CharField(max_length=50)
     reason_type = models.SmallIntegerField(choices=((1,'满意'),(2,'不满意')))
+
+    def __str__(self):
+        return self.reason
+
+    class Meta:
+        unique_together=('reason','reason_type')
