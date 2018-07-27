@@ -662,6 +662,20 @@ class StoreOrderView(ListDetailDeleteViewSet):
             serializer.save(order=store_order)
             return Response({"code":1000,"msg":'评价成功',"success":"SUCCESS"}, status=status.HTTP_201_CREATED)
 
+    @action(methods=['post'], detail=True, serializer_class=serializers.ChangeDwdArriveTimeSerializer)
+    def change_arrive_time(self,request,pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        store_order = self.get_object()
+        dwd_order = serializer.validated_data['dwd_order']
+        arrive_time = serializer.validated_data['arrive_time']
+        op = request.query_params.get('op','')
+        if op !='backend' and dwd_order.store_order == store_order:
+            dwd_order.user_arrive_time = arrive_time
+            return Response({'code':1000,'msg':'修改成功'})
+        else:
+            return Response({'code':4206,'msg':'您无此权限'})
+
 
 class InitialPaymentView(CreateOnlyViewSet):
     serializer_class = serializers.InitialTradeSerializer

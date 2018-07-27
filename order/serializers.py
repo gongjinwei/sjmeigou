@@ -415,3 +415,8 @@ class CommentContentSerializer(serializers.ModelSerializer):
             DwdOrderCommentSerializer().create(dwd_order_comment_data)
 
         return instance
+
+
+class ChangeDwdArriveTimeSerializer(serializers.Serializer):
+    arrive_time=serializers.DateTimeField()
+    dwd_order = serializers.PrimaryKeyRelatedField(queryset=models.DwdOrder.objects.filter(user_arrive_time__isnull=True))
