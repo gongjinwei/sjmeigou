@@ -361,8 +361,8 @@ class DwdOrderCommentSerializer(serializers.ModelSerializer):
 
 
 class CommentContentSerializer(serializers.ModelSerializer):
-    comment_images = ImageCommentSerializer(many=True)
-    dwd_order_comment = DwdOrderCommentSerializer(allow_null=True)
+    comment_images = ImageCommentSerializer(many=True,required=False)
+    dwd_order_comment = DwdOrderCommentSerializer(required=False)
 
     class Meta:
         model = models.CommentContent
@@ -370,7 +370,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         order = validated_data.pop('order')
-        image_data = validated_data.pop('comment_images')
+        image_data = validated_data.pop('comment_images',[])
         dwd_order_comment_data=validated_data.pop('dwd_order_comment',None)
         image_ids = [image['image'] for image in image_data]
         request = self.context.get('request')

@@ -627,11 +627,12 @@ class StoreOrderView(ListDetailDeleteViewSet):
         serializer.save(store_order=store_order,user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(methods=['post'], detail=True, serializer_class=serializers.CommentContentSerializer)
+    @action(methods=['get','post'], detail=True, serializer_class=serializers.CommentContentSerializer)
     def add_comment(self,request,pk=None):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         store_order = self.get_object()
+
         if store_order.state !=4:
             return Response({"code":4203,"msg":'该状态不能被评价',"success":"FAIL"})
         op = request.query_params.get('op','')
