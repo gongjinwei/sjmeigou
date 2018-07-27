@@ -633,8 +633,9 @@ class StoreOrderView(ListDetailDeleteViewSet):
         if request.method =='GET':
             ret={}
             dwd_order = getattr(store_order,'dwd_order_info',None)
-            if dwd_order:
+            if dwd_order or request.query_params.get('op','') !='backend':
                 ret['dwd_order']={
+                    'id':dwd_order.id,
                     "rider_name":dwd_order.rider_name,
                     "arrive_time":dwd_order.arrive_time
                 }
