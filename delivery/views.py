@@ -1,4 +1,4 @@
-import hashlib, json
+import hashlib, datetime
 
 from django.conf import settings
 from rest_framework.viewsets import ModelViewSet
@@ -46,6 +46,13 @@ class OrderCallbackViewSets(ModelViewSet):
             if dwd_status == 15:
                 dwd_store_order.store_order.state = 3
                 dwd_store_order.store_order.save()
+
+            if dwd_status == 100:
+                arrive_time = serializer.validated_data.get('time_status_update')
+                arrive_time= datetime.datetime.fromtimestamp(arrive_time/1000)
+                data.update({
+                    "arrive_time":arrive_time
+                })
 
             if not created:
                 # 状态码只允许改大
