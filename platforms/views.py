@@ -1,8 +1,10 @@
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
+from django_filters.rest_framework import DjangoFilterBackend
 
 from django.utils.crypto import get_random_string
+
 
 # Create your views here.
 
@@ -120,3 +122,6 @@ class AccountViewSets(ModelViewSet):
 class DeliveryReasonView(ModelViewSet):
     queryset = models.DeliveryReason.objects.all()
     serializer_class = serializers.DeliverReasonSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields=('reason_type',)
+

@@ -282,5 +282,5 @@ class DwdOrder(models.Model):
 
 class DwdOrderComment(models.Model):
     is_satisfied = models.BooleanField(default=True)
-    satisfied_reasons=models.ManyToManyField(to='platforms.DeliveryReason',null=True)
+    satisfied_reasons=models.ManyToManyField(to='platforms.DeliveryReason')
     comment_time = models.DateTimeField(auto_now_add=True)
