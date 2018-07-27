@@ -70,7 +70,7 @@ class DianWoDa:
     def order_cancel(self, order_original_id, cancel_reason):
         url_postfix = '/api/v3/order-cancel.json'
         r = self._send_prepare(url_postfix, order_original_id=order_original_id, cancle_reason=cancel_reason)
-        print(r)
+        return r
 
     # 修改订单备注
 

@@ -400,3 +400,10 @@ class DwdOrderCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.DwdOrderComment
         fields = '__all__'
+
+    def create(self, validated_data):
+        sats = validated_data.pop('satisfied_reasons',[])
+        instance = self.Meta.model.objects.create(**validated_data)
+        for sat in sats:
+            instance.satisfied_reasons.add(sat)
+        return instance

@@ -541,15 +541,21 @@ class StoreOrderView(ListDetailDeleteViewSet):
             else:
                 return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAIL"})
         elif op == 2 and order.user == user:
-            if order.state == 1:
+            if (order.state==2 and not hasattr(order,'dwd_order_info')) or order.state == 1:
                 order.state = 8
                 order.save()
                 return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
-            elif order.state == 2:
+            elif order.state == 2 and hasattr(order,'dwd_order_info') and order.dww_order_info<=10:
                 # 取消点我达订单,取消成功则更新状态
-                order.state = 8
-                order.save()
-                return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
+                ret=dwd.order_cancel(order.id,'用户取消订单')
+                if ret.get('errorCode','')=='0':
+                    order.state = 8
+                    order.save()
+                    return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
+                else:
+                    return Response({'code':4204,'msg':'取消错误',"return_code":ret})
+            else:
+                return Response({'code':4205,'msg':'订单此状态无法被取消'})
         elif op == 3 and order.store == user.stores and order.state == 7:
             # 平台进入退款操作，成功后更新状态
             order.state = 6
@@ -630,9 +636,9 @@ class StoreOrderView(ListDetailDeleteViewSet):
             return Response({"code":4203,"msg":'该状态不能被评价',"success":"FAIL"})
         op = request.query_params.get('op','')
         if op =='backend' and models.OrderComment.objects.filter(order=store_order,state__in=[2,3]).exists():
-            return Response({'code':4203,"msg":"您已评价过了",'success':'FAIL'})
+            return Response({'code':4204,"msg":"您已评价过了",'success':'FAIL'})
         elif not op and models.OrderComment.objects.filter(order=store_order,state__in=[1,3]).exists():
-            return Response({'code': 4203, "msg": "您已评价过了", 'success': 'FAIL'})
+            return Response({'code': 4204, "msg": "您已评价过了", 'success': 'FAIL'})
         serializer.save(order=store_order)
         return Response({"code":1000,"msg":'评价成功',"success":"SUCCESS"}, status=status.HTTP_201_CREATED)
 

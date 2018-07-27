@@ -137,7 +137,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
 
                 order.store_orders.update(account_paid=F('account'), state=2, paid_time=paid_time)
                 # 下物流单
-                for store_o in order.store_orders:
+                for store_o in order.store_orders.all():
                     self.order_deliver_server(store_o, plat_account)
             else:
                 # 没有店铺订单，平台收入增加
