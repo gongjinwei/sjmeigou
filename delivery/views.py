@@ -47,11 +47,18 @@ class OrderCallbackViewSets(ModelViewSet):
                 dwd_store_order.store_order.state = 3
                 dwd_store_order.store_order.save()
 
-            if dwd_status == 100:
+            elif dwd_status == 100:
                 arrive_time = serializer.validated_data.get('time_status_update')
                 arrive_time= datetime.datetime.fromtimestamp(arrive_time/1000)
                 data.update({
                     "arrive_time":arrive_time
+                })
+
+            elif dwd_status == 5:
+                accept_time = serializer.validated_data.get('time_status_update')
+                accept_time = datetime.datetime.fromtimestamp(accept_time / 1000)
+                data.update({
+                    "arrive_time": accept_time
                 })
 
             if not created:

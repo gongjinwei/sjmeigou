@@ -271,6 +271,7 @@ class DwdOrder(models.Model):
     dwd_status = models.SmallIntegerField(choices=(
     (0, '系统派单中'), (3, '骑手已转单'), (5, '骑手已接单'), (10, '骑手已到店，等待商家发货'), (15, '骑手已离店，配送途中'), (98, '订单出现异常，骑手无法完成'),
     (99, '订单已取消'), (100, '骑手已妥投')), null=True)
+    accept_time = models.DateTimeField(null=True,editable=False)
     arrive_time = models.DateTimeField(null=True,editable=False)
     rider_name = models.CharField(max_length=50, null=True)
     rider_code = models.CharField(max_length=20, null=True)
