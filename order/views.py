@@ -577,6 +577,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'], detail=True)
     def check_delivery(self, request, pk=None):
+        order=self.get_object()
         te = request.query_params.get('test', '')
         te_option = {
             'accept': 'order_accept_test',
