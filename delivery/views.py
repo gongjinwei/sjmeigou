@@ -42,6 +42,9 @@ class OrderCallbackViewSets(ModelViewSet):
                 'rider_mobile': serializer.validated_data.get('rider_mobile', None)
             }
 
+            if dwd_store_order.dwd_status and dwd_store_order.dwd_status > dwd_status:
+                return Response({'success': False, 'errmsg': '状态错误'})
+
             # 做相应订单状态变更
             if dwd_status == 15:
                 dwd_store_order.store_order.state = 3
@@ -65,8 +68,7 @@ class OrderCallbackViewSets(ModelViewSet):
                 # 状态码只允许改大
                 if dwd_store_order.dwd_status and dwd_store_order.dwd_status < dwd_status:
                     dwd_store_order.__dict__.update(data)
-                if dwd_store_order.dwd_status and dwd_store_order.dwd_status > dwd_status:
-                    return Response({'success': False, 'errmsg': '状态错误'})
+
                 elif not dwd_store_order.dwd_status:
                     dwd_store_order.__dict__.update(data)
             else:
