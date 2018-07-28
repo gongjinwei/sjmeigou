@@ -697,7 +697,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             "refund_fee":refund_fee
         }
         models.OrderRefund.objects.create(create_time=now,**refund_data)
-        ret=weixinpay.refund(refund_data)
+        ret=weixinpay.refund(**refund_data)
         return Response(ret)
 
 
