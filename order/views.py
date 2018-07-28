@@ -704,8 +704,16 @@ class StoreOrderView(ListDetailDeleteViewSet):
             "refund_fee":refund_fee
         }
         ret=weixinpay.refund(**refund_data)
-        models.OrderRefund.objects.create(create_time=now,**refund_data)
-        return Response(ret)
+        if ret.get("return_code",'')=="SUCCESS":
+            receive_sign=ret.pop('sign')
+            mysign=weixinpay.sign(ret)
+            if receive_sign==mysign:
+                ret.pop('serializer',None)
+
+                models.OrderRefundResult.objects.create(**ret)
+                return Response({'code':1000,"msg":"退款成功"})
+            else:
+                return Response({'code':4210,'msg':"退款异常"})
 
 
 class InitialPaymentView(CreateOnlyViewSet):
