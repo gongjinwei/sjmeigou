@@ -17,7 +17,7 @@ from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet
-from tools.contrib import get_deliver_pay
+from tools.contrib import get_deliver_pay,store_order_refund
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
 
@@ -685,32 +685,10 @@ class StoreOrderView(ListDetailDeleteViewSet):
             return Response({'code':4207,'msg':'商户不能发起退款'})
 
         refund_fee = serializer.validated_data['refund_fee']
-        now=datetime.datetime.now()
-        total_fee =int(store_order.account_paid*100)
-        if models.OrderTrade.objects.filter(store_order=store_order).exists():
-            order_trade = models.OrderTrade.objects.get(store_order=store_order,paid_money__isnull=False)
-        elif models.OrderTrade.objects.filter(unify_order=store_order.unify_order):
-            order_trade = models.OrderTrade.objects.get(unify_order=store_order.unify_order, paid_money__isnull=False)
-        else:
-            return Response({'code':4208,'msg':'无此支付单号'})
+        code,msg=store_order_refund(models.OrderTrade,models.OrderRefundResult,store_order,refund_fee)
+        return Response({'code':code,'msg':msg})
 
-        refund_data= {
-            "total_fee":total_fee,
-            "out_refund_no":datetime.datetime.strftime(now,'TK%Y%m%d%H%M%S%f{}'.format(random.randint(10,100))),
-            "out_trade_no":order_trade.trade_no,
-            "refund_fee":refund_fee
-        }
-        ret=weixinpay.refund(**refund_data)
-        if ret.get("return_code",'')=="SUCCESS":
-            receive_sign=ret.pop('sign')
-            mysign=weixinpay.sign(ret)
-            if receive_sign==mysign:
-                ret.pop('serializer',None)
 
-                models.OrderRefundResult.objects.create(**ret)
-                return Response({'code':1000,"msg":"退款成功"})
-            else:
-                return Response({'code':4210,'msg':"退款异常"})
 
 
 class InitialPaymentView(CreateOnlyViewSet):
