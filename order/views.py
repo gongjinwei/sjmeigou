@@ -543,7 +543,9 @@ class StoreOrderView(ListDetailDeleteViewSet):
         elif op == 2 and order.user == user:
             if (order.state==2 and not hasattr(order,'dwd_order_info')) or order.state == 1:
                 if order.state==2:
-                    store_order_refund(models.OrderTrade,models.OrderRefundResult,order,int(order,order.account_paid*100))
+                    code,msg=store_order_refund(models.OrderTrade,models.OrderRefundResult,order,int(order,order.account_paid*100))
+                    if code!=1000:
+                        return Response({'code':code,'msg':msg})
                 order.state = 8
                 order.save()
                 return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
@@ -551,8 +553,10 @@ class StoreOrderView(ListDetailDeleteViewSet):
                 # 取消点我达订单,取消成功则更新状态
                 ret=dwd.order_cancel(order.id,'用户取消订单')
                 if ret.get('errorCode','')=='0':
-                    store_order_refund(models.OrderTrade, models.OrderRefundResult,order,
+                    code, msg =store_order_refund(models.OrderTrade, models.OrderRefundResult,order,
                                        int(order, order.account_paid * 100))
+                    if code!=1000:
+                        return Response({'code':code,'msg':msg})
                     order.state = 8
                     order.save()
                     return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
