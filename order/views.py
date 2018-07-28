@@ -542,6 +542,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
                 return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAIL"})
         elif op == 2 and order.user == user:
             if (order.state==2 and not hasattr(order,'dwd_order_info')) or order.state == 1:
+                if order.state==2:
+                    store_order_refund(models.OrderTrade,models.OrderRefundResult,order,int(order,order.account_paid*100))
                 order.state = 8
                 order.save()
                 return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
@@ -549,6 +551,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
                 # 取消点我达订单,取消成功则更新状态
                 ret=dwd.order_cancel(order.id,'用户取消订单')
                 if ret.get('errorCode','')=='0':
+                    store_order_refund(models.OrderTrade, models.OrderRefundResult,order,
+                                       int(order, order.account_paid * 100))
                     order.state = 8
                     order.save()
                     return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
@@ -687,8 +691,6 @@ class StoreOrderView(ListDetailDeleteViewSet):
         refund_fee = serializer.validated_data['refund_fee']
         code,msg=store_order_refund(models.OrderTrade,models.OrderRefundResult,store_order,refund_fee)
         return Response({'code':code,'msg':msg})
-
-
 
 
 class InitialPaymentView(CreateOnlyViewSet):
