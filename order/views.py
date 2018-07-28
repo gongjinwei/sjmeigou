@@ -685,12 +685,21 @@ class StoreOrderView(ListDetailDeleteViewSet):
             return Response({'code':4207,'msg':'商户不能发起退款'})
 
         refund_fee = serializer.validated_data['refund_fee']
+        now=datetime.datetime.now()
         total_fee =int(store_order.account_paid)*100
         if hasattr(store_order,'dwd_order_info'):
-            pass
+            if store_order.dwd_order_info.dwd_status in [15,100]:
+                return Response({'code':4208,"msg":"商家已发货无法退款"})
         refund_data= {
-            "total_fee":int(store_order.account_paid)*100
+            "total_fee":total_fee,
+            "out_refund_no":datetime.datetime.strftime(now,'TK%Y%m%d%H%M%S%f{}'.format(random.randint(10,100))),
+            "out_trade_no":store_order.store_order_no,
+            "refund_fee":refund_fee
         }
+        models.OrderRefund.objects.create(create_time=now,**refund_data)
+        ret=weixinpay.refund(refund_data)
+        return Response(ret)
+
 
 
 class InitialPaymentView(CreateOnlyViewSet):

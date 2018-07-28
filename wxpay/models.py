@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class NotifyOrderModel(models.Model):
     return_code=models.CharField(max_length=16)
     return_msg=models.CharField(max_length=128,null=True,blank=True)
