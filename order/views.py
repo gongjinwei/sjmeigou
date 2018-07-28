@@ -17,7 +17,7 @@ from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet
-from tools.contrib import get_deliver_pay,store_order_refund
+from tools.contrib import get_deliver_pay, store_order_refund
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
 
@@ -267,7 +267,7 @@ class BalanceView(CreateOnlyViewSet):
 
             delivery_pay, store_to_pay, deliver_distance = get_deliver_pay(origin,
                                                                            destination) if origin and destination else (
-            0, 0, None)
+                0, 0, None)
             store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store, account_type=5)
 
             has_enough_delivery = store_delivery_charge.bank_balance >= Decimal(20.00)
@@ -541,29 +541,30 @@ class StoreOrderView(ListDetailDeleteViewSet):
             else:
                 return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAIL"})
         elif op == 2 and order.user == user:
-            if (order.state==2 and not hasattr(order,'dwd_order_info')) or order.state == 1:
-                if order.state==2:
-                    code,msg=store_order_refund(models.OrderTrade,models.OrderRefundResult,order,int(order,order.account_paid*100))
-                    if code!=1000:
-                        return Response({'code':code,'msg':msg})
+            if (order.state == 2 and not hasattr(order, 'dwd_order_info')) or order.state == 1:
+                if order.state == 2:
+                    code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, order,
+                                                   int(order, order.account_paid * 100))
+                    if code != 1000:
+                        return Response({'code': code, 'msg': msg})
                 order.state = 8
                 order.save()
                 return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
-            elif order.state == 2 and hasattr(order,'dwd_order_info') and order.dww_order_info<=10:
+            elif order.state == 2 and hasattr(order, 'dwd_order_info') and order.dww_order_info <= 10:
                 # 取消点我达订单,取消成功则更新状态
-                ret=dwd.order_cancel(order.id,'用户取消订单')
-                if ret.get('errorCode','')=='0':
-                    code, msg =store_order_refund(models.OrderTrade, models.OrderRefundResult,order,
-                                       int(order, order.account_paid * 100))
-                    if code!=1000:
-                        return Response({'code':code,'msg':msg})
+                ret = dwd.order_cancel(order.id, '用户取消订单')
+                if ret.get('errorCode', '') == '0':
+                    code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, order,
+                                                   int(order, order.account_paid * 100))
+                    if code != 1000:
+                        return Response({'code': code, 'msg': msg})
                     order.state = 8
                     order.save()
                     return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
                 else:
-                    return Response({'code':4204,'msg':'取消错误',"return_code":ret})
+                    return Response({'code': 4204, 'msg': '取消错误', "return_code": ret})
             else:
-                return Response({'code':4205,'msg':'订单此状态无法被取消'})
+                return Response({'code': 4205, 'msg': '订单此状态无法被取消'})
         elif op == 3 and order.store == user.stores and order.state == 7:
             # 平台进入退款操作，成功后更新状态
             order.state = 6
@@ -591,7 +592,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
 
     @action(methods=['get'], detail=True)
     def check_delivery(self, request, pk=None):
-        order=self.get_object()
+        order = self.get_object()
         te = request.query_params.get('test', '')
         te_option = {
             'accept': 'order_accept_test',
@@ -627,74 +628,74 @@ class StoreOrderView(ListDetailDeleteViewSet):
             ret.update(ori_dis)
         return Response(ret)
 
-    @action(methods=['post'],detail=True,serializer_class=serializers.CommentImageSerializer)
-    def add_comment_image(self,request,pk=None):
+    @action(methods=['post'], detail=True, serializer_class=serializers.CommentImageSerializer)
+    def add_comment_image(self, request, pk=None):
         store_order = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(store_order=store_order,user=request.user)
+        serializer.save(store_order=store_order, user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(methods=['get','post'], detail=True, serializer_class=serializers.CommentContentSerializer)
-    def add_comment(self,request,pk=None):
+    @action(methods=['get', 'post'], detail=True, serializer_class=serializers.CommentContentSerializer)
+    def add_comment(self, request, pk=None):
         store_order = self.get_object()
-        if request.method =='GET':
-            ret={}
-            dwd_order = getattr(store_order,'dwd_order_info',None)
-            if dwd_order and request.query_params.get('op','') !='backend':
-                ret['dwd_order']={
-                    'id':dwd_order.id,
-                    "rider_name":dwd_order.rider_name,
-                    "arrive_time":dwd_order.arrive_time
+        if request.method == 'GET':
+            ret = {}
+            dwd_order = getattr(store_order, 'dwd_order_info', None)
+            if dwd_order and request.query_params.get('op', '') != 'backend':
+                ret['dwd_order'] = {
+                    'id': dwd_order.id,
+                    "rider_name": dwd_order.rider_name,
+                    "arrive_time": dwd_order.arrive_time
                 }
-                ret['commentator']={
-                    'logo':store_order.store.logo,
-                    'name':store_order.store.name
+                ret['commentator'] = {
+                    'logo': store_order.store.logo,
+                    'name': store_order.store.name
                 }
-            elif request.query_params.get('op','') =='backend':
-                ret['commentator']={
-                    'logo':store_order.user.userinfo.avatarUrl,
-                    'name':store_order.user.userinfo.nickName
+            elif request.query_params.get('op', '') == 'backend':
+                ret['commentator'] = {
+                    'logo': store_order.user.userinfo.avatarUrl,
+                    'name': store_order.user.userinfo.nickName
                 }
             return Response(ret)
         elif request.method == 'POST':
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            if store_order.state !=4:
-                return Response({"code":4203,"msg":'该状态不能被评价',"success":"FAIL"})
-            op = request.query_params.get('op','')
-            if op =='backend' and models.OrderComment.objects.filter(order=store_order,state__in=[2,3]).exists():
-                return Response({'code':4204,"msg":"您已评价过了",'success':'FAIL'})
-            elif not op and models.OrderComment.objects.filter(order=store_order,state__in=[1,3]).exists():
+            if store_order.state != 4:
+                return Response({"code": 4203, "msg": '该状态不能被评价', "success": "FAIL"})
+            op = request.query_params.get('op', '')
+            if op == 'backend' and models.OrderComment.objects.filter(order=store_order, state__in=[2, 3]).exists():
+                return Response({'code': 4204, "msg": "您已评价过了", 'success': 'FAIL'})
+            elif not op and models.OrderComment.objects.filter(order=store_order, state__in=[1, 3]).exists():
                 return Response({'code': 4204, "msg": "您已评价过了", 'success': 'FAIL'})
             serializer.save(order=store_order)
-            return Response({"code":1000,"msg":'评价成功',"success":"SUCCESS"}, status=status.HTTP_201_CREATED)
+            return Response({"code": 1000, "msg": '评价成功', "success": "SUCCESS"}, status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True, serializer_class=serializers.ChangeDwdArriveTimeSerializer)
-    def change_arrive_time(self,request,pk=None):
+    def change_arrive_time(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         store_order = self.get_object()
         dwd_order = serializer.validated_data['dwd_order']
         arrive_time = serializer.validated_data['arrive_time']
-        op = request.query_params.get('op','')
-        if op !='backend' and dwd_order.store_order == store_order:
+        op = request.query_params.get('op', '')
+        if op != 'backend' and dwd_order.store_order == store_order:
             dwd_order.user_arrive_time = arrive_time
-            return Response({'code':1000,'msg':'修改成功'})
+            return Response({'code': 1000, 'msg': '修改成功'})
         else:
-            return Response({'code':4206,'msg':'您无此权限'})
+            return Response({'code': 4206, 'msg': '您无此权限'})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.OrderRefundSerializer)
-    def refund(self,request,pk=None):
+    def refund(self, request, pk=None):
         store_order = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if request.query_params.get('op','') =='backend':
-            return Response({'code':4207,'msg':'商户不能发起退款'})
+        if request.query_params.get('op', '') == 'backend':
+            return Response({'code': 4207, 'msg': '商户不能发起退款'})
 
         refund_fee = serializer.validated_data['refund_fee']
-        code,msg=store_order_refund(models.OrderTrade,models.OrderRefundResult,store_order,refund_fee)
-        return Response({'code':code,'msg':msg})
+        code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, store_order, refund_fee)
+        return Response({'code': code, 'msg': msg})
 
 
 class InitialPaymentView(CreateOnlyViewSet):
@@ -707,5 +708,3 @@ class InitialPaymentView(CreateOnlyViewSet):
         ret = prepare_payment(order.user, order.unify_order.order_desc, order.account, order.store_order_no,
                               order_type='store_order')
         return Response(ret)
-
-
