@@ -687,15 +687,12 @@ class StoreOrderView(ListDetailDeleteViewSet):
         refund_fee = serializer.validated_data['refund_fee']
         now=datetime.datetime.now()
         total_fee =int(store_order.account_paid*100)
-        # if hasattr(store_order,'dwd_order_info'):
-        #     if store_order.dwd_order_info.dwd_status in [15,100]:
-        #         return Response({'code':4208,"msg":"商家已发货无法退款"})
         if models.OrderTrade.objects.filter(store_order=store_order).exists():
             order_trade = models.OrderTrade.objects.get(store_order=store_order,paid_money__isnull=False)
         elif models.OrderTrade.objects.filter(unify_order=store_order.unify_order):
             order_trade = models.OrderTrade.objects.get(unify_order=store_order.unify_order, paid_money__isnull=False)
         else:
-            return Response({'code':4208,'msg':'无此订单号'})
+            return Response({'code':4208,'msg':'无此支付单号'})
 
         refund_data= {
             "total_fee":total_fee,
