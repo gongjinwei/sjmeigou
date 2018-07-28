@@ -113,7 +113,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
 
                             keep_data = {
                                 "voucher": 1,
-                                "money": cash_fee * 100,
+                                "money": int(cash_fee * 100),
                                 "remark": '%s充值收入' % recharge.account.get_account_type_display(),
                                 "intercourse_business2": recharge.id,
                                 'account': recharge.account.id,
@@ -154,7 +154,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                 # 记一笔平台收入
                 keep_data = {
                     "voucher": 1,
-                    "money": cash_fee * 100,
+                    "money": int(cash_fee * 100),
                     "remark": '平台其他收入',
                     'account': plat_account.id,
                     'keep_account_no': KeepAccounts.account_no()

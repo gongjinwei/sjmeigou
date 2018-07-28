@@ -420,3 +420,9 @@ class CommentContentSerializer(serializers.ModelSerializer):
 class ChangeDwdArriveTimeSerializer(serializers.Serializer):
     arrive_time=serializers.DateTimeField()
     dwd_order = serializers.PrimaryKeyRelatedField(queryset=models.DwdOrder.objects.filter(user_arrive_time__isnull=True))
+
+
+class OrderRefundSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrderRefund
+        fields = '__all__'

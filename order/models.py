@@ -294,5 +294,5 @@ class OrderRefund(models.Model):
     out_trade_no = models.CharField(max_length=32,help_text='商户订单号',editable=False)
     out_refund_no = models.CharField(max_length=64,help_text='商户退款单号',editable=False,primary_key=True)
     total_fee = models.PositiveIntegerField(editable=False)
-    refund_fee = models.PositiveIntegerField()
+    refund_fee = models.PositiveIntegerField(help_text='分')
     create_time = models.DateTimeField(auto_now_add=True)

@@ -676,6 +676,22 @@ class StoreOrderView(ListDetailDeleteViewSet):
         else:
             return Response({'code':4206,'msg':'您无此权限'})
 
+    @action(methods=['post'], detail=True, serializer_class=serializers.OrderRefundSerializer)
+    def order_refund(self,request,pk=None):
+        store_order = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if request.query_params.get('op','') =='backend':
+            return Response({'code':4207,'msg':'商户不能发起退款'})
+
+        refund_fee = serializer.validated_data['refund_fee']
+        total_fee =int(store_order.account_paid)*100
+        if hasattr(store_order,'dwd_order_info'):
+            pass
+        refund_data= {
+            "total_fee":int(store_order.account_paid)*100
+        }
+
 
 class InitialPaymentView(CreateOnlyViewSet):
     serializer_class = serializers.InitialTradeSerializer
