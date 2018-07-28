@@ -29,7 +29,7 @@ DWD_APPKEY = getattr(settings, 'DWD_APPKEY')
 DWD_TEST_URL = getattr(settings, 'DWD_TEST_URL')
 DWD_ORIGINAL_URL = getattr(settings, 'DWD_ORIGINAL_URL')
 
-weixinpay = WeixinPay(app_id, mch_id, mch_key, notify_url)
+weixinpay = WeixinPay(app_id, mch_id, mch_key, notify_url,mch_key_file,mch_cert_file)
 dwd = dianwoda.DianWoDa(DWD_APPKEY, DWD_SECRET, DWD_TEST_URL)
 
 

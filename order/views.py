@@ -701,7 +701,6 @@ class StoreOrderView(ListDetailDeleteViewSet):
         return Response(ret)
 
 
-
 class InitialPaymentView(CreateOnlyViewSet):
     serializer_class = serializers.InitialTradeSerializer
 
