@@ -690,10 +690,17 @@ class StoreOrderView(ListDetailDeleteViewSet):
         # if hasattr(store_order,'dwd_order_info'):
         #     if store_order.dwd_order_info.dwd_status in [15,100]:
         #         return Response({'code':4208,"msg":"商家已发货无法退款"})
+        if models.OrderTrade.objects.filter(store_order=store_order).exists():
+            order_trade = models.OrderTrade.objects.get(store_order=store_order,paid_money__isnull=False)
+        elif models.OrderTrade.objects.filter(unify_order=store_order.unify_order):
+            order_trade = models.OrderTrade.objects.get(unify_order=store_order.unify_order, paid_money__isnull=False)
+        else:
+            return Response({'code':4208,'msg':'无此订单号'})
+
         refund_data= {
             "total_fee":total_fee,
             "out_refund_no":datetime.datetime.strftime(now,'TK%Y%m%d%H%M%S%f{}'.format(random.randint(10,100))),
-            "out_trade_no":store_order.store_order_no,
+            "out_trade_no":order_trade.trade_no,
             "refund_fee":refund_fee
         }
         ret=weixinpay.refund(**refund_data)
