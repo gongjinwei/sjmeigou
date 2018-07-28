@@ -677,7 +677,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             return Response({'code':4206,'msg':'您无此权限'})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.OrderRefundSerializer)
-    def order_refund(self,request,pk=None):
+    def refund(self,request,pk=None):
         store_order = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -687,9 +687,9 @@ class StoreOrderView(ListDetailDeleteViewSet):
         refund_fee = serializer.validated_data['refund_fee']
         now=datetime.datetime.now()
         total_fee =int(store_order.account_paid)*100
-        if hasattr(store_order,'dwd_order_info'):
-            if store_order.dwd_order_info.dwd_status in [15,100]:
-                return Response({'code':4208,"msg":"商家已发货无法退款"})
+        # if hasattr(store_order,'dwd_order_info'):
+        #     if store_order.dwd_order_info.dwd_status in [15,100]:
+        #         return Response({'code':4208,"msg":"商家已发货无法退款"})
         refund_data= {
             "total_fee":total_fee,
             "out_refund_no":datetime.datetime.strftime(now,'TK%Y%m%d%H%M%S%f{}'.format(random.randint(10,100))),
