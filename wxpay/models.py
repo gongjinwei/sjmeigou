@@ -32,3 +32,14 @@ class NotifyOrderModel(models.Model):
     out_trade_no=models.CharField(max_length=32,null=True,blank=True)
     attach=models.CharField(max_length=128,null=True,blank=True)
     time_end=models.CharField(max_length=14,null=True,blank=True)
+    out_refund_no = models.CharField(max_length=64,null=True)
+    refund_id = models.CharField(max_length=32,null=True)
+    refund_fee = models.IntegerField(null=True)
+    settlement_refund_fee =models.IntegerField(null=True)
+    cash_refund_fee = models.IntegerField(null=True)
+    coupon_refund_fee=models.IntegerField(null=True)
+    coupon_refund_count=models.IntegerField(null=True)
+    coupon_refund_fee_0 = models.IntegerField(null=True)
+    coupon_refund_id_0 = models.CharField(max_length=20,null=True)
+
+
