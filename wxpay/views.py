@@ -46,6 +46,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         serializer.is_valid(raise_exception=True)
         data = copy.copy(serializer.validated_data)
         received_sign = data.pop('sign', '')
+        out_refund_no = data.get('out_refund_no',None)
         # 重复使用签名验证
         # if models.NotifyOrderModel.objects.filter(sign=received_sign).exists():
         #     return Response({"return_code":"False","return_msg":"exists error"})
@@ -53,73 +54,80 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         if received_sign == sign:
             return_code = data.get('return_code')
             fee_type = data.get('fee_type')
-            # 取平台账号
-            platform_account, created = Account.objects.get_or_create(user=None, store=None, account_type=1)
 
-            if return_code == 'SUCCESS' and fee_type == 'CNY':
-                cash_fee = Decimal(data.get('cash_fee', 0) / 100)
-                out_trade_no = data.get('out_trade_no')
-                time_end = data.get('time_end')
-                paid_time = datetime.strptime(time_end, '%Y%m%d%H%M%S')
-                if OrderTrade.objects.filter(pk=out_trade_no).exists():
+            # 处理非退款通知
 
-                    # 把交易时间与交易金额写入交易中
-                    order_trade = OrderTrade.objects.get(pk=out_trade_no)
-                    order_trade.paid_time = paid_time
-                    order_trade.paid_money = cash_fee
-                    order_trade.save()
+            if not out_refund_no:
+                # 取平台账号
+                platform_account, created = Account.objects.get_or_create(user=None, store=None, account_type=1)
 
-                    # 处理平台付款
-                    if order_trade.unify_order:
-                        order = order_trade.unify_order
-                        self.receive_fee(order, cash_fee, paid_time, platform_account)
+                if return_code == 'SUCCESS' and fee_type == 'CNY':
+                    cash_fee = Decimal(data.get('cash_fee', 0) / 100)
+                    out_trade_no = data.get('out_trade_no')
+                    time_end = data.get('time_end')
+                    paid_time = datetime.strptime(time_end, '%Y%m%d%H%M%S')
+                    if OrderTrade.objects.filter(pk=out_trade_no).exists():
 
-                    # 处理店铺订单付款
-                    elif order_trade.store_order:
-                        order = order_trade.store_order
-                        self.receive_fee(order, cash_fee, paid_time, platform_account)
-                        # 减优惠券
-                        if order.coupon:
-                            order.coupon.has_num -= 1
-                            order.coupon.save()
-                        # 参加活动一次
-                        if order.activity:
-                            join_act, created = JoinActivity.objects.get_or_create(
-                                defaults=dict(user=order.user, activity=order.activity, nums_join=1), user=order.user,
-                                activity=order.activity)
-                            if not created:
-                                join_act.nums_join += 1
-                                join_act.save()
-                        # 减库存
-                        if hasattr(order, 'sku_orders'):
-                            for sku_data in order.sku_orders.all():
-                                sku_data.sku.stock -= sku_data.num
-                                sku_data.sku.save()
+                        # 把交易时间与交易金额写入交易中
+                        order_trade = OrderTrade.objects.get(pk=out_trade_no)
+                        order_trade.paid_time = paid_time
+                        order_trade.paid_money = cash_fee
+                        order_trade.save()
 
-                    # 处理充值
-                    elif order_trade.recharge:
-                        recharge = order_trade.recharge
-                        recharge.recharge_result = True
-                        recharge.paid_money = cash_fee
-                        # 余额增加且平台账户增加收入
-                        recharge.account.bank_balance += cash_fee
-                        platform_account.bank_balance += cash_fee
-                        # 记录平台收入一笔
+                        # 处理平台付款
+                        if order_trade.unify_order:
+                            order = order_trade.unify_order
+                            self.receive_fee(order, cash_fee, paid_time, platform_account)
 
-                        keep_data = {
-                            "voucher": 1,
-                            "money": cash_fee * 100,
-                            "remark": '%s充值收入' % recharge.account.get_account_type_display(),
-                            "intercourse_business2": recharge.id,
-                            'account': recharge.account.id,
-                            'keep_account_no': KeepAccounts.account_no()
-                        }
-                        keep_serializer = KeepAccountSerializer(data=keep_data)
-                        keep_serializer.is_valid(raise_exception=True)
-                        keep_serializer.save()
-                        recharge.account.save()
-                        recharge.save()
+                        # 处理店铺订单付款
+                        elif order_trade.store_order:
+                            order = order_trade.store_order
+                            self.receive_fee(order, cash_fee, paid_time, platform_account)
+                            # 减优惠券
+                            if order.coupon:
+                                order.coupon.has_num -= 1
+                                order.coupon.save()
+                            # 参加活动一次
+                            if order.activity:
+                                join_act, created = JoinActivity.objects.get_or_create(
+                                    defaults=dict(user=order.user, activity=order.activity, nums_join=1), user=order.user,
+                                    activity=order.activity)
+                                if not created:
+                                    join_act.nums_join += 1
+                                    join_act.save()
+                            # 减库存
+                            if hasattr(order, 'sku_orders'):
+                                for sku_data in order.sku_orders.all():
+                                    sku_data.sku.stock -= sku_data.num
+                                    sku_data.sku.save()
 
+                        # 处理充值
+                        elif order_trade.recharge:
+                            recharge = order_trade.recharge
+                            recharge.recharge_result = True
+                            recharge.paid_money = cash_fee
+                            # 余额增加且平台账户增加收入
+                            recharge.account.bank_balance += cash_fee
+                            platform_account.bank_balance += cash_fee
+                            # 记录平台收入一笔
+
+                            keep_data = {
+                                "voucher": 1,
+                                "money": cash_fee * 100,
+                                "remark": '%s充值收入' % recharge.account.get_account_type_display(),
+                                "intercourse_business2": recharge.id,
+                                'account': recharge.account.id,
+                                'keep_account_no': KeepAccounts.account_no()
+                            }
+                            keep_serializer = KeepAccountSerializer(data=keep_data)
+                            keep_serializer.is_valid(raise_exception=True)
+                            keep_serializer.save()
+                            recharge.account.save()
+                            recharge.save()
+
+            # 处理退款通知
+            else:
+                pass
             self.perform_create(serializer)
             return Response({"return_code": "SUCCESS", "return_msg": "OK"})
         else:
