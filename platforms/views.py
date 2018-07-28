@@ -127,3 +127,7 @@ class DeliveryReasonView(ModelViewSet):
     filter_fields=('reason_type',)
     ordering_fields=('id',)
 
+class ProtocolViewSets(ModelViewSet):
+    queryset = models.Protocol.objects.all()
+    serializer_class = serializers.ProtocolSerializer
+

@@ -98,3 +98,9 @@ class DeliveryReason(models.Model):
 
     class Meta:
         unique_together=('reason','reason_type')
+
+
+class Protocol(models.Model):
+    protocol_type = models.SmallIntegerField(choices=((1,'商户协议'),),unique=True)
+    file = models.FileField(upload_to='sjmeigou/protocol/')
+    update_time = models.DateTimeField(auto_now=True)

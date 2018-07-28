@@ -65,3 +65,7 @@ class DeliverReasonSerializer(serializers.ModelSerializer):
         model = models.DeliveryReason
         fields = '__all__'
 
+class ProtocolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Protocol
+        fields='__all__'
