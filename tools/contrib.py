@@ -64,3 +64,10 @@ def store_order_refund(trade_model, result_model, store_order, refund_fee):
             return (4302, "退款异常")
     else:
         return (4303, ret)
+
+
+def look_up_adocode(location):
+    url = 'https://restapi.amap.com/v3/geocode/regeo?key=%s&location=%s' % (gd_key, location)
+    r = requests.get(url).json()
+    if r['status'] == '1':
+        return r['regeocode']['addressComponent']['adcode'][:4]
