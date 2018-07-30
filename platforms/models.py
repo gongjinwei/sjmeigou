@@ -29,6 +29,13 @@ class Delivers(models.Model):
     name = models.CharField(max_length=20)
 
 
+class DeliverAdcode(models.Model):
+    deliver = models.ForeignKey(to='Delivers',on_delete=models.CASCADE,related_name='adocodes')
+    name = models.CharField(max_length=128)
+    code = models.CharField(max_length=6)
+    prefix = models.CharField(max_length=4)
+
+
 class StoreActivityType(models.Model):
     type_name = models.CharField(max_length=10)
     type_pic = models.ImageField(upload_to='sjmeigou/activity')
