@@ -198,7 +198,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             'order_price': int(store_order.account_paid * 100),
             'cargo_weight': 0,
             'cargo_num': 1,
-            'city_code': '330100',
+            'city_code': store.adcode,
             'seller_id': str(store.id),
             'seller_name': store.info.contract_name,
             'seller_mobile': store.info.contract_mobile,
