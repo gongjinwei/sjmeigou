@@ -540,31 +540,11 @@ class StoreOrderView(ListDetailDeleteViewSet):
                 return Response({'code': 1000, 'msg': '收货成功', "return_code": "SUCCESS"})
             else:
                 return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAIL"})
-        elif op == 2 and order.user == user:
-            if (order.state == 2 and not hasattr(order, 'dwd_order_info')) or order.state == 1:
-                if order.state == 2:
-                    code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, order,
-                                                   int(order.account_paid * 100))
-                    if code != 1000:
-                        return Response({'code': code, 'msg': msg})
+        elif op == 2 and order.user == user and order.state ==1:
                 order.state = 8
                 order.save()
                 return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
-            elif order.state == 2 and hasattr(order, 'dwd_order_info') and order.dww_order_info <= 10:
-                # 取消点我达订单,取消成功则更新状态
-                ret = dwd.order_cancel(order.id, '用户取消订单')
-                if ret.get('errorCode', '') == '0':
-                    code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, order,
-                                                   int(order.account_paid * 100))
-                    if code != 1000:
-                        return Response({'code': code, 'msg': msg})
-                    order.state = 8
-                    order.save()
-                    return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
-                else:
-                    return Response({'code': 4204, 'msg': '取消错误', "return_code": ret})
-            else:
-                return Response({'code': 4205, 'msg': '订单此状态无法被取消'})
+
         elif op == 3 and order.store == user.stores and order.state == 7:
             # 平台进入退款操作，成功后更新状态
             order.state = 6
@@ -616,16 +596,16 @@ class StoreOrderView(ListDetailDeleteViewSet):
         if ret.get("errorCode", '') == "0":
             dwd_order_serializer = serializers.DwdRiderSerializer(instance=dwd_order)
             ret.update(dwd_order_serializer.data)
-            ori_dis = {
-                "seller_lat": store_order.store.latitude,
-                "seller_lng": store_order.store.longitude,
-                "seller_name": store_order.store.name,
-                "seller_logo": store_order.store.logo,
-                "seller_contract": store_order.store.store_phone,
-                "receiver_lat": store_order.unify_order.address.latitude,
-                "receiver_lng": store_order.unify_order.address.longitude
-            }
-            ret.update(ori_dis)
+        ori_dis = {
+            "seller_lat": store_order.store.latitude,
+            "seller_lng": store_order.store.longitude,
+            "seller_name": store_order.store.name,
+            "seller_logo": store_order.store.logo,
+            "seller_contract": store_order.store.store_phone,
+            "receiver_lat": store_order.unify_order.address.latitude,
+            "receiver_lng": store_order.unify_order.address.longitude
+        }
+        ret.update(ori_dis)
         return Response(ret)
 
     @action(methods=['post'], detail=True, serializer_class=serializers.CommentImageSerializer)
