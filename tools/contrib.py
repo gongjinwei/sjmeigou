@@ -4,6 +4,7 @@ import requests
 from django.conf import settings
 from django.core.cache import cache
 from wxpay.views import weixinpay
+from weixin.pay import WeixinPayError
 
 gd_key = getattr(settings, 'GDKEY')
 
@@ -47,7 +48,10 @@ def store_order_refund(trade_model, result_model, store_order, refund_fee):
         "out_trade_no": order_trade.trade_no,
         "refund_fee": refund_fee
     }
-    ret = weixinpay.refund(**refund_data)
+    try:
+        ret = weixinpay.refund(**refund_data)
+    except WeixinPayError as e:
+        return (4305,e.args[0])
     if ret.get("return_code", '') == "SUCCESS":
         receive_sign = ret.pop('sign')
         mysign = weixinpay.sign(ret)
