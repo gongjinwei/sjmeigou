@@ -544,7 +544,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             if (order.state == 2 and not hasattr(order, 'dwd_order_info')) or order.state == 1:
                 if order.state == 2:
                     code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, order,
-                                                   int(order, order.account_paid * 100))
+                                                   int(order.account_paid * 100))
                     if code != 1000:
                         return Response({'code': code, 'msg': msg})
                 order.state = 8
@@ -555,7 +555,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
                 ret = dwd.order_cancel(order.id, '用户取消订单')
                 if ret.get('errorCode', '') == '0':
                     code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, order,
-                                                   int(order, order.account_paid * 100))
+                                                   int(order.account_paid * 100))
                     if code != 1000:
                         return Response({'code': code, 'msg': msg})
                     order.state = 8
