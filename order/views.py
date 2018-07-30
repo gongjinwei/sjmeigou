@@ -602,6 +602,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             "seller_name": store_order.store.name,
             "seller_logo": store_order.store.logo,
             "seller_contract": store_order.store.store_phone,
+            "rider_mobile":dwd_order.rider_mobile,
             "receiver_lat": store_order.unify_order.address.latitude,
             "receiver_lng": store_order.unify_order.address.longitude
         }
