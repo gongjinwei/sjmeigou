@@ -6,6 +6,8 @@ from tools.viewset import ListOnlyViewSet
 from . import models,serializers
 from goods.serializers import FirstClassSerializer
 from goods.models import FirstClass
+from platforms.models import DeliverAdcode
+from tools.contrib import look_up_adocode
 # Create your views here.
 
 
@@ -52,7 +54,13 @@ class ApplicationViewSets(ModelViewSet):
         return Response({'code':1000,'msg':'申请成功'})
 
     def perform_create(self, serializer):
-        serializer.save(application_user=self.request.user)
+        latitude = serializer.validated_data['latitude'],6
+        longitude = serializer.validated_data['longitude'],6
+        adocode = look_up_adocode('%6f,%6f' % (longitude,latitude))
+        if adocode and DeliverAdcode.objects.filter(code=adocode).exists():
+            serializer.save(application_user=self.request.user,adocode=adocode)
+        else:
+            Response({'code':2002,'msg':'你所处的区域不在配送范围'})
 
     def get_queryset(self):
 

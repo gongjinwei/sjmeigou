@@ -11,6 +11,7 @@ from django_filters import FilterSet
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
+from tools.contrib import look_up_adocode
 
 from guardian.shortcuts import assign_perm
 
@@ -23,7 +24,7 @@ import requests, uuid
 from . import serializers, models
 from index.models import Application
 from goods.models import GoodDetail,SearchHistory
-from platforms.models import CodeWarehouse,Account
+from platforms.models import CodeWarehouse,Account,DeliverAdcode
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
@@ -52,7 +53,8 @@ class StoresViewSets(ModelViewSet):
                 "name":application.store_name,
                 "receive_address":application.store_address,
                 "longitude":application.longitude,
-                "latitude":application.latitude
+                "latitude":application.latitude,
+                'adcode':application.adcode
             })
             self.perform_create(serializer)
             # 更新激活码状态
@@ -86,6 +88,18 @@ class StoresViewSets(ModelViewSet):
             return models.Stores.objects.filter(user=self.request.user)
 
         return models.Stores.objects.none()
+
+    def perform_update(self, serializer):
+        longitude=serializer.validated_data.get('longitude','')
+        latitude=serializer.validated_data.get('latitude','')
+        if latitude and longitude:
+            adcode = look_up_adocode('%6f,%6f' % (longitude,latitude))
+            if adcode and DeliverAdcode.objects.filter(code=adcode).exists():
+                serializer.save(adcode=adcode)
+            else:
+                return Response({'code':2004,'msg':'此区域无法进行配送'})
+        else:
+            serializer.save()
 
 
 class DepositView(ModelViewSet):

@@ -70,4 +70,4 @@ def look_up_adocode(location):
     url = 'https://restapi.amap.com/v3/geocode/regeo?key=%s&location=%s' % (gd_key, location)
     r = requests.get(url).json()
     if r['status'] == '1':
-        return r['regeocode']['addressComponent']['adcode'][:4]
+        return r['regeocode']['addressComponent']['adcode'][:4]+'00'

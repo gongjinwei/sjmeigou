@@ -47,6 +47,7 @@ class Application(models.Model):
     license_legal_representative = models.CharField(max_length=128)
     longitude = models.FloatField()
     latitude = models.FloatField()
+    adcode = models.CharField(max_length=6,default='330700')
     receiver_account_num = models.CharField(max_length=30)
     receiver_bank_name = models.CharField(max_length=128)
     receiver_name = models.CharField(max_length=50)
