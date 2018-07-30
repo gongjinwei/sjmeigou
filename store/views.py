@@ -89,18 +89,6 @@ class StoresViewSets(ModelViewSet):
 
         return models.Stores.objects.none()
 
-    def perform_update(self, serializer):
-        longitude=serializer.validated_data.get('longitude','')
-        latitude=serializer.validated_data.get('latitude','')
-        if latitude and longitude:
-            adcode = look_up_adocode('%6f,%6f' % (longitude,latitude))
-            if adcode and DeliverAdcode.objects.filter(code=adcode).exists():
-                serializer.save(adcode=adcode)
-            else:
-                return Response({'code':2004,'msg':'此区域无法进行配送'})
-        else:
-            serializer.save()
-
 
 class DepositView(ModelViewSet):
     """
@@ -182,6 +170,18 @@ class StoreInfoView(RetrieveUpdateViewSets):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.StoreInfoSerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
+
+    def perform_update(self, serializer):
+        longitude=serializer.validated_data.get('longitude','')
+        latitude=serializer.validated_data.get('latitude','')
+        if latitude and longitude:
+            adcode = look_up_adocode('%6f,%6f' % (longitude,latitude))
+            if adcode and DeliverAdcode.objects.filter(code=adcode).exists():
+                serializer.save(adcode=adcode)
+            else:
+                return Response({'code':2004,'msg':'此区域无法进行配送'})
+        else:
+            serializer.save()
 
 
 class EnterpriseQualificationView(RetrieveOnlyViewSets):
