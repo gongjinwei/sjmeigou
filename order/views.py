@@ -481,8 +481,13 @@ class UnifyOrderView(CreateOnlyViewSet):
                      'deliver_distance': deliver_distance})
 
                 # 移除购物车
-                models.ShoppingCarItem.objects.filter(shopping_car__user=self.request.user, shopping_car__store=store,
-                                                      sku__in=skus).delete()
+                shopping_car =models.ShoppingCar.objects.filter(user=self.request.user,store=store)
+                if shopping_car.exists():
+                    shopping_car = shopping_car[0]
+
+                    models.ShoppingCarItem.objects.filter(shopping_car=shopping_car,sku__in=skus).delete()
+                    if len(shopping_car.items.all()) ==0:
+                        shopping_car.delete()
 
         # 统一下单
         if order_money != price:
