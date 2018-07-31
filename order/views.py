@@ -685,6 +685,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user,order=store_order)
 
+        return Response({'code':1000,'msg':'追评成功'})
+
 
 class InitialPaymentView(CreateOnlyViewSet):
     serializer_class = serializers.InitialTradeSerializer
