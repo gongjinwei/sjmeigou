@@ -136,4 +136,7 @@ class ProtocolViewSets(ModelViewSet):
 class RefundReasonViewSets(ModelViewSet):
     queryset = models.RefundReason.objects.all()
     serializer_class = serializers.RefundReasonSerializer
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_fields = ('reason_type',)
+    ordering_fields = ('id',)
 
