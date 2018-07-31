@@ -426,7 +426,7 @@ class UnifyOrderView(CreateOnlyViewSet):
                                                                                            account_type=5)
 
                             if store_delivery_charge.bank_balance < Decimal(20.00):
-                                return Response({'code': 4109, 'msg': '商户没有足够物流费用错误', 'success': 'FAIL'})
+                                return Response({'code': 4109, 'msg': '商户物流费用不足', 'success': 'FAIL'})
 
                             address = serializer.validated_data.get('address', None)
                             if not address:
@@ -677,6 +677,13 @@ class StoreOrderView(ListDetailDeleteViewSet):
         refund_fee = serializer.validated_data['refund_fee']
         code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, store_order, refund_fee)
         return Response({'code': code, 'msg': msg})
+
+    @action(methods=['post'],detail=True,serializer_class=serializers.OrderReviewSerializer)
+    def add_review(self,request,pk=None):
+        store_order = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user,order=store_order)
 
 
 class InitialPaymentView(CreateOnlyViewSet):

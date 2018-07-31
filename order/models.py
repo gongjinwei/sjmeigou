@@ -242,6 +242,7 @@ class CommentImage(models.Model):
     store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, editable=False)
     comment_content = models.ForeignKey(to='CommentContent', on_delete=models.CASCADE, null=True, editable=False,
                                         related_name='comment_images')
+    review_content = models.ForeignKey(to='OrderReview',on_delete=models.CASCADE,null=True,editable=False,related_name='review_images')
     image = models.ImageField(upload_to='sjmeigou/order/comment/%Y%m%d/')
     add_time = models.DateTimeField(auto_now_add=True)
 
@@ -319,4 +320,11 @@ class OrderRefundResult(models.Model):
     coupon_refund_count = models.IntegerField(null=True)
     coupon_id_0 = models.CharField(max_length=20, null=True, blank=True)
 
+
+class OrderReview(models.Model):
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+    order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,editable=False,related_name='reviews')
+    content = models.CharField(max_length=255)
+    state = models.SmallIntegerField(choices=((1,'正常'),(2,'不可见')),default=1)
+    create_time= models.DateTimeField(auto_now_add=True)
 
