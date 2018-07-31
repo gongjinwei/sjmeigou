@@ -328,7 +328,7 @@ class OrderReview(models.Model):
 
 
 class OrderRefund(models.Model):
-    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE)
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,editable=False)
     refund_type = models.SmallIntegerField(choices=((1, '仅退款'), (2, '退货退款')))
     good_state = models.SmallIntegerField(choices=((1,'未收到货'),(2,'已收到货')))
     reason = models.ForeignKey(to='platforms.RefundReason',on_delete=models.CASCADE)
