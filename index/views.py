@@ -54,8 +54,8 @@ class ApplicationViewSets(ModelViewSet):
         return Response({'code':1000,'msg':'申请成功'})
 
     def perform_create(self, serializer):
-        latitude = serializer.validated_data['latitude'],6
-        longitude = serializer.validated_data['longitude'],6
+        latitude = serializer.validated_data['latitude'],
+        longitude = serializer.validated_data['longitude'],
         adocode = look_up_adocode('%6f,%6f' % (longitude,latitude))
         if adocode and DeliverAdcode.objects.filter(code=adocode).exists():
             serializer.save(application_user=self.request.user,adocode=adocode)

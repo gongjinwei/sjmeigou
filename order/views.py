@@ -685,7 +685,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
         if request.query_params.get('op', '') == 'backend':
             return Response({'code': 4207, 'msg': '商户不能发起退款'})
 
-        refund_fee = serializer.validated_data['refund_money']
+        refund_fee = int(serializer.validated_data['refund_money']*100)
+
         code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, store_order, refund_fee)
         serializer.save(store_order=store_order,state=1)
         return Response({'code': code, 'msg': msg})
