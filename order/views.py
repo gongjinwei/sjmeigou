@@ -686,6 +686,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
             return Response({'code': 4207, 'msg': '商户不能发起退款'})
 
         serializer.save(store_order=store_order,state=1)
+        store_order.state=7
+        store_order.save()
         return Response(serializer.data)
 
     @action(methods=['post'],detail=True,serializer_class=serializers.OrderReviewSerializer)

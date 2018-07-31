@@ -170,7 +170,7 @@ class StoreOrder(models.Model):
     account_paid = models.DecimalField(editable=False, decimal_places=2, max_digits=30, default=Decimal(0.00))
     paid_time = models.DateTimeField(editable=False, null=True)
     state = models.SmallIntegerField(choices=(
-    (1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '已完成待评价'), (5, '交易完成'), (6, '退款成功'), (7, '待退款'), (8, '订单已取消'),
+    (1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '已完成待评价'), (5, '交易完成'), (6, '退款成功'), (7, '退款中'), (8, '订单已取消'),
     (9, '已完成用户删除')),
                                      editable=False, default=1)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
@@ -334,6 +334,6 @@ class OrderRefund(models.Model):
     reason = models.ForeignKey(to='platforms.RefundReason',on_delete=models.CASCADE)
     refund_money = models.DecimalField(help_text='退款金额（元）',decimal_places=2,max_digits=30)
     refund_desc = models.CharField(max_length=1024,null=True)
-    state = models.SmallIntegerField(choices=((1,'买家发起退款'),(2,'退款成功'),(3,'卖家拒绝退款')),editable=False)
+    state = models.SmallIntegerField(choices=((1,'买家发起退款'),(2,'退款成功'),(3,'卖家拒绝退款'),(4,'等待买家发货'),(5,'等待商家收货')),editable=False)
     create_time =models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
