@@ -678,18 +678,15 @@ class StoreOrderView(ListDetailDeleteViewSet):
             return Response({'code': 4206, 'msg': '您无此权限'})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.OrderRefundSerializer)
-    def refund(self, request, pk=None):
+    def init_refund(self, request, pk=None):
         store_order = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if request.query_params.get('op', '') == 'backend':
             return Response({'code': 4207, 'msg': '商户不能发起退款'})
 
-        refund_fee = int(serializer.validated_data['refund_money']*100)
-
-        code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, store_order, refund_fee)
         serializer.save(store_order=store_order,state=1)
-        return Response({'code': code, 'msg': msg})
+        return Response(serializer.data)
 
     @action(methods=['post'],detail=True,serializer_class=serializers.OrderReviewSerializer)
     def add_review(self,request,pk=None):
