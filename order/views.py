@@ -70,6 +70,12 @@ class ShoppingCarItemView(ModelViewSet):
 
         return Response(serializer.data)
 
+    def perform_destroy(self, instance):
+        shopping_car = instance.shopping_car
+        instance.delete()
+        if not hasattr(shopping_car,'items'):
+            shopping_car.delete()
+
 
 class ShoppingCarView(ListOnlyViewSet):
     serializer_class = serializers.ShoppingCarSerializer

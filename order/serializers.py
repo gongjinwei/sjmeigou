@@ -422,8 +422,10 @@ class ChangeDwdArriveTimeSerializer(serializers.Serializer):
     dwd_order = serializers.PrimaryKeyRelatedField(queryset=models.DwdOrder.objects.filter(user_arrive_time__isnull=True))
 
 
-class OrderRefundSerializer(serializers.Serializer):
-    refund_fee = serializers.IntegerField()
+class OrderRefundSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrderRefund
+        fields = '__all__'
 
 
 class OrderReviewSerializer(serializers.ModelSerializer):
