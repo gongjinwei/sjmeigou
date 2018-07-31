@@ -73,7 +73,7 @@ class ShoppingCarItemView(ModelViewSet):
     def perform_destroy(self, instance):
         shopping_car = instance.shopping_car
         instance.delete()
-        if not hasattr(shopping_car,'items'):
+        if len(shopping_car.items.all())==0:
             shopping_car.delete()
 
 
