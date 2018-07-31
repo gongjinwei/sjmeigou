@@ -111,3 +111,14 @@ class Protocol(models.Model):
     protocol_type = models.SmallIntegerField(choices=((1,'商户协议'),),unique=True)
     file = models.FileField(upload_to='sjmeigou/protocol/')
     update_time = models.DateTimeField(auto_now=True)
+
+
+class RefundReason(models.Model):
+    reason_type = models.SmallIntegerField(choices=((1, '未收货'), (2, '已收货')))
+    reason_name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.reason_name
+
+    class Meta:
+        unique_together=('reason_type','reason_name')

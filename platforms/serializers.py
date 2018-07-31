@@ -69,3 +69,9 @@ class ProtocolSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Protocol
         fields='__all__'
+
+
+class RefundReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.RefundReason
+        fields = '__all__'

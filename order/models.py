@@ -5,8 +5,6 @@ from decimal import Decimal
 from datetime import datetime
 import random
 
-from platforms.models import AccountRecharge
-
 
 # Create your models here.
 
@@ -250,7 +248,7 @@ class CommentImage(models.Model):
 class OrderTrade(models.Model):
     store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, null=True)
     unify_order = models.ForeignKey(to='UnifyOrder', on_delete=models.CASCADE, null=True)
-    recharge = models.ForeignKey(to=AccountRecharge, on_delete=models.CASCADE, null=True)
+    recharge = models.ForeignKey(to='platforms.AccountRecharge', on_delete=models.CASCADE, null=True)
     trade_no = models.CharField(primary_key=True, max_length=30)
     paid_time = models.DateTimeField(null=True, editable=False)
     paid_money = models.DecimalField(default=Decimal(0.00), max_digits=30, decimal_places=2, editable=False)
@@ -329,22 +327,11 @@ class OrderReview(models.Model):
     create_time= models.DateTimeField(auto_now_add=True)
 
 
-class RefundReason(models.Model):
-    reason_type = models.SmallIntegerField(choices=((1, '未收货'), (2, '已收货')))
-    reason_name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.reason_name
-
-    class Meta:
-        unique_together=('reason_type','reason_name')
-
-
 class OrderRefund(models.Model):
     store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE)
     refund_type = models.SmallIntegerField(choices=((1, '仅退款'), (2, '退货退款')))
     good_state = models.SmallIntegerField(choices=((1,'未收到货'),(2,'已收到货')))
-    reason = models.ForeignKey(to='RefundReason',on_delete=models.CASCADE)
+    reason = models.ForeignKey(to='platforms.RefundReason',on_delete=models.CASCADE)
     refund_money = models.DecimalField(help_text='退款金额（元）',decimal_places=2,max_digits=30)
     refund_desc = models.CharField(max_length=1024,null=True)
     state = models.SmallIntegerField(choices=((1,'买家发起退款'),(2,'退款成功'),(3,'卖家拒绝退款')),editable=False)
