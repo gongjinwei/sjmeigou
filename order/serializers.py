@@ -423,9 +423,18 @@ class ChangeDwdArriveTimeSerializer(serializers.Serializer):
 
 
 class OrderRefundSerializer(serializers.ModelSerializer):
+    refund_images = ImageCommentSerializer(many=True,required=False)
     class Meta:
         model = models.OrderRefund
         fields = '__all__'
+
+    def create(self, validated_data):
+        order = validated_data.get('store_order')
+        image_data = validated_data.pop('refund_images',[])
+        image_ids = [image['image'] for image in image_data]
+        order_refund = models.OrderRefund.objects.create(**validated_data)
+        models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(refund=order_refund)
+        return order_refund
 
 
 class OrderReviewSerializer(serializers.ModelSerializer):

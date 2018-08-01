@@ -241,6 +241,7 @@ class CommentImage(models.Model):
     comment_content = models.ForeignKey(to='CommentContent', on_delete=models.CASCADE, null=True, editable=False,
                                         related_name='comment_images')
     review_content = models.ForeignKey(to='OrderReview',on_delete=models.CASCADE,null=True,editable=False,related_name='review_images')
+    refund = models.ForeignKey(to='OrderRefund',on_delete=models.CASCADE,null=True,editable=False,related_name='refund_images')
     image = models.ImageField(upload_to='sjmeigou/order/comment/%Y%m%d/')
     add_time = models.DateTimeField(auto_now_add=True)
 
