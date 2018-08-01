@@ -424,6 +424,8 @@ class ChangeDwdArriveTimeSerializer(serializers.Serializer):
 
 class OrderRefundSerializer(serializers.ModelSerializer):
     refund_images = ImageCommentSerializer(many=True,required=False)
+    state_name = serializers.ReadOnlyField(source='get_state_display')
+
     class Meta:
         model = models.OrderRefund
         fields = '__all__'
