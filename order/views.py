@@ -713,7 +713,10 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             if op != 'backend':
                 return queryset.filter(store_order__user=user)
             else:
-                return queryset.filter(store_order=self.request.user.stores)
+                if hasattr(user,'stores'):
+                    return queryset.filter(store_order=self.request.user.stores)
+                else:
+                    return queryset.none()
         else:
             return queryset.none()
 
@@ -730,3 +733,13 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         store_order.state = 7
         store_order.save()
         return Response(serializer.data)
+
+    @action(methods=['delete'],detail=True)
+    def cancel(self,request,pk=None):
+        instance = self.get_object()
+        if request.query_params.get('op','')=='backend':
+            return Response({'code': 4208, 'msg': '商户不能取消退款'})
+        else:
+            instance.state=6
+            instance.save()
+            return Response({'code':1000,'msg':'取消成功'})
