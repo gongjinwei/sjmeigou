@@ -257,7 +257,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     store_name = serializers.ReadOnlyField(source='store.name')
     dwd_order_info = DwdOrderInfoSerializer(read_only=True)
     delivery_name = serializers.ReadOnlyField(source='deliver_server.server.name')
-    refunds = serializers.PrimaryKeyRelatedField(queryset=models.OrderRefund.objects.filter(state=1))
+    refund = serializers.SerializerMethodField()
 
     class Meta:
         model = models.StoreOrder
@@ -269,6 +269,11 @@ class StoreOrderSerializer(serializers.ModelSerializer):
         for sku in sku_data:
             models.SkuOrder.objects.create(store_order=store_order, **sku)
         return store_order
+
+    def get_refund(self,obj):
+        refunds= models.OrderRefund.objects.filter(result=1,store_order=obj)
+        if refunds.exists():
+            return refunds.values_list('id',flat=True)
 
 
 class UnifyOrderSerializer(serializers.ModelSerializer):
