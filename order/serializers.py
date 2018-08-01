@@ -280,7 +280,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     def get_refund(self,obj):
         refunds= models.OrderRefund.objects.filter(result=1,store_order=obj)
         if refunds.exists():
-            return RefundForOrderSerializer(refunds,many=True)
+            return RefundForOrderSerializer(refunds,many=True).data
 
 
 class UnifyOrderSerializer(serializers.ModelSerializer):
