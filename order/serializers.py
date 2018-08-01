@@ -273,7 +273,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     def get_refund(self,obj):
         refunds= models.OrderRefund.objects.filter(result=1,store_order=obj)
         if refunds.exists():
-            return refunds.values('id','state','get_state_display')
+            return refunds.values('id','state')
 
 
 class UnifyOrderSerializer(serializers.ModelSerializer):
