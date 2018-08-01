@@ -250,6 +250,13 @@ class DwdOrderInfoSerializer(serializers.ModelSerializer):
         model = models.DwdOrder
         fields = ('dwd_status', 'status_name')
 
+class RefundForOrderSerializer(serializers.ModelSerializer):
+    state_name = serializers.ReadOnlyField(source='get_state_display')
+
+    class Meta:
+        model = models.OrderRefund
+        fields =('id','state','state_name')
+
 
 class StoreOrderSerializer(serializers.ModelSerializer):
     sku_orders = SkuOrderSerializer(many=True, required=False)
@@ -273,7 +280,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     def get_refund(self,obj):
         refunds= models.OrderRefund.objects.filter(result=1,store_order=obj)
         if refunds.exists():
-            return refunds.values('id','state')
+            return RefundForOrderSerializer(refunds,many=True)
 
 
 class UnifyOrderSerializer(serializers.ModelSerializer):
