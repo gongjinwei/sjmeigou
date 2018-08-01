@@ -44,3 +44,6 @@ class ListDeleteViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, Generic
 class ListDetailDeleteViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin,
                                 GenericViewSet):
     pass
+
+class ListRetrieveCreateViewSets(mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.CreateModelMixin,GenericViewSet):
+    pass

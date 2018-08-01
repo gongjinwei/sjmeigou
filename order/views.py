@@ -16,7 +16,7 @@ from . import serializers, models
 from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
-    ListDetailDeleteViewSet
+    ListDetailDeleteViewSet,ListRetrieveCreateViewSets
 from tools.contrib import get_deliver_pay, store_order_refund
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
@@ -699,7 +699,7 @@ class InitialPaymentView(CreateOnlyViewSet):
         return Response(ret)
 
 
-class OrderRefundView(ModelViewSet):
+class OrderRefundView(ListRetrieveCreateViewSets):
     queryset = models.OrderRefund.objects.all()
     serializer_class = serializers.OrderRefundSerializer
 
