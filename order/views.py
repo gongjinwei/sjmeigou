@@ -714,6 +714,8 @@ class OrderRefundView(ModelViewSet):
                 return queryset.filter(store_order__user=user)
             else:
                 return queryset.filter(store_order=self.request.user.stores)
+        else:
+            return queryset.none()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
