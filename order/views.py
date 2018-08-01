@@ -677,19 +677,6 @@ class StoreOrderView(ListDetailDeleteViewSet):
         else:
             return Response({'code': 4206, 'msg': '您无此权限'})
 
-    @action(methods=['post'], detail=True, serializer_class=serializers.OrderRefundSerializer)
-    def init_refund(self, request, pk=None):
-        store_order = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if request.query_params.get('op', '') == 'backend':
-            return Response({'code': 4207, 'msg': '商户不能发起退款'})
-
-        serializer.save(store_order=store_order,state=1)
-        store_order.state=7
-        store_order.save()
-        return Response(serializer.data)
-
     @action(methods=['post'],detail=True,serializer_class=serializers.OrderReviewSerializer)
     def add_review(self,request,pk=None):
         store_order = self.get_object()
@@ -710,3 +697,34 @@ class InitialPaymentView(CreateOnlyViewSet):
         ret = prepare_payment(order.user, order.unify_order.order_desc, order.account, order.store_order_no,
                               order_type='store_order')
         return Response(ret)
+
+
+class OrderRefundView(ModelViewSet):
+    queryset = models.OrderRefund.objects.all()
+    serializer_class = serializers.OrderRefundSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset=self.queryset
+        op = self.request.query_params.get('op','')
+        if user.is_staff:
+            return queryset
+        elif user.is_authenticated:
+            if op != 'backend':
+                return queryset.filter(store_order__user=user)
+            else:
+                return queryset.filter(store_order=self.request.user.stores)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if request.query_params.get('op', '') == 'backend':
+            return Response({'code': 4207, 'msg': '商户不能发起退款'})
+        store_order = serializer.validated_data['store_order']
+        refund_type = serializer.validated_data['refund_type']
+        state = 1 if refund_type == 1 else 4
+        serializer.save(store_order=store_order, state=state)
+        store_order.state = 7
+        store_order.save()
+        return Response(serializer.data)

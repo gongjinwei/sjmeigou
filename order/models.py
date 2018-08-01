@@ -328,12 +328,12 @@ class OrderReview(models.Model):
 
 
 class OrderRefund(models.Model):
-    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,editable=False)
+    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE)
     refund_type = models.SmallIntegerField(choices=((1, '仅退款'), (2, '退货退款')))
     good_state = models.SmallIntegerField(choices=((1,'未收到货'),(2,'已收到货')))
     reason = models.ForeignKey(to='platforms.RefundReason',on_delete=models.CASCADE)
     refund_money = models.DecimalField(help_text='退款金额（元）',decimal_places=2,max_digits=30)
     refund_desc = models.CharField(max_length=1024,null=True)
-    state = models.SmallIntegerField(choices=((1,'买家发起退款'),(2,'退款成功'),(3,'卖家拒绝退款'),(4,'等待买家发货'),(5,'等待商家收货')),editable=False)
+    state = models.SmallIntegerField(choices=((1,'买家发起退款,等待卖家确认'),(2,'退款成功'),(3,'卖家拒绝退款'),(4,'等待买家发货'),(5,'等待商家收货'),(6,'取消退款')),editable=False)
     create_time =models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
