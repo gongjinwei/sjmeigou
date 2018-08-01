@@ -727,6 +727,8 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         if request.query_params.get('op', '') == 'backend':
             return Response({'code': 4207, 'msg': '商户不能发起退款'})
         store_order = serializer.validated_data['store_order']
+        if models.OrderRefund.objects.filter(store_order=store_order,result=1).exists():
+            return Response({'code':4209,'msg':'退款进行中不能再次发起'})
         refund_type = serializer.validated_data['refund_type']
         state = 1 if refund_type == 1 else 4
         serializer.save(store_order=store_order, state=state)
