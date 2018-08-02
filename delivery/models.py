@@ -54,7 +54,8 @@ class InitDwdOrder(models.Model):
 class InitGoodRefund(models.Model):
     store_order = models.ForeignKey(to='order.StoreOrder', on_delete=models.CASCADE,editable=False)
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
-    price = models.IntegerField()
+    price = models.DecimalField(max_digits=30,decimal_places=2,help_text='元')
+    distance = models.FloatField(null=True,editable=False)
     paid_money = models.IntegerField(editable=False,null=True)
     paid_time = models.DateTimeField(editable=False,null=True)
     state = models.SmallIntegerField(editable=False,choices=((1,'未支付'),(2,'支付成功')),default=1)
