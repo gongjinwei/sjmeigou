@@ -92,7 +92,7 @@ def prepare_dwd_order(store_order,user,op,InitDwdOrder_model):
         'cargo_weight': 0,
         'cargo_num': 1,
         'city_code': store.adcode,
-        'seller_id': user.userInfo.openId,
+        'seller_id': user.userinfo.openId,
         'money_rider_needpaid': 0,
         'money_rider_prepaid': 0,
         'money_rider_charge': 0,
