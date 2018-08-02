@@ -66,4 +66,6 @@ class InitDwdOrderSerializer(serializers.ModelSerializer):
                 'consignee_lat': store.latitude,
                 'consignee_lng': store.longitude
             })
+        dwdorder.__dict__.update(temp)
+        dwdorder.save()
         dwd.order_send(**temp)

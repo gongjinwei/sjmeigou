@@ -20,6 +20,7 @@ from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyVi
 from tools.contrib import get_deliver_pay, store_order_refund
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
+from delivery.models import InitDwdOrder
 
 client = get_redis_connection()
 
@@ -350,6 +351,9 @@ def prepare_payment(user, body, account, order_no, order_type=None):
 
     elif order_type == "recharge":
         order_trade.recharge = AccountRecharge.objects.get(pk=order_no)
+
+    elif order_type == 'dwd_order':
+        order_trade.dwd_order = InitDwdOrder.objects.get(pk=order_no)
 
     res = weixinpay.unified_order(trade_type="JSAPI", openid=user.userinfo.openId, body=body,
                                   total_fee=int(account * 100), out_trade_no=order_trade.trade_no)
@@ -745,3 +749,10 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             instance.state=6
             instance.save()
             return Response({'code':1000,'msg':'取消成功'})
+
+    @action(methods=['get','post'], detail=True)
+    def calculate_distance(self,request,pk=None):
+        instance = self.get_object()
+
+        if request.method =='GET':
+            pass

@@ -20,8 +20,8 @@ class OrderCallback(models.Model):
 
 
 class InitDwdOrder(models.Model):
-    store_order = models.ForeignKey(to='order.StoreOrder',on_delete=models.CASCADE)
-    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+
+
     create_time = models.DateTimeField(auto_now_add=True)
     order_original_id = models.CharField(max_length=40,primary_key=True,editable=False)
     order_create_time = models.IntegerField()
@@ -51,3 +51,14 @@ class InitDwdOrder(models.Model):
     def trade_number(self):
         now = datetime.datetime.now()
         return datetime.datetime.strftime(now, 'DWD%Y%m%d%H%M%S%f') + str(random.randint(1000, 9999))
+
+
+class InitGoodRefund(models.Model):
+    store_order = models.ForeignKey(to='order.StoreOrder', on_delete=models.CASCADE)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
+    price = models.IntegerField(editable=False)
+    paid_money = models.IntegerField(editable=False,null=True)
+    paid_time = models.DateTimeField(editable=False,null=True)
+    state = models.SmallIntegerField(editable=False,choices=((1,'未支付'),(2,'支付成功')),default=1)
+    settlement = models.SmallIntegerField(choices=((1,'微信支付'),))
+    remark = models.CharField(null=True,max_length=100)
