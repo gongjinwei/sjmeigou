@@ -20,8 +20,6 @@ class OrderCallback(models.Model):
 
 
 class InitDwdOrder(models.Model):
-
-
     create_time = models.DateTimeField(auto_now_add=True)
     order_original_id = models.CharField(max_length=40,primary_key=True,editable=False)
     order_create_time = models.IntegerField()

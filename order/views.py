@@ -746,9 +746,15 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         if request.query_params.get('op', '') == 'backend':
             return Response({'code': 4208, 'msg': '商户不能取消退款'})
         else:
-            instance.state = 6
-            instance.save()
-            return Response({'code': 1000, 'msg': '取消成功'})
+            if instance.state ==1 or instance.state == 6:
+                instance.state = 6
+                instance.result =2
+                instance.store_order.state =3
+                instance.store_order.save()
+                instance.save()
+                return Response({'code': 1000, 'msg': '取消成功'})
+            else:
+                return Response({'code':4209,'msg':'此状态无法取消退款'})
 
     @action(methods=['get', 'post'], detail=True)
     def calculate_distance(self, request, pk=None):
