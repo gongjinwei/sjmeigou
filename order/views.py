@@ -810,7 +810,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 instance.state = 1
                 instance.save()
                 return Response({'code': 1000, 'msg': '确认收货成功'})
-            if operation == 3 and instance.state in [1, 4, 5]:
+            if operation == 3 and instance.state in [1, 4, 5,7]:
                 instance.state = 3
                 instance.result = 2
                 instance.store_order.state = 3

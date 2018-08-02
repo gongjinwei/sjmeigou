@@ -52,7 +52,7 @@ class InitDwdOrder(models.Model):
 
 
 class InitGoodRefund(models.Model):
-    store_order = models.ForeignKey(to='order.StoreOrder', on_delete=models.CASCADE)
+    store_order = models.ForeignKey(to='order.StoreOrder', on_delete=models.CASCADE,editable=False)
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
     price = models.IntegerField(editable=False)
     paid_money = models.IntegerField(editable=False,null=True)

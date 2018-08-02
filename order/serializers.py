@@ -10,6 +10,7 @@ from store.models import Stores
 from goods.models import SKU, GoodDeliver
 from tools.contrib import get_deliver_pay
 from platforms.models import DeliveryReason
+from delivery.models import InitGoodRefund
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -465,3 +466,5 @@ class OrderReviewSerializer(serializers.ModelSerializer):
         return order_review
 
 
+class InitGoodRefundSerializer(serializers.ModelSerializer):
+    pass
