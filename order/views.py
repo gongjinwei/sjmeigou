@@ -749,7 +749,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         store_order.save()
         return Response(serializer.data)
 
-    @action(methods=['get', 'post'], detail=True)
+    @action(methods=['get', 'post'], detail=True,serializer_class=serializers.InitGoodRefundSerializer)
     def calculate_distance(self, request, pk=None):
         instance = self.get_object()
         op = request.query_params.get('op', '')

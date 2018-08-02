@@ -467,4 +467,7 @@ class OrderReviewSerializer(serializers.ModelSerializer):
 
 
 class InitGoodRefundSerializer(serializers.ModelSerializer):
-    pass
+
+    class Meta:
+        model = InitGoodRefund
+        fields = '__all__'
