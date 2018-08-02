@@ -801,7 +801,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             dwd_order.good_refund=good_refund
             dwd_order.save()
             ret=prepare_payment(request.user,'点我达订单',price,good_refund.id,order_type='good_refund')
-            return Response(ret)
+            return Response({'code':1000,'data':ret})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.GoodRefundStateChange)
     def change_state(self, request, pk=None):
