@@ -445,6 +445,10 @@ class OrderRefundSerializer(serializers.ModelSerializer):
         return order_refund
 
 
+class GoodRefundStateChange(serializers.Serializer):
+    operation = serializers.ChoiceField(choices=((1,'卖家确认收货'),(2,'卖家同意退款'),(3,'卖家拒绝退款'),(4,'买家取消退款')))
+
+
 class OrderReviewSerializer(serializers.ModelSerializer):
     review_images = ImageCommentSerializer(many=True,required=False)
 
@@ -459,3 +463,5 @@ class OrderReviewSerializer(serializers.ModelSerializer):
         order_review = models.OrderReview.objects.create(**validated_data)
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(review_content=order_review)
         return order_review
+
+

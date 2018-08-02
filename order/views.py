@@ -733,30 +733,14 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         store_order = serializer.validated_data['store_order']
         if models.OrderRefund.objects.filter(store_order=store_order, result=1).exists():
             return Response({'code': 4209, 'msg': '退款进行中不能再次发起'})
-        if store_order.state !=3:
-            return Response({'code':4211,'msg':'此订单状态无法完成退款'})
+        if store_order.state != 3:
+            return Response({'code': 4211, 'msg': '此订单状态无法完成退款'})
         refund_type = serializer.validated_data['refund_type']
         state = 1 if refund_type == 1 else 4
         serializer.save(store_order=store_order, state=state)
         store_order.state = 7
         store_order.save()
         return Response(serializer.data)
-
-    @action(methods=['delete'], detail=True)
-    def cancel(self, request, pk=None):
-        instance = self.get_object()
-        if request.query_params.get('op', '') == 'backend':
-            return Response({'code': 4208, 'msg': '商户不能取消退款'})
-        else:
-            if instance.state ==1 or instance.state == 6:
-                instance.state = 6
-                instance.result =2
-                instance.store_order.state =3
-                instance.store_order.save()
-                instance.save()
-                return Response({'code': 1000, 'msg': '取消成功'})
-            else:
-                return Response({'code':4209,'msg':'此状态无法取消退款'})
 
     @action(methods=['get', 'post'], detail=True)
     def calculate_distance(self, request, pk=None):
@@ -776,7 +760,8 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                     'consignee_name': receive_address.contact,
                     'consignee_mobile': receive_address.phone,
                     'consignee_address': receive_address.address + receive_address.room_no,
-                    'delivery_pay': A + 2 * B
+                    'delivery_pay': A + 2 * B,
+                    'distance': C
                 })
 
             else:
@@ -790,5 +775,30 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                     'consignee_name': store.info.contract_name,
                     'consignee_mobile': None,
                     'consignee_address': store.receive_address,
-                    'delivery_pay': A + 2 * B
+                    'delivery_pay': A + 2 * B,
+                    'distance':C
                 })
+        elif request.method == 'POST':
+            pass
+
+    @action(methods=['post'], detail=True, serializer_class=serializers.GoodRefundStateChange)
+    def change_state(self, request, pk=None):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        op = request.query_params.get('op', '')
+        operation = serializer.validated_data['operation']
+        if op != 'backend' and operation == 4:
+            if instance.state == 1 or instance.state == 4:
+                instance.state = 6
+                instance.result = 2
+                instance.store_order.state = 3
+                instance.store_order.save()
+                instance.save()
+                return Response({'code': 1000, 'msg': '取消成功'})
+            else:
+                return Response({'code': 4209, 'msg': '此状态无法取消退款'})
+        elif op == 'backend' and operation != 4:
+            pass
+        else:
+            return Response({'code': 4208, 'msg': '操作无效'})
