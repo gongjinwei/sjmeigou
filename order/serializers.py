@@ -446,7 +446,7 @@ class OrderRefundSerializer(serializers.ModelSerializer):
 
 
 class GoodRefundStateChange(serializers.Serializer):
-    operation = serializers.ChoiceField(choices=((1,'卖家确认收货'),(2,'卖家同意退款'),(3,'卖家拒绝退款'),(4,'买家取消退款')))
+    operation = serializers.ChoiceField(choices=((1,'卖家确认收货'),(2,'卖家同意退款'),(3,'卖家拒绝退款'),(4,'买家取消退款'),(5,'卖家同意退货')))
 
 
 class OrderReviewSerializer(serializers.ModelSerializer):

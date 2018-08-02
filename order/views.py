@@ -718,7 +718,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 return queryset.filter(store_order__user=user)
             else:
                 if hasattr(user, 'stores'):
-                    return queryset.filter(store_order=self.request.user.stores)
+                    return queryset.filter(store_order__store=self.request.user.stores)
                 else:
                     return queryset.none()
         else:
@@ -736,7 +736,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         if store_order.state != 3:
             return Response({'code': 4211, 'msg': '此订单状态无法完成退款'})
         refund_type = serializer.validated_data['refund_type']
-        state = 1 if refund_type == 1 else 4
+        state = 1 if refund_type == 1 else 7
         serializer.save(store_order=store_order, state=state)
         store_order.state = 7
         store_order.save()
@@ -798,7 +798,16 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 return Response({'code': 1000, 'msg': '取消成功'})
             else:
                 return Response({'code': 4209, 'msg': '此状态无法取消退款'})
-        elif op == 'backend' and operation != 4:
-            pass
+        elif op == 'backend':
+            if operation ==1 and instance.state in [4,5]:
+                instance.state=1
+                instance.save()
+                return Response({'code':1000,'msg':'收货成功'})
+            if operation ==3 and instance.state in [1,4,5]:
+                instance.state =3
+                instance.store_order.state=3
+                instance.store_order.save()
+                instance.save()
+                return
         else:
             return Response({'code': 4208, 'msg': '操作无效'})
