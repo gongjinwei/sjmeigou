@@ -764,7 +764,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         op = request.query_params.get('op', '')
         if request.method == 'GET':
             store = instance.store_order.store
-            receive_address = instance.unify_order.address
+            receive_address = instance.store_order.unify_order.address
             if op == 'backend':
                 origin = '%6f,%6f' % (store.longitude, store.latitude)
                 destination = '%6f,%6f' % (receive_address.longitude, receive_address.latitude)
