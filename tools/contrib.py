@@ -51,7 +51,7 @@ def store_order_refund(trade_model, result_model, store_order, refund_fee):
     try:
         ret = weixinpay.refund(**refund_data)
     except WeixinPayError as e:
-        return (4305,e.args[0])
+        return (4305, e.args[0])
     if ret.get("return_code", '') == "SUCCESS":
         receive_sign = ret.pop('sign')
         mysign = weixinpay.sign(ret)
@@ -70,17 +70,17 @@ def look_up_adocode(location):
     url = 'https://restapi.amap.com/v3/geocode/regeo?key=%s&location=%s' % (gd_key, location)
     r = requests.get(url).json()
     if r['status'] == '1':
-        return r['regeocode']['addressComponent']['adcode'][:4]+'00'
+        return r['regeocode']['addressComponent']['adcode'][:4] + '00'
 
 
 def look_up_towncode(location):
     url = 'https://restapi.amap.com/v3/geocode/regeo?key=%s&location=%s' % (gd_key, location)
     r = requests.get(url).json()
     if r['status'] == '1':
-        return r['regeocode']['addressComponent'].get('towncode',None)
+        return r['regeocode']['addressComponent'].get('towncode', None)
 
 
-def prepare_dwd_order(store_order,user,op,InitDwdOrder_model):
+def prepare_dwd_order(store_order, user, op, InitDwdOrder_model):
     receive_address = store_order.unify_order.address
     store = store_order.store
     dwdorder = InitDwdOrder_model()
@@ -104,8 +104,8 @@ def prepare_dwd_order(store_order,user,op,InitDwdOrder_model):
             'seller_name': store.info.contract_name,
             'seller_mobile': store.info.contract_mobile,
             'seller_address': store.receive_address,
-            'seller_lat':round(store.latitude,6),
-            'seller_lng': round(store.longitude,6),
+            'seller_lat': round(store.latitude, 6),
+            'seller_lng': round(store.longitude, 6),
             'consignee_name': receive_address.contact,
             'consignee_mobile': receive_address.phone,
             'consignee_address': receive_address.address + receive_address.room_no,
@@ -123,8 +123,8 @@ def prepare_dwd_order(store_order,user,op,InitDwdOrder_model):
             'consignee_name': store.info.contract_name,
             'consignee_mobile': store.info.contract_mobile,
             'consignee_address': store.receive_address,
-            'consignee_lat': round(store.latitude),
-            'consignee_lng': round(store.longitude)
+            'consignee_lat': round(store.latitude, 6),
+            'consignee_lng': round(store.longitude, 6)
         })
     dwdorder.__dict__.update(temp_dict)
-    return (dwdorder,temp_dict)
+    return (dwdorder, temp_dict)
