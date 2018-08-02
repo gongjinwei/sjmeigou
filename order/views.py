@@ -776,7 +776,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                     'consignee_mobile': None,
                     'consignee_address': store.receive_address,
                     'delivery_pay': A + 2 * B,
-                    'distance':C
+                    'distance': C
                 })
         elif request.method == 'POST':
             pass
@@ -799,15 +799,32 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             else:
                 return Response({'code': 4209, 'msg': '此状态无法取消退款'})
         elif op == 'backend':
-            if operation ==1 and instance.state in [4,5]:
-                instance.state=1
+            if operation == 1 and instance.state in [4, 5]:
+                instance.state = 1
                 instance.save()
-                return Response({'code':1000,'msg':'收货成功'})
-            if operation ==3 and instance.state in [1,4,5]:
-                instance.state =3
-                instance.store_order.state=3
+                return Response({'code': 1000, 'msg': '确认收货成功'})
+            if operation == 3 and instance.state in [1, 4, 5]:
+                instance.state = 3
+                instance.result = 2
+                instance.store_order.state = 3
                 instance.store_order.save()
                 instance.save()
-                return
+                return Response({'code': 1000, 'msg': '拒绝退款成功'})
+            if operation == 5 and instance.state == 7:
+                instance.state = 3
+                instance.save()
+                return Response({'code': 1000, 'msg': '同意退货成功'})
+            if operation == 2 and instance.state == 1:
+                # 发起微信退款
+                code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, instance.store_order,
+                                               instance.refund_money)
+                if code == 1000:
+                    instance.state = 2
+                    instance.result = 2
+                    instance.store_order.state = 6
+                    instance.state_order.save()
+                    instance.save()
+                return Response({'code': code, 'msg': msg})
+
         else:
             return Response({'code': 4208, 'msg': '操作无效'})

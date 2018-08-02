@@ -34,7 +34,7 @@ def store_order_refund(trade_model, result_model, store_order, refund_fee):
     total_fee = int(store_order.account_paid * 100)
     if trade_model.objects.filter(store_order=store_order).exists():
         order_trade = trade_model.objects.get(store_order=store_order, paid_money__isnull=False)
-    elif trade_model.objects.filter(unify_order=store_order.unify_order):
+    elif trade_model.objects.filter(unify_order=store_order.unify_order).exists():
         order_trade = trade_model.objects.get(unify_order=store_order.unify_order, paid_money__isnull=False)
     else:
         return (4301, '无此支付单号')
