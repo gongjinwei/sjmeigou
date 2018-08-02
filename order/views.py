@@ -17,10 +17,10 @@ from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet, ListRetrieveCreateViewSets
-from tools.contrib import get_deliver_pay, store_order_refund
+from tools.contrib import get_deliver_pay, store_order_refund,prepare_dwd_order
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
-from delivery.models import InitGoodRefund
+from delivery.models import InitGoodRefund,InitDwdOrder
 
 client = get_redis_connection()
 
@@ -786,7 +786,12 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                     'distance': C
                 })
         elif request.method == 'POST':
-            pass
+            # 发起DWD订单
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            store_order = instance.store_order
+            prepare_dwd_order(store_order,request.user,op,InitDwdOrder)
+            serializer.save(store_order=store_order,user=request.user)
 
     @action(methods=['post'], detail=True, serializer_class=serializers.GoodRefundStateChange)
     def change_state(self, request, pk=None):
