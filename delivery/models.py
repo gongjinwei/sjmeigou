@@ -61,4 +61,5 @@ class InitGoodRefund(models.Model):
     paid_time = models.DateTimeField(editable=False,null=True)
     state = models.SmallIntegerField(editable=False,choices=((1,'未支付'),(2,'支付成功')),default=1)
     settlement = models.SmallIntegerField(choices=((1,'微信支付'),))
+    create_time = models.DateTimeField(auto_now_add=True)
     remark = models.CharField(null=True,max_length=100)

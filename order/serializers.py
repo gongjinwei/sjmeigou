@@ -223,8 +223,8 @@ class ReceiveAddressSerializer(serializers.ModelSerializer):
                         continue
                     if Stores.objects.filter(pk=store_id).exists():
                         store = Stores.objects.get(pk=store_id)
-                        destination = '%s,%s' % (ret.get('longitude'), ret.get('latitude'))
-                        origin = "%s,%s" % (store.longitude, store.latitude)
+                        destination = '%6f,%6f' % (ret.get('longitude'), ret.get('latitude'))
+                        origin = "%6f,%6f" % (store.longitude, store.latitude)
                         delivery, store_pay, deliver_distance = get_deliver_pay(origin, destination)
                         ret['deliver_pays'].append(
                             {"deliver_pay": delivery, 'store_id': store_id, 'deliver_distance': deliver_distance})

@@ -16,11 +16,11 @@ from . import serializers, models
 from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
-    ListDetailDeleteViewSet,ListRetrieveCreateViewSets
+    ListDetailDeleteViewSet, ListRetrieveCreateViewSets
 from tools.contrib import get_deliver_pay, store_order_refund
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
-from delivery.models import InitDwdOrder
+from delivery.models import InitGoodRefund
 
 client = get_redis_connection()
 
@@ -74,7 +74,7 @@ class ShoppingCarItemView(ModelViewSet):
     def perform_destroy(self, instance):
         shopping_car = instance.shopping_car
         instance.delete()
-        if len(shopping_car.items.all())==0:
+        if len(shopping_car.items.all()) == 0:
             shopping_car.delete()
 
 
@@ -205,7 +205,7 @@ class BalanceView(CreateOnlyViewSet):
         stores = serializer.validated_data['stores']
         receive_address = models.ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
         if receive_address.exists():
-            destination = '%s,%s' % (receive_address[0].longitude, receive_address[0].latitude)
+            destination = '%6f,%6f' % (receive_address[0].longitude, receive_address[0].latitude)
         else:
             destination = ''
         ret = []
@@ -270,7 +270,7 @@ class BalanceView(CreateOnlyViewSet):
                     sd.append(ser_)
 
             # 计算配送费用
-            origin = '%s,%s' % (store.longitude, store.latitude)
+            origin = '%6f,%6f' % (store.longitude, store.latitude)
 
             delivery_pay, store_to_pay, deliver_distance = get_deliver_pay(origin,
                                                                            destination) if origin and destination else (
@@ -352,8 +352,8 @@ def prepare_payment(user, body, account, order_no, order_type=None):
     elif order_type == "recharge":
         order_trade.recharge = AccountRecharge.objects.get(pk=order_no)
 
-    elif order_type == 'dwd_order':
-        order_trade.dwd_order = InitDwdOrder.objects.get(pk=order_no)
+    elif order_type == 'good_refund':
+        order_trade.dwd_order = InitGoodRefund.objects.get(pk=order_no)
 
     res = weixinpay.unified_order(trade_type="JSAPI", openid=user.userinfo.openId, body=body,
                                   total_fee=int(account * 100), out_trade_no=order_trade.trade_no)
@@ -442,8 +442,8 @@ class UnifyOrderView(CreateOnlyViewSet):
                             if not address:
                                 return Response({'code': 4108, 'msg': '必须选择地址', 'success': 'FAIL'})
                             else:
-                                destination = '%s,%s' % (address.longitude, address.latitude)
-                                origin = '%s,%s' % (store.longitude, store.latitude)
+                                destination = '%6f,%6f' % (address.longitude, address.latitude)
+                                origin = '%6f,%6f' % (store.longitude, store.latitude)
 
                                 store_deliver_payment, store_to_pay, deliver_distance = get_deliver_pay(origin,
                                                                                                         destination)
@@ -485,12 +485,12 @@ class UnifyOrderView(CreateOnlyViewSet):
                      'deliver_distance': deliver_distance})
 
                 # 移除购物车
-                shopping_car =models.ShoppingCar.objects.filter(user=self.request.user,store=store)
+                shopping_car = models.ShoppingCar.objects.filter(user=self.request.user, store=store)
                 if shopping_car.exists():
                     shopping_car = shopping_car[0]
 
-                    models.ShoppingCarItem.objects.filter(shopping_car=shopping_car,sku__in=skus).delete()
-                    if len(shopping_car.items.all()) ==0:
+                    models.ShoppingCarItem.objects.filter(shopping_car=shopping_car, sku__in=skus).delete()
+                    if len(shopping_car.items.all()) == 0:
                         shopping_car.delete()
 
         # 统一下单
@@ -555,10 +555,10 @@ class StoreOrderView(ListDetailDeleteViewSet):
                 return Response({'code': 1000, 'msg': '收货成功', "return_code": "SUCCESS"})
             else:
                 return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAIL"})
-        elif op == 2 and order.user == user and order.state ==1:
-                order.state = 8
-                order.save()
-                return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
+        elif op == 2 and order.user == user and order.state == 1:
+            order.state = 8
+            order.save()
+            return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
 
         elif op == 3 and order.store == user.stores and order.state == 7:
             # 平台进入退款操作，成功后更新状态
@@ -617,7 +617,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             "seller_name": store_order.store.name,
             "seller_logo": store_order.store.logo,
             "seller_contract": store_order.store.store_phone,
-            "rider_mobile":dwd_order.rider_mobile,
+            "rider_mobile": dwd_order.rider_mobile,
             "receiver_lat": store_order.unify_order.address.latitude,
             "receiver_lng": store_order.unify_order.address.longitude
         }
@@ -681,14 +681,14 @@ class StoreOrderView(ListDetailDeleteViewSet):
         else:
             return Response({'code': 4206, 'msg': '您无此权限'})
 
-    @action(methods=['post'],detail=True,serializer_class=serializers.OrderReviewSerializer)
-    def add_review(self,request,pk=None):
+    @action(methods=['post'], detail=True, serializer_class=serializers.OrderReviewSerializer)
+    def add_review(self, request, pk=None):
         store_order = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user,order=store_order)
+        serializer.save(user=request.user, order=store_order)
 
-        return Response({'code':1000,'msg':'追评成功'})
+        return Response({'code': 1000, 'msg': '追评成功'})
 
 
 class InitialPaymentView(CreateOnlyViewSet):
@@ -709,15 +709,15 @@ class OrderRefundView(ListRetrieveCreateViewSets):
 
     def get_queryset(self):
         user = self.request.user
-        queryset=self.queryset
-        op = self.request.query_params.get('op','')
+        queryset = self.queryset
+        op = self.request.query_params.get('op', '')
         if user.is_staff:
             return queryset
         elif user.is_authenticated:
             if op != 'backend':
                 return queryset.filter(store_order__user=user)
             else:
-                if hasattr(user,'stores'):
+                if hasattr(user, 'stores'):
                     return queryset.filter(store_order=self.request.user.stores)
                 else:
                     return queryset.none()
@@ -731,8 +731,8 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         if request.query_params.get('op', '') == 'backend':
             return Response({'code': 4207, 'msg': '商户不能发起退款'})
         store_order = serializer.validated_data['store_order']
-        if models.OrderRefund.objects.filter(store_order=store_order,result=1).exists():
-            return Response({'code':4209,'msg':'退款进行中不能再次发起'})
+        if models.OrderRefund.objects.filter(store_order=store_order, result=1).exists():
+            return Response({'code': 4209, 'msg': '退款进行中不能再次发起'})
         refund_type = serializer.validated_data['refund_type']
         state = 1 if refund_type == 1 else 4
         serializer.save(store_order=store_order, state=state)
@@ -740,19 +740,47 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         store_order.save()
         return Response(serializer.data)
 
-    @action(methods=['delete'],detail=True)
-    def cancel(self,request,pk=None):
+    @action(methods=['delete'], detail=True)
+    def cancel(self, request, pk=None):
         instance = self.get_object()
-        if request.query_params.get('op','')=='backend':
+        if request.query_params.get('op', '') == 'backend':
             return Response({'code': 4208, 'msg': '商户不能取消退款'})
         else:
-            instance.state=6
+            instance.state = 6
             instance.save()
-            return Response({'code':1000,'msg':'取消成功'})
+            return Response({'code': 1000, 'msg': '取消成功'})
 
-    @action(methods=['get','post'], detail=True)
-    def calculate_distance(self,request,pk=None):
+    @action(methods=['get', 'post'], detail=True)
+    def calculate_distance(self, request, pk=None):
         instance = self.get_object()
+        op = request.query_params.get('op', '')
+        if request.method == 'GET':
+            store = instance.store_order.store
+            receive_address = instance.unify_order.address
+            if op == 'backend':
+                origin = '%6f,%6f' % (store.longitude, store.latitude)
+                destination = '%6f,%6f' % (receive_address.longitude, receive_address.latitude)
+                A, B, C = get_deliver_pay(origin, destination)
+                return Response({
+                    'seller_mobile': None,
+                    'seller_name': store.info.contract_name,
+                    'seller_address': store.receive_address,
+                    'consignee_name': receive_address.contact,
+                    'consignee_mobile': receive_address.phone,
+                    'consignee_address': receive_address.address + receive_address.room_no,
+                    'delivery_pay': A + 2 * B
+                })
 
-        if request.method =='GET':
-            pass
+            else:
+                origin = '%6f,%6f' % (receive_address.longitude, receive_address.latitude)
+                destination = '%6f,%6f' % (store.longitude, store.latitude)
+                A, B, C = get_deliver_pay(origin, destination)
+                return Response({
+                    'seller_name': receive_address.contact,
+                    'seller_mobile': receive_address.phone,
+                    'seller_address': receive_address.address + receive_address.room_no,
+                    'consignee_name': store.info.contract_name,
+                    'consignee_mobile': None,
+                    'consignee_address': store.receive_address,
+                    'delivery_pay': A + 2 * B
+                })
