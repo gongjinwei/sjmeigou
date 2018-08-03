@@ -580,6 +580,11 @@ class StoreOrderView(ListDetailDeleteViewSet):
     @action(methods=['get'], detail=True)
     def check_delivery(self, request, pk=None):
         order = self.get_object()
+        init_order = InitDwdOrder.objects.filter(dwd_store_order__store_order=order,has_paid=True)
+        if init_order.exists():
+            init_id = init_order[0].order_original_id
+        else:
+            return Response({'code':3002,'msg':'无物流单'})
         te = request.query_params.get('test', '')
         te_option = {
             'accept': 'order_accept_test',
@@ -588,7 +593,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
             "finish": 'order_finish_test'
         }
         if te and te_option.get(te, '') and hasattr(dwd, te_option.get(te)):
-            getattr(dwd, te_option.get(te))(pk)
+            getattr(dwd, te_option.get(te))(init_id)
         ret = dwd.order_get(pk)
         return Response(ret)
 
