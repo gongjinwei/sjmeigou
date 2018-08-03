@@ -879,7 +879,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             init_order = init_order[0]
         else:
             return Response({'code': 3002, 'msg': '无物流单'})
-        dwd_order = InitGoodRefund.objects.filter(refund=refund,paid_money__isnull=False,user=request.user)
+        dwd_order = InitGoodRefund.objects.filter(refund=refund,state=2,user=request.user)
         ret = dwd.order_rider_position(init_order.order_original_id, dwd_order.rider_code)
         # 只有骑手位置正确返回时才返回相应结果
         if ret.get("errorCode", '') == "0" and dwd_order.exists():
