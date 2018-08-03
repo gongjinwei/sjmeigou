@@ -868,7 +868,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         }
         if te and te_option.get(te, '') and hasattr(dwd, te_option.get(te)):
             getattr(dwd, te_option.get(te))(init_id)
-        ret = dwd.order_get(pk)
+        ret = dwd.order_get(init_id)
         return Response(ret)
 
     @action(methods=['get'], detail=True)
@@ -876,24 +876,24 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         refund = self.get_object()
         init_order = InitDwdOrder.objects.filter(good_refund__refund=refund, has_paid=True)
         if init_order.exists():
-            init_id = init_order[0].order_original_id
+            init_order = init_order[0]
         else:
             return Response({'code': 3002, 'msg': '无物流单'})
         dwd_order = InitGoodRefund.objects.get(refund=refund)
-        ret = dwd.order_rider_position(init_id, dwd_order.rider_code)
+        ret = dwd.order_rider_position(init_order.order_original_id, dwd_order.rider_code)
         # 只有骑手位置正确返回时才返回相应结果
         if ret.get("errorCode", '') == "0":
             dwd_order_serializer = serializers.InitGoodDeliverySerializer(instance=dwd_order)
             ret.update(dwd_order_serializer.data)
         ori_dis = {
-            "seller_lat": refund.store_order.store.latitude,
-            "seller_lng": refund.store_order.store.longitude,
+            "seller_lat": init_order.seller_lat,
+            "seller_lng": init_order.seller_lng,
             "seller_name": refund.store_order.store.name,
             "seller_logo": refund.store_order.store.logo,
             "seller_contract": refund.store_order.store.store_phone,
             "rider_mobile": dwd_order.rider_mobile,
-            "receiver_lat": refund.store_order.unify_order.address.latitude,
-            "receiver_lng": refund.store_order.unify_order.address.longitude
+            "receiver_lat": init_order.consignee_lat,
+            "receiver_lng": init_order.consignee_lng
         }
         ret.update(ori_dis)
         return Response(ret)
