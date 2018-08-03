@@ -600,10 +600,13 @@ class StoreOrderView(ListDetailDeleteViewSet):
     @action(methods=['get'], detail=True)
     def check_rider(self, request, pk=None):
         store_order = self.get_object()
-        if not models.DwdOrder.objects.filter(store_order=store_order).exists():
-            return Response({'errorCode': '3001', 'msg': '该物流单不存在'})
+        init_order = InitDwdOrder.objects.filter(dwd_store_order__store_order=order, has_paid=True)
+        if init_order.exists():
+            init_id = init_order[0].order_original_id
+        else:
+            return Response({'code': 3002, 'msg': '无物流单'})
         dwd_order = models.DwdOrder.objects.get(store_order=store_order)
-        ret = dwd.order_rider_position(pk, dwd_order.rider_code)
+        ret = dwd.order_rider_position(init_id, dwd_order.rider_code)
         # 只有骑手位置正确返回时才返回相应结果
         if ret.get("errorCode", '') == "0":
             dwd_order_serializer = serializers.DwdRiderSerializer(instance=dwd_order)
