@@ -6,6 +6,9 @@ from django.core.cache import cache
 from wxpay.views import weixinpay
 from weixin.pay import WeixinPayError
 
+from delivery.models import InitDwdOrder
+from order.models import OrderRefundResult,OrderTrade
+
 gd_key = getattr(settings, 'GDKEY')
 
 
@@ -29,13 +32,13 @@ def get_deliver_pay(origin, destination):
     return ret
 
 
-def store_order_refund(trade_model, result_model, store_order, refund_fee):
+def store_order_refund(store_order, refund_fee):
     now = datetime.datetime.now()
     total_fee = int(store_order.account_paid * 100)
-    if trade_model.objects.filter(store_order=store_order).exists():
-        order_trade = trade_model.objects.get(store_order=store_order, paid_money__isnull=False)
-    elif trade_model.objects.filter(unify_order=store_order.unify_order).exists():
-        order_trade = trade_model.objects.get(unify_order=store_order.unify_order, paid_money__isnull=False)
+    if OrderTrade.objects.filter(store_order=store_order).exists():
+        order_trade = OrderTrade.objects.get(store_order=store_order, paid_money__isnull=False)
+    elif OrderTrade.objects.filter(unify_order=store_order.unify_order).exists():
+        order_trade = OrderTrade.objects.get(unify_order=store_order.unify_order, paid_money__isnull=False)
     else:
         return (4301, '无此支付单号')
 
@@ -58,7 +61,7 @@ def store_order_refund(trade_model, result_model, store_order, refund_fee):
         if receive_sign == mysign:
             ret.pop('serializer', None)
 
-            result_model.objects.create(**ret)
+            OrderRefundResult.objects.create(**ret)
             return (1000, "退款成功")
         else:
             return (4302, "退款异常")
@@ -80,10 +83,10 @@ def look_up_towncode(location):
         return r['regeocode']['addressComponent'].get('towncode', None)
 
 
-def prepare_dwd_order(store_order, user, op, InitDwdOrder_model):
+def prepare_dwd_order(store_order, user, op):
     receive_address = store_order.unify_order.address
     store = store_order.store
-    dwdorder = InitDwdOrder_model()
+    dwdorder = InitDwdOrder()
     temp_dict = {
         'order_original_id': dwdorder.trade_number,
         'order_create_time': int(store_order.paid_time.timestamp() * 1000),
@@ -92,7 +95,7 @@ def prepare_dwd_order(store_order, user, op, InitDwdOrder_model):
         'cargo_weight': 0,
         'cargo_num': 1,
         'city_code': store.adcode,
-        'seller_id': user.userinfo.openId,
+        'seller_id': user.userinfo.id,
         'money_rider_needpaid': 0,
         'money_rider_prepaid': 0,
         'money_rider_charge': 0,
@@ -127,4 +130,4 @@ def prepare_dwd_order(store_order, user, op, InitDwdOrder_model):
             'consignee_lng': round(store.longitude, 6)
         })
     dwdorder.__dict__.update(temp_dict)
-    return (dwdorder, temp_dict)
+    return dwdorder

@@ -17,10 +17,10 @@ from goods.models import SKU
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet, ListRetrieveCreateViewSets
-from tools.contrib import get_deliver_pay, store_order_refund,prepare_dwd_order
+from tools.contrib import get_deliver_pay, store_order_refund, prepare_dwd_order
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
-from delivery.models import InitGoodRefund,InitDwdOrder
+from delivery.models import InitGoodRefund, InitDwdOrder
 
 client = get_redis_connection()
 
@@ -749,7 +749,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         store_order.save()
         return Response(serializer.data)
 
-    @action(methods=['get', 'post'], detail=True,serializer_class=serializers.InitGoodRefundSerializer)
+    @action(methods=['get', 'post'], detail=True, serializer_class=serializers.InitGoodRefundSerializer)
     def calculate_distance(self, request, pk=None):
         instance = self.get_object()
         op = request.query_params.get('op', '')
@@ -790,18 +790,18 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             store_order = instance.store_order
-            dwd_order,temp_dict=prepare_dwd_order(store_order,request.user,op,InitDwdOrder)
-            origin = '%6f,%6f' % (temp_dict['seller_lng'],temp_dict['seller_lat'])
-            destination = '%6f,%6f' % (temp_dict['consignee_lng'],temp_dict['consignee_lat'])
-            A,B,C = get_deliver_pay(origin,destination)
+            dwd_order = prepare_dwd_order(store_order, request.user, op)
+            origin = '%6f,%6f' % (dwd_order.seller_lng, dwd_order.seller_lat)
+            destination = '%6f,%6f' % (dwd_order.consignee_lng, dwd_order.consignee_lat)
+            A, B, C = get_deliver_pay(origin, destination)
             price = serializer.validated_data['price']
-            if price !=Decimal(A+2*B):
-                return Response({'code':4301,'msg':'价格不符'})
-            good_refund=serializer.save(store_order=store_order,user=request.user,distance=C)
-            dwd_order.good_refund=good_refund
+            if price != Decimal(A + 2 * B):
+                return Response({'code': 4301, 'msg': '价格不符'})
+            good_refund = serializer.save(store_order=store_order, user=request.user, distance=C)
+            dwd_order.good_refund = good_refund
             dwd_order.save()
-            ret=prepare_payment(request.user,'点我达订单',price,good_refund.id,order_type='good_refund')
-            return Response({'code':1000,'data':ret})
+            ret = prepare_payment(request.user, '点我达订单', price, good_refund.id, order_type='good_refund')
+            return Response({'code': 1000, 'data': ret})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.GoodRefundStateChange)
     def change_state(self, request, pk=None):
@@ -825,7 +825,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 instance.state = 1
                 instance.save()
                 return Response({'code': 1000, 'msg': '确认收货成功'})
-            if operation == 3 and instance.state in [1, 4, 5,7]:
+            if operation == 3 and instance.state in [1, 4, 5, 7]:
                 instance.state = 3
                 instance.result = 2
                 instance.store_order.state = 3
@@ -838,8 +838,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 return Response({'code': 1000, 'msg': '同意退货成功'})
             if operation == 2 and instance.state == 1:
                 # 发起微信退款
-                code, msg = store_order_refund(models.OrderTrade, models.OrderRefundResult, instance.store_order,
-                                               instance.refund_money)
+                code, msg = store_order_refund(instance.store_order,instance.refund_money)
                 if code == 1000:
                     instance.state = 2
                     instance.result = 2
