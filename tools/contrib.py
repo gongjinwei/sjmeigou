@@ -3,11 +3,8 @@ import math, datetime, random
 import requests
 from django.conf import settings
 from django.core.cache import cache
-from wxpay.views import weixinpay
 from weixin.pay import WeixinPayError
 
-from delivery.models import InitDwdOrder
-from order.models import OrderRefundResult,OrderTrade
 
 gd_key = getattr(settings, 'GDKEY')
 
@@ -33,6 +30,7 @@ def get_deliver_pay(origin, destination):
 
 
 def store_order_refund(store_order, refund_fee):
+    from order.models import OrderRefundResult, OrderTrade
     now = datetime.datetime.now()
     total_fee = int(store_order.account_paid * 100)
     if OrderTrade.objects.filter(store_order=store_order).exists():
@@ -51,6 +49,7 @@ def store_order_refund(store_order, refund_fee):
         "out_trade_no": order_trade.trade_no,
         "refund_fee": refund_fee
     }
+    from wxpay.views import weixinpay
     try:
         ret = weixinpay.refund(**refund_data)
     except WeixinPayError as e:
@@ -83,10 +82,11 @@ def look_up_towncode(location):
         return r['regeocode']['addressComponent'].get('towncode', None)
 
 
-def prepare_dwd_order(store_order, user, op):
+def prepare_dwd_order(store_order, user, op=None):
+    from delivery.models import InitDwdOrder
+    dwdorder = InitDwdOrder()
     receive_address = store_order.unify_order.address
     store = store_order.store
-    dwdorder = InitDwdOrder()
     temp_dict = {
         'order_original_id': dwdorder.trade_number,
         'order_create_time': int(store_order.paid_time.timestamp() * 1000),

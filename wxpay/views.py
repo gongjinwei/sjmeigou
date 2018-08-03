@@ -15,6 +15,7 @@ from register.views import CustomerXMLRender, CustomerXMLParser
 from order.models import JoinActivity, OrderTrade, DwdOrder
 from platforms.models import Account, KeepAccounts
 from platforms.serializers import KeepAccountSerializer
+from tools.contrib import prepare_dwd_order
 
 # Create your views here.
 mch_id = getattr(settings, "WEIXIN_MCH_ID")
@@ -185,39 +186,16 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             store_account.bank_balance -= store_order.store_to_pay
             store_account.save()
             plat_account.save()
-            self.send_store_deliver(store_order)
             # 发起物流单
+            self.send_store_deliver(store_order)
 
     def send_store_deliver(self, store_order):
-        store = store_order.store
-        receive_address = store_order.unify_order.address
-        tmp_json = {
-            'order_original_id': store_order.store_order_no,
-            'order_create_time': int(store_order.paid_time.timestamp() * 1000),
-            'order_remark': '',
-            'order_price': int(store_order.account_paid * 100),
-            'cargo_weight': 0,
-            'cargo_num': 1,
-            'city_code': store.adcode,
-            'seller_id': str(store.id),
-            'seller_name': store.info.contract_name,
-            'seller_mobile': store.info.contract_mobile,
-            'seller_address': store.receive_address,
-            'seller_lat': store.latitude,
-            'seller_lng': store.longitude,
-            'consignee_name': receive_address.contact,
-            'consignee_mobile': receive_address.phone,
-            'consignee_address': receive_address.address + receive_address.room_no,
-            'consignee_lat': round(receive_address.latitude, 6),
-            'consignee_lng': round(receive_address.longitude, 6),
-            'money_rider_needpaid': 0,
-            'money_rider_prepaid': 0,
-            'money_rider_charge': 0,
-            'time_waiting_at_seller': 300,
-            'delivery_fee_from_seller': 0
-        }
-
-        ret = dwd.order_send(tmp_json)
+        user = store_order.user
+        init_dwd_order = prepare_dwd_order(store_order,user,op='backend')
+        init_dwd_order.store_order = store_order
+        init_dwd_order.save()
+        serializer = serializers.InitDwdOrderSerializer(instance=init_dwd_order)
+        ret = dwd.order_send(serializer.data)
         if ret.get('errorCode', '') == '0':
             dwd_order_id = ret['result']['dwd_order_id']
             dwd_order_distance = ret['result']['distance']

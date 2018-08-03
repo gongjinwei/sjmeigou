@@ -20,7 +20,8 @@ class OrderCallback(models.Model):
 
 
 class InitDwdOrder(models.Model):
-    good_refund = models.ForeignKey(to='InitGoodRefund',on_delete=models.CASCADE)
+    good_refund = models.ForeignKey(to='InitGoodRefund',on_delete=models.SET_NULL,null=True)
+    store_order = models.ForeignKey(to='order.StoreOrder',on_delete=models.SET_NULL,null=True)
     order_original_id = models.CharField(max_length=40,primary_key=True,editable=False)
     order_create_time = models.BigIntegerField()
     order_remark = models.CharField(max_length=128,blank=True,default='')

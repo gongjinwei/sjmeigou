@@ -250,7 +250,7 @@ class OrderTrade(models.Model):
     store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, null=True)
     unify_order = models.ForeignKey(to='UnifyOrder', on_delete=models.CASCADE, null=True)
     recharge = models.ForeignKey(to='platforms.AccountRecharge', on_delete=models.CASCADE, null=True)
-    good_refund = models.ForeignKey(to='delivery.InitGoodRefund',on_delete=models.CASCADE,null=True)
+    good_refund = models.ForeignKey(to='delivery.InitDwdOrder',on_delete=models.CASCADE,null=True)
     trade_no = models.CharField(primary_key=True, max_length=30)
     paid_time = models.DateTimeField(null=True, editable=False)
     paid_money = models.DecimalField(default=Decimal(0.00), max_digits=30, decimal_places=2, editable=False)

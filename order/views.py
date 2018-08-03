@@ -20,7 +20,7 @@ from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyVi
 from tools.contrib import get_deliver_pay, store_order_refund, prepare_dwd_order
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
-from delivery.models import InitGoodRefund, InitDwdOrder
+from delivery.models import  InitDwdOrder
 
 client = get_redis_connection()
 
@@ -353,7 +353,7 @@ def prepare_payment(user, body, account, order_no, order_type=None):
         order_trade.recharge = AccountRecharge.objects.get(pk=order_no)
 
     elif order_type == 'good_refund':
-        order_trade.dwd_order = InitGoodRefund.objects.get(pk=order_no)
+        order_trade.good_refund = InitDwdOrder.objects.get(pk=order_no)
 
     res = weixinpay.unified_order(trade_type="JSAPI", openid=user.userinfo.openId, body=body,
                                   total_fee=int(account * 100), out_trade_no=order_trade.trade_no)
@@ -447,7 +447,6 @@ class UnifyOrderView(CreateOnlyViewSet):
 
                                 store_deliver_payment, store_to_pay, deliver_distance = get_deliver_pay(origin,
                                                                                                         destination)
-
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'FAIL'})
                 now = datetime.datetime.now()
@@ -497,9 +496,8 @@ class UnifyOrderView(CreateOnlyViewSet):
         if order_money != price:
             return Response({'code': 4107, 'msg': '下单价格不符', 'success': 'FAIL'})
 
-        account = order_money
         serializer.validated_data.update({
-            'account': account,
+            'account': order_money,
             'order_no': order_no
         })
 
@@ -507,7 +505,7 @@ class UnifyOrderView(CreateOnlyViewSet):
 
         # 生成总的待付款信息
 
-        ret = prepare_payment(self.request.user, body, account, order_no, order_type='unify_order')
+        ret = prepare_payment(self.request.user, body,order_money, order_no, order_type='unify_order')
 
         return Response({"code": 1000, 'msg': '下单成功', "data": ret})
 
@@ -559,12 +557,6 @@ class StoreOrderView(ListDetailDeleteViewSet):
             order.state = 8
             order.save()
             return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
-
-        elif op == 3 and order.store == user.stores and order.state == 7:
-            # 平台进入退款操作，成功后更新状态
-            order.state = 6
-            order.save()
-            return Response({'code': 1000, 'msg': '退款成功', "return_code": "SUCCESS"})
 
         return Response({'code': 4210, 'msg': '未知操作', "return_code": "FAIL"})
 
@@ -800,7 +792,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             good_refund = serializer.save(store_order=store_order, user=request.user, distance=C)
             dwd_order.good_refund = good_refund
             dwd_order.save()
-            ret = prepare_payment(request.user, '点我达订单', price, good_refund.id, order_type='good_refund')
+            ret = prepare_payment(request.user, '点我达订单', price, dwd_order.order_original_id, order_type='good_refund')
             return Response({'code': 1000, 'data': ret})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.GoodRefundStateChange)
