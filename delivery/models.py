@@ -21,7 +21,8 @@ class OrderCallback(models.Model):
 
 class InitDwdOrder(models.Model):
     good_refund = models.ForeignKey(to='InitGoodRefund',on_delete=models.SET_NULL,null=True)
-    store_order = models.ForeignKey(to='order.StoreOrder',on_delete=models.SET_NULL,null=True)
+    dwd_store_order = models.ForeignKey(to='order.DwdOrder',on_delete=models.SET_NULL,null=True)
+    has_paid = models.BooleanField(default=False)
     order_original_id = models.CharField(max_length=40,primary_key=True,editable=False)
     order_create_time = models.BigIntegerField()
     order_remark = models.CharField(max_length=128,blank=True,default='')
@@ -57,9 +58,21 @@ class InitGoodRefund(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
     price = models.DecimalField(max_digits=30,decimal_places=2,help_text='元')
     distance = models.FloatField(null=True,editable=False)
-    paid_money = models.IntegerField(editable=False,null=True)
+    paid_money = models.DecimalField(max_digits=30,decimal_places=2,editable=False,null=True)
     paid_time = models.DateTimeField(editable=False,null=True)
     state = models.SmallIntegerField(editable=False,choices=((1,'未支付'),(2,'支付成功')),default=1)
     settlement = models.SmallIntegerField(choices=((1,'微信支付'),),default=1)
     create_time = models.DateTimeField(auto_now_add=True)
     remark = models.CharField(null=True,max_length=100)
+    dwd_status = models.SmallIntegerField(choices=(
+        (0, '系统派单中'), (3, '骑手已转单'), (5, '骑手已接单'), (10, '骑手已到店，等待商家发货'), (15, '骑手已离店，配送途中'), (98, '订单出现异常，骑手无法完成'),
+        (99, '订单已取消'), (100, '骑手已妥投')), null=True)
+    accept_time = models.DateTimeField(null=True, editable=False)
+    user_arrive_time = models.DateTimeField(null=True, editable=False)
+    arrive_time = models.DateTimeField(null=True, editable=False)
+    rider_name = models.CharField(max_length=50, null=True,editable=False)
+    rider_code = models.CharField(max_length=20, null=True,editable=False)
+    rider_mobile = models.CharField(max_length=12, null=True,editable=False)
+    cancel_reason = models.CharField(max_length=100, null=True,editable=False)
+    dwd_order_id = models.CharField(max_length=50, null=True,editable=False)
+    dwd_order_distance = models.IntegerField(null=True,editable=False)

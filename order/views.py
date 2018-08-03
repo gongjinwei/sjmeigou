@@ -782,17 +782,18 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             store_order = instance.store_order
-            dwd_order = prepare_dwd_order(store_order, request.user, op)
-            origin = '%6f,%6f' % (dwd_order.seller_lng, dwd_order.seller_lat)
-            destination = '%6f,%6f' % (dwd_order.consignee_lng, dwd_order.consignee_lat)
+            init_order = prepare_dwd_order(store_order, request.user, op)
+            origin = '%6f,%6f' % (init_order.seller_lng,init_order.seller_lat)
+            destination = '%6f,%6f' % (init_order.consignee_lng, init_order.consignee_lat)
             A, B, C = get_deliver_pay(origin, destination)
             price = serializer.validated_data['price']
             if price != Decimal(A + 2 * B):
                 return Response({'code': 4301, 'msg': '价格不符'})
             good_refund = serializer.save(store_order=store_order, user=request.user, distance=C)
-            dwd_order.good_refund = good_refund
-            dwd_order.save()
-            ret = prepare_payment(request.user, '点我达订单', price, dwd_order.order_original_id, order_type='good_refund')
+            # 关联相应的退货单
+            init_order.good_refund = good_refund
+            init_order.save()
+            ret = prepare_payment(request.user, '点我达订单', price, init_order.order_original_id, order_type='good_refund')
             return Response({'code': 1000, 'data': ret})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.GoodRefundStateChange)

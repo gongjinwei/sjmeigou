@@ -126,6 +126,28 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                             recharge.account.save()
                             recharge.save()
 
+                        # 处理退款单
+                        elif order_trade.good_refund:
+                            # 在点我达发起单上标记已支付
+                            init_order = order_trade.good_refund
+                            init_order.has_paid=True
+                            init_order.save()
+                            good_refund = init_order.good_refund
+                            good_refund.paid_money = cash_fee
+                            good_refund.paid_time =paid_time
+                            if cash_fee >= good_refund.price:
+                                good_refund.state=1
+                            good_refund.save()
+                            # 发起点我订单
+                            serializer = serializers.InitDwdOrderSerializer(instance=init_order)
+                            ret = dwd.order_send(serializer.data)
+                            if ret.get('errorCode', '') == '0':
+                                dwd_order_id = ret['result']['dwd_order_id']
+                                dwd_order_distance = ret['result']['distance']
+                                good_refund.dwd_order_id=dwd_order_id
+                                good_refund.dwd_order_distance = dwd_order_distance
+                                good_refund.save()
+
             # 处理退款通知
             else:
                 pass
@@ -192,12 +214,15 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
     def send_store_deliver(self, store_order):
         user = store_order.user
         init_dwd_order = prepare_dwd_order(store_order,user,op='backend')
-        init_dwd_order.store_order = store_order
+        init_dwd_order.has_paid=True
         init_dwd_order.save()
         serializer = serializers.InitDwdOrderSerializer(instance=init_dwd_order)
         ret = dwd.order_send(serializer.data)
         if ret.get('errorCode', '') == '0':
             dwd_order_id = ret['result']['dwd_order_id']
             dwd_order_distance = ret['result']['distance']
-            DwdOrder.objects.create(store_order=store_order, dwd_order_id=dwd_order_id,
+            dwd_store_order=DwdOrder.objects.create(store_order=store_order, dwd_order_id=dwd_order_id,
                                     dwd_order_distance=dwd_order_distance)
+
+            init_dwd_order.dwd_store_order=dwd_store_order
+            init_dwd_order.save()

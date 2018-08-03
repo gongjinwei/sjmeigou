@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.cache import cache
 from weixin.pay import WeixinPayError
 
-
 gd_key = getattr(settings, 'GDKEY')
 
 

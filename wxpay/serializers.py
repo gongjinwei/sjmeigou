@@ -15,4 +15,4 @@ class InitDwdOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InitDwdOrder
-        exclude =('good_refund','store_order')
+        exclude =('good_refund','dwd_store_order','has_paid')
