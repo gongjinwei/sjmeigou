@@ -797,7 +797,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             price = serializer.validated_data['price']
             if price != Decimal(A + 2 * B):
                 return Response({'code': 4301, 'msg': '价格不符'})
-            good_refund = serializer.save(store_order=store_order, user=request.user, distance=C)
+            good_refund = serializer.save(refund=instance, user=request.user, distance=C)
             # 关联相应的退货单
             init_order.good_refund = good_refund
             init_order.save()

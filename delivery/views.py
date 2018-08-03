@@ -52,8 +52,12 @@ class OrderCallbackViewSets(ModelViewSet):
 
                 # 做相应订单状态变更
                 if dwd_status == 15:
-                    dwd_store_order.store_order.state = 3
-                    dwd_store_order.store_order.save()
+                    if init_order.dwd_store_order:
+                        dwd_store_order.store_order.state = 3
+                        dwd_store_order.store_order.save()
+                    else:
+                        dwd_store_order.good_refund.refund.state=5
+                        dwd_store_order.good_refund.refund.save()
 
                 elif dwd_status == 100:
                     arrive_time = serializer.validated_data.get('time_status_update')
