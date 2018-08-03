@@ -891,7 +891,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             "seller_name": refund.store_order.store.name,
             "seller_logo": refund.store_order.store.logo,
             "seller_contract": refund.store_order.store.store_phone,
-            "rider_mobile": dwd_order.rider_mobile if dwd_order.exists() else None,
+            "rider_mobile": dwd_order[0].rider_mobile if dwd_order.exists() else None,
             "receiver_lat": init_order.consignee_lat,
             "receiver_lng": init_order.consignee_lng
         }
