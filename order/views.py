@@ -20,7 +20,7 @@ from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyVi
 from tools.contrib import get_deliver_pay, store_order_refund, prepare_dwd_order
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
-from delivery.models import  InitDwdOrder
+from delivery.models import InitDwdOrder,InitGoodRefund
 
 client = get_redis_connection()
 
@@ -850,3 +850,50 @@ class OrderRefundView(ListRetrieveCreateViewSets):
 
         else:
             return Response({'code': 4208, 'msg': '操作无效'})
+
+    @action(methods=['get'], detail=True)
+    def check_delivery(self, request, pk=None):
+        refund = self.get_object()
+        init_order = InitDwdOrder.objects.filter(good_refund__refund=refund, has_paid=True)
+        if init_order.exists():
+            init_id = init_order[0].order_original_id
+        else:
+            return Response({'code': 3002, 'msg': '无物流单'})
+        te = request.query_params.get('test', '')
+        te_option = {
+            'accept': 'order_accept_test',
+            'arrive': 'order_arrive_test',
+            'fetch': "order_fetch_test",
+            "finish": 'order_finish_test'
+        }
+        if te and te_option.get(te, '') and hasattr(dwd, te_option.get(te)):
+            getattr(dwd, te_option.get(te))(init_id)
+        ret = dwd.order_get(pk)
+        return Response(ret)
+
+    @action(methods=['get'], detail=True)
+    def check_rider(self, request, pk=None):
+        refund = self.get_object()
+        init_order = InitDwdOrder.objects.filter(good_refund__refund=refund, has_paid=True)
+        if init_order.exists():
+            init_id = init_order[0].order_original_id
+        else:
+            return Response({'code': 3002, 'msg': '无物流单'})
+        dwd_order = InitGoodRefund.objects.get(refund=refund)
+        ret = dwd.order_rider_position(init_id, dwd_order.rider_code)
+        # 只有骑手位置正确返回时才返回相应结果
+        if ret.get("errorCode", '') == "0":
+            dwd_order_serializer = serializers.InitGoodDeliverySerializer(instance=dwd_order)
+            ret.update(dwd_order_serializer.data)
+        ori_dis = {
+            "seller_lat": refund.store_order.store.latitude,
+            "seller_lng": refund.store_order.store.longitude,
+            "seller_name": refund.store_order.store.name,
+            "seller_logo": refund.store_order.store.logo,
+            "seller_contract": refund.store_order.store.store_phone,
+            "rider_mobile": dwd_order.rider_mobile,
+            "receiver_lat": refund.store_order.unify_order.address.latitude,
+            "receiver_lng": refund.store_order.unify_order.address.longitude
+        }
+        ret.update(ori_dis)
+        return Response(ret)

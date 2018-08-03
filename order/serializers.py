@@ -471,3 +471,11 @@ class InitGoodRefundSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitGoodRefund
         fields = '__all__'
+
+
+class InitGoodDeliverySerializer(serializers.ModelSerializer):
+    status_name = serializers.ReadOnlyField(source='get_dwd_status_display')
+
+    class Meta:
+        model = InitGoodRefund
+        fields =('dwd_status', 'rider_name', 'rider_mobile', 'status_name')
