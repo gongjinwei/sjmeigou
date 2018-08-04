@@ -8,7 +8,7 @@ from django.db.models import Avg
 from geopy.distance import VincentyDistance
 
 from . import models
-from order.models import CommentContent, Coupon, StoreActivity,OrderComment
+from order.models import CommentContent, Coupon, StoreActivity,OrderComment,SkuOrder
 from goods.models import GoodDetail
 
 
@@ -73,6 +73,18 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.GoodsType
         exclude = ('store_goods_type',)
+
+
+class SkuOrderSerializer(serializers.ModelSerializer):
+    color = serializers.ReadOnlyField(source='sku.color.color_name')
+    price = serializers.ReadOnlyField(source='sku.price')
+    size = serializers.ReadOnlyField(source='sku.size.size_name')
+    good_title =serializers.ReadOnlyField(source='sku.color.good_detail.title')
+
+
+    class Meta:
+        model = SkuOrder
+        fields = ('sku','num','color','price','size','good_title')
 
 
 class StoreMessageSerializer(serializers.ModelSerializer):
@@ -176,10 +188,11 @@ class StoreSearchSerializer(serializers.ModelSerializer):
 class CommentContentSerializer(serializers.ModelSerializer):
     comment_images =serializers.SerializerMethodField()
     comment_name = serializers.SerializerMethodField()
+    sku_orders = serializers.SerializerMethodField()
 
     class Meta:
         model = CommentContent
-        fields = ('id','comment_images','comment','score','comment_name','is_buyer_comment')
+        fields = ('id','comment_images','comment','score','comment_name','is_buyer_comment','comment_time','sku_orders')
 
     def get_comment_images(self,obj):
         images = obj.comment_images.all()
@@ -193,9 +206,14 @@ class CommentContentSerializer(serializers.ModelSerializer):
         else:
             return obj.order_comment.order.store.user.userinfo.nickName
 
+    def get_sku_orders(self,obj):
+        skus = SkuOrder.objects.filter(store_order=obj.order_comment.order)
+        return SkuOrderSerializer(skus,many=True).data
+
 
 class OrderCommentSerializer(serializers.ModelSerializer):
     comment_contents = CommentContentSerializer(many=True,read_only=True)
+    paid_time = serializers.ReadOnlyField(source='order.paid_time')
 
     class Meta:
         model = OrderComment
@@ -207,7 +225,7 @@ class StoreCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Stores
-        fields = ('comments',)
+        fields = ('comments','name','logo')
 
     def get_comments(self,obj):
         com = OrderComment.objects.filter(order__store=obj)
