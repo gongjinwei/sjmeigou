@@ -346,16 +346,6 @@ class StoreSearchView(ListOnlyViewSet):
         return Response(sorted(filter(lambda x:x.get('distance',0)<=5,serializer.data),key=lambda x:x.get('distance',0)))
 
 
-class StoreMessageView(ListOnlyViewSet):
+class StoreMessageView(RetrieveOnlyViewSets):
     queryset = models.Stores.objects.filter(active_state=1)
     serializer_class = serializers.StoreMessageSerializer
-
-    def get_queryset(self):
-        queryset=self.queryset
-        store_id = self.request.query_params.get('store', '')
-        if store_id:
-            try:
-                store_id=int(store_id)
-                return queryset.filter(pk=store_id)
-            except ValueError:
-                return queryset.none()
