@@ -225,7 +225,7 @@ class StoreCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Stores
-        fields = ('comments','name','logo')
+        fields = ('comments','name','logo','id')
 
     def get_comments(self,obj):
         com = OrderComment.objects.filter(order__store=obj)
