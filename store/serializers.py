@@ -1,7 +1,7 @@
 # -*- coding:UTF-8 -*-
 import datetime
+
 from rest_framework import serializers
-from django.db.models import Aggregate
 from order.models import CommentContent
 from geopy.distance import VincentyDistance
 
@@ -69,18 +69,11 @@ class GoodDetailSerializer(serializers.ModelSerializer):
 
 
 class GoodsTypeSerializer(serializers.ModelSerializer):
-    logo = serializers.ReadOnlyField(source='store_goods_type.store.logo')
-    store_name = serializers.ReadOnlyField(source='store_goods_type.store.name')
-    score_avg = serializers.SerializerMethodField()
 
     class Meta:
         model = models.GoodsType
         exclude=('store_goods_type',)
 
-    def get_score_avg(self,obj):
-        orders = obj.store_goods_type.store.store_orders.all()
-        comments=CommentContent.objects.filter(is_buyer_comment=True,order_comment__order__in=orders)
-        return
 
 
 class StoreGoodsTypeSerializer(serializers.ModelSerializer):

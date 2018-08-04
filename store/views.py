@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
+from django.db.models import Avg
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
@@ -25,6 +26,7 @@ from . import serializers, models
 from index.models import Application
 from goods.models import GoodDetail,SearchHistory
 from platforms.models import CodeWarehouse,Account,DeliverAdcode
+from order.models import CommentContent
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
@@ -235,7 +237,7 @@ class GoodsTypeView(ListDeleteViewSet):
         serializer_class = serializers.GoodDetailSerializer
         try:
             store_id = int(store_id)
-
+            store = models.Stores.objects.get(pk=store_id)
             # 不加good_type返回类型，good_type=0返回所有，good_type=null返回未分类，其他返回筛选结果
             if good_type == '':
                 queryset = models.GoodsType.objects.filter(store_goods_type__store_id=store_id)
@@ -247,17 +249,25 @@ class GoodsTypeView(ListDeleteViewSet):
             else:
                 good_type_id = int(good_type)
                 queryset = self.filter_queryset(GoodDetail.objects.filter(store_id=store_id, good_type_id=good_type_id))
-
+            orders = store.store_orders.all()
+            comments = CommentContent.objects.filter(is_buyer_comment=True,order_comment__order__in=orders)
+            store_ret = {
+                'logo':store.logo,
+                'store_name':store.name,
+                'take_off':store.take_off,
+                'score_avg':comments.aggregate(Avg('score')).get('score__avg',0.0)
+            }
         except ValueError:
             queryset = GoodDetail.objects.none()
+            store_ret=None
 
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = serializer_class(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            return self.get_paginated_response({'data':serializer.data,'score_info':store_ret})
 
         serializer = serializer_class(queryset, many=True)
-        return Response(serializer.data)
+        return Response({'data':serializer.data,'score_info':store_ret})
 
     @action(methods=['post'], detail=True, serializer_class=serializers.AddGoodsSerializer)
     def add_goods(self, request, pk=None):
