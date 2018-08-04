@@ -259,6 +259,8 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     dwd_order_info = DwdOrderInfoSerializer(read_only=True)
     delivery_name = serializers.ReadOnlyField(source='deliver_server.server.name')
     refund = serializers.SerializerMethodField()
+    comment_state_name = serializers.ReadOnlyField(source='ordercomment.get_state_display')
+    comment_state = serializers.ReadOnlyField(source='ordercomment.state')
 
     class Meta:
         model = models.StoreOrder

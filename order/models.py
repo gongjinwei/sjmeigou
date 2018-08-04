@@ -165,7 +165,7 @@ class StoreOrder(models.Model):
     store_order_no = models.CharField(primary_key=True, editable=False, max_length=18)
     coupon = models.ForeignKey(to='GetCoupon', on_delete=models.DO_NOTHING, null=True)
     activity = models.ForeignKey(to='StoreActivity', on_delete=models.DO_NOTHING, null=True)
-    store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING)
+    store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING,related_name='store_orders')
     account = models.DecimalField(editable=False, decimal_places=2, max_digits=30)
     account_paid = models.DecimalField(editable=False, decimal_places=2, max_digits=30, default=Decimal(0.00))
     paid_time = models.DateTimeField(editable=False, null=True)
