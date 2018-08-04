@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
-from django.db.models import Avg
+
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
@@ -249,14 +249,7 @@ class GoodsTypeView(ListDeleteViewSet):
             else:
                 good_type_id = int(good_type)
                 queryset = self.filter_queryset(GoodDetail.objects.filter(store_id=store_id, good_type_id=good_type_id))
-            orders = store.store_orders.all()
-            comments = CommentContent.objects.filter(is_buyer_comment=True,order_comment__order__in=orders)
-            store_ret = {
-                'logo':store.logo,
-                'store_name':store.name,
-                'take_off':store.take_off,
-                'score_avg':comments.aggregate(Avg('score')).get('score__avg',0.0)
-            }
+
         except ValueError:
             queryset = GoodDetail.objects.none()
             store_ret=None
@@ -264,10 +257,10 @@ class GoodsTypeView(ListDeleteViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = serializer_class(page, many=True)
-            return self.get_paginated_response({'data':serializer.data,'store_info':store_ret})
+            return self.get_paginated_response(serializer.data)
 
         serializer = serializer_class(queryset, many=True)
-        return Response({'data':serializer.data,'score_info':store_ret})
+        return Response(serializer.data)
 
     @action(methods=['post'], detail=True, serializer_class=serializers.AddGoodsSerializer)
     def add_goods(self, request, pk=None):
@@ -352,3 +345,17 @@ class StoreSearchView(ListOnlyViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(sorted(filter(lambda x:x.get('distance',0)<=5,serializer.data),key=lambda x:x.get('distance',0)))
 
+
+class StoreMessageView(ListOnlyViewSet):
+    queryset = models.Stores.objects.filter(active_state=1)
+    serializer_class = serializers.StoreMessageSerializer
+
+    def get_queryset(self):
+        queryset=self.queryset
+        store_id = self.request.query_params.get('store', '')
+        if store_id:
+            try:
+                store_id=int(store_id)
+                return queryset.filter(pk=store_id)
+            except ValueError:
+                return queryset.none()

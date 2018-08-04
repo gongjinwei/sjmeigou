@@ -14,5 +14,6 @@ router.register('enterpriseQualification',views.EnterpriseQualificationView,base
 router.register('storeGoodType',views.StoreGoodsTypeView,base_name='storeGoodType')
 router.register('goodType',views.GoodsTypeView,base_name='goodType')
 router.register('storeSearch',views.StoreSearchView,base_name='storeSearch')
+router.register('storeMessage',views.StoreMessageView,base_name='storeMessage')
 
 urlpatterns=router.urls

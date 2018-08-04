@@ -2,13 +2,15 @@
 import datetime
 
 from rest_framework import serializers
-from order.models import CommentContent
+
+from django.db.models import Avg
+
 from geopy.distance import VincentyDistance
 
 from . import models
-
-from goods.models import GoodDetail
+from order.models import CommentContent
 from order.models import Coupon,StoreActivity
+from goods.models import GoodDetail
 
 
 class StoresSerializer(serializers.ModelSerializer):
@@ -74,6 +76,31 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
         model = models.GoodsType
         exclude=('store_goods_type',)
 
+
+class StoreMessageSerializer(serializers.ModelSerializer):
+    score_avg =serializers.SerializerMethodField()
+    coupons = serializers.SerializerMethodField()
+    activities = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Stores
+        fields = ('logo','name','take_off','activities','score_avg','coupons')
+
+    def get_scroe_avg(self,obj):
+        orders = obj.store_orders.all()
+        comments = CommentContent.objects.filter(is_buyer_comment=True, order_comment__order__in=orders)
+        return comments.aggregate(Avg('score')).get('score__avg',0.0)
+
+    def get_coupons(self,obj):
+        today = datetime.date.today()
+        coupon = Coupon.objects.filter(store=obj,date_from__lte=today,date_to__gte=today,available_num__gt=0)
+        return [cou.act_name for cou in coupon]
+
+    def get_activities(self,obj):
+        now = datetime.datetime.now()
+        valid_activities=StoreActivity.objects.filter(store=obj,datetime_from__lte=now,datetime_to__gte=now,state=0)
+
+        return [activity.act_name for activity in valid_activities]
 
 
 class StoreGoodsTypeSerializer(serializers.ModelSerializer):
