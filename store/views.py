@@ -264,7 +264,7 @@ class GoodsTypeView(ListDeleteViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = serializer_class(page, many=True)
-            return self.get_paginated_response({'data':serializer.data,'score_info':store_ret})
+            return self.get_paginated_response({'data':serializer.data,'store_info':store_ret})
 
         serializer = serializer_class(queryset, many=True)
         return Response({'data':serializer.data,'score_info':store_ret})
