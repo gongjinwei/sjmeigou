@@ -220,7 +220,7 @@ class InitiatePayment(models.Model):
 
 
 class OrderComment(models.Model):
-    order = models.OneToOneField(to='StoreOrder', on_delete=models.CASCADE)
+    order = models.OneToOneField(to='StoreOrder', on_delete=models.CASCADE,related_name='order_comments')
     state = models.SmallIntegerField(choices=((0, '未评价'), (1, '买家已评价'), (2, '卖家已评价'), (3, '双方已评')), editable=False,
                                      default=0)
 

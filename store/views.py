@@ -349,3 +349,8 @@ class StoreSearchView(ListOnlyViewSet):
 class StoreMessageView(RetrieveOnlyViewSets):
     queryset = models.Stores.objects.filter(active_state=1)
     serializer_class = serializers.StoreMessageSerializer
+
+
+class StoreCommentView(RetrieveOnlyViewSets):
+    queryset = models.Stores.objects.filter(active_state=1)
+    serializer_class = serializers.StoreCommentSerializer
