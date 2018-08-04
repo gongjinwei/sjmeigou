@@ -94,7 +94,7 @@ class StoreMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Stores
-        fields = ('logo', 'name', 'take_off', 'activities', 'score_avg', 'coupons')
+        fields = ('logo', 'name', 'take_off', 'activities', 'score_avg', 'coupons','receive_address')
 
     def get_score_avg(self, obj):
         orders = obj.store_orders.all()
