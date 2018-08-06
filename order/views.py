@@ -637,6 +637,9 @@ class StoreOrderView(ListDetailDeleteViewSet):
         store_order = self.get_object()
         if request.method == 'GET':
             ret = {}
+            sku_orders = store_order.sku_orders.all()
+            sku_order_serializer = serializers.SkuOrderSerializer(sku_orders,many=True)
+            ret.update({'skus':sku_order_serializer.data})
             dwd_order = getattr(store_order, 'dwd_order_info', None)
             if dwd_order and request.query_params.get('op', '') != 'backend':
                 ret['dwd_order'] = {
