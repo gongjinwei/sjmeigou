@@ -632,7 +632,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
         serializer.save(store_order=store_order, user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(methods=['get', 'post'], detail=True, serializer_class=serializers.CommentContentSerializer)
+    @action(methods=['get', 'post'], detail=True, serializer_class=serializers.StoreOrderCommentSerializer)
     def add_comment(self, request, pk=None):
         store_order = self.get_object()
         if request.method == 'GET':
