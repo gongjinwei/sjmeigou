@@ -241,7 +241,7 @@ class SkuOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.SkuOrder
-        fields = ('sku', 'num', 'title', 'color', 'size', 'price', 'color_pic')
+        fields = ('sku', 'num', 'title', 'color', 'size', 'price', 'color_pic','id')
 
 
 class DwdOrderInfoSerializer(serializers.ModelSerializer):
