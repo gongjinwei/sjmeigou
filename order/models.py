@@ -228,6 +228,7 @@ class OrderComment(models.Model):
 class CommentContent(models.Model):
     order_comment = models.ForeignKey(to='OrderComment', on_delete=models.CASCADE, related_name='comment_contents',
                                       editable=False)
+    sku_order = models.ForeignKey(to='SkuOrder',on_delete=models.CASCADE)
     is_buyer_comment = models.BooleanField(default=True, editable=False)
     is_anonymous = models.BooleanField(default=False)
     comment = models.CharField(max_length=255,null=True)
