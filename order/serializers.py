@@ -437,7 +437,7 @@ class StoreOrderCommentSerializer(serializers.ModelSerializer):
             DwdOrderCommentSerializer().create(dwd_order_comment_data)
 
         for comment_contents in comment_contents_data:
-            comment_contents.update({'order_comment':order_comment,'is_buyer_comment':is_buyer_comment})
+            comment_contents.update({'order_comment':order_comment,'is_buyer_comment':is_buyer_comment,'order':order})
             CommentContentSerializer().create(comment_contents)
         return order_comment
 
