@@ -10,7 +10,6 @@ from geopy.distance import VincentyDistance
 
 from . import models
 from order.models import CommentContent, Coupon, StoreActivity,SkuOrder
-from order.serializers import CommentContentSerializer
 from goods.models import GoodDetail
 
 
@@ -186,17 +185,5 @@ class StoreSearchSerializer(serializers.ModelSerializer):
         if obj.goods.values('title', 'master_graphs', 'min_price', 'id'):
             return obj.goods.values('title', 'master_graphs', 'min_price', 'id')[:3]
 
-
-class StoreCommentSerializer(serializers.ModelSerializer):
-    comments = serializers.SerializerMethodField()
-
-    class Meta:
-        model = models.Stores
-        fields = ('comments','name','logo','id')
-
-    def get_comments(self,obj):
-        com = CommentContent.objects.filter(sku_order__store_order__store=obj)
-        com_data = CommentContentSerializer(com,many=True).data
-        return com_data
 
 

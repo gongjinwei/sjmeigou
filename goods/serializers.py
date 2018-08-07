@@ -9,6 +9,8 @@ from . import models
 from platforms.serializers import DeliverServiceSerializer
 from platforms.models import DeliverServices
 from geopy.distance import VincentyDistance
+from order.serializers import CommentContentSerializer
+from order.models import CommentContent
 
 
 class SecondClassSerializer(serializers.ModelSerializer):
@@ -133,6 +135,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
     colors=SKUColorSerializer(many=True)
     after_sale_services=AfterSaleServicesSerializer(many=True)
     delivers=GoodDeliverSerializer(many=True)
+    latest_comment = serializers.SerializerMethodField()
 
     def get_class_name(self,obj):
         return "%s>%s" % (obj.third_class.second_class.second_class_name,obj.third_class.third_class_name)
@@ -159,6 +162,10 @@ class GoodDetailSerializer(serializers.ModelSerializer):
                 models.SKU.objects.create(color=color,**sku)
 
         return instance
+
+    def get_latest_comment(self,obj):
+        return CommentContent.objects.filter(sku_order__sku__color__good_detail=obj).latest('comment_time')
+
 
 
 class GoodSearchSerializer(serializers.ModelSerializer):
