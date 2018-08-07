@@ -164,8 +164,8 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         return instance
 
     def get_latest_comment(self,obj):
-        return CommentContent.objects.filter(sku_order__sku__color__good_detail=obj).latest('comment_time')
-
+        content = CommentContent.objects.filter(sku_order__sku__color__good_detail=obj).latest('comment_time')
+        return CommentContentSerializer(content).data
 
 
 class GoodSearchSerializer(serializers.ModelSerializer):
