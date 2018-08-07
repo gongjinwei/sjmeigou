@@ -100,7 +100,7 @@ class StoreMessageSerializer(serializers.ModelSerializer):
 
     def get_score_avg(self, obj):
         orders = obj.store_orders.all()
-        comments = CommentContent.objects.filter(is_buyer_comment=True, order_comment__order__in=orders)
+        comments = CommentContent.objects.filter(sku_order__store_order__in=orders)
         return comments.aggregate(Avg('score')).get('score__avg', 0.0)
 
     def get_coupons(self, obj):
