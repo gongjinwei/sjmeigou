@@ -371,7 +371,6 @@ class DwdOrderCommentSerializer(serializers.ModelSerializer):
 
 class CommentContentSerializer(serializers.ModelSerializer):
     comment_images = ImageCommentSerializer(many=True,required=False)
-    dwd_order_comment = DwdOrderCommentSerializer(required=False)
 
     class Meta:
         model = models.CommentContent
@@ -383,52 +382,29 @@ class CommentContentSerializer(serializers.ModelSerializer):
         image_ids = [image['image'] for image in image_data]
 
         instance, created = models.CommentContent.objects.get_or_create(defaults=validated_data,
-                                                                        order_comment=validated_data['order_comment'],
-                                                                        is_buyer_comment=validated_data[
-                                                                            'is_buyer_comment'])
+                                                                        sku_order=validated_data['sku_order'])
 
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(comment_content=instance)
 
         return instance
 
 
-class StoreOrderCommentSerializer(serializers.ModelSerializer):
+class StoreOrderCommentSerializer(serializers.Serializer):
     dwd_order_comment = DwdOrderCommentSerializer(required=False)
     comment_contents = CommentContentSerializer(many=True)
-
-    class Meta:
-        model = models.OrderComment
-        fields = '__all__'
 
     def create(self, validated_data):
         order = validated_data['order']
         comment_contents_data = validated_data.pop('comment_contents',[])
         dwd_order_comment_data = validated_data.pop('dwd_order_comment', [])
 
-        order_comment = self.Meta.model.objects.get_or_create(defaults={'order':order},order=order)
-
         request = self.context.get('request')
         user = request.user
         op = request.query_params.get('op', '')
 
         if order.user == user and op != 'backend':
-            is_buyer_comment = True
-
-            if order_comment.state == 0:
-                order_comment.state = 1
-            elif order_comment.state == 2:
-                order_comment.state = 3
-                order.state = 5
-        else:
-            is_buyer_comment = False
-
-            if order_comment.state == 0:
-                order_comment.state = 2
-            elif order_comment.state == 1:
-                order_comment.state = 3
-                order.state = 5
-        order.save()
-        order_comment.save()
+            order.state = 5
+            order.save()
 
         # 判断是否有点我达订单且妥投
         if dwd_order_comment_data and models.DwdOrder.objects.filter(store_order=order, dwd_status=100).exists():
@@ -437,9 +413,9 @@ class StoreOrderCommentSerializer(serializers.ModelSerializer):
             DwdOrderCommentSerializer().create(dwd_order_comment_data)
 
         for comment_contents in comment_contents_data:
-            comment_contents.update({'order_comment':order_comment,'is_buyer_comment':is_buyer_comment,'order':order})
+            comment_contents.update({'order':order})
             CommentContentSerializer().create(comment_contents)
-        return order_comment
+        return order
 
 
 class ChangeDwdArriveTimeSerializer(serializers.Serializer):

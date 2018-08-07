@@ -219,17 +219,8 @@ class InitiatePayment(models.Model):
     has_paid = models.BooleanField(default=False)
 
 
-class OrderComment(models.Model):
-    order = models.OneToOneField(to='StoreOrder', on_delete=models.CASCADE,related_name='order_comments',editable=False)
-    state = models.SmallIntegerField(choices=((0, '未评价'), (1, '买家已评价'), (2, '卖家已评价'), (3, '双方已评')), editable=False,
-                                     default=0)
-
-
 class CommentContent(models.Model):
-    order_comment = models.ForeignKey(to='OrderComment', on_delete=models.CASCADE, related_name='comment_contents',
-                                      editable=False)
-    sku_order = models.ForeignKey(to='SkuOrder',on_delete=models.CASCADE)
-    is_buyer_comment = models.BooleanField(default=True, editable=False)
+    sku_order = models.OneToOneField(to='SkuOrder',on_delete=models.CASCADE)
     is_anonymous = models.BooleanField(default=False)
     comment = models.CharField(max_length=255,null=True)
     score = models.SmallIntegerField(choices=((1, '很差'), (2, '一般'), (3, '满意'), (4, '非常满意'), (5, '完美')))
