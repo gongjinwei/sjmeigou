@@ -9,8 +9,8 @@ from . import models
 from platforms.serializers import DeliverServiceSerializer
 from platforms.models import DeliverServices
 from geopy.distance import VincentyDistance
-from order.serializers import CommentContentSerializer
 from order.models import CommentContent
+from order.serializers import CommentContentSerializer
 
 
 class SecondClassSerializer(serializers.ModelSerializer):
@@ -126,6 +126,20 @@ class SKUColorSerializer(serializers.ModelSerializer):
         for sku in skus:
             models.SKU.objects.create(color=instance, **sku)
 
+class CommentFirstSerializer(serializers.ModelSerializer):
+    avatarUrl = serializers.ReadOnlyField(source='sku_order.store_order.user.userinfo.avatarUrl')
+    comment_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CommentContent
+        fields = ('comment','avatarUrl','comment_name')
+
+    def get_comment_name(self, obj):
+        if obj.is_anonymous:
+            return '匿名用户'
+        else:
+            return obj.sku_order.store_order.user.userinfo.nickName
+
 
 class GoodDetailSerializer(serializers.ModelSerializer):
     class_name=serializers.SerializerMethodField()
@@ -164,8 +178,9 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         return instance
 
     def get_latest_comment(self,obj):
-        content = CommentContent.objects.filter(sku_order__sku__color__good_detail=obj).latest('comment_time')
-        return CommentContentSerializer(content).data
+        content = CommentContent.objects.filter(sku_order__sku__color__good_detail=obj)
+        if content.exists():
+            return CommentFirstSerializer(content.latest('comment_time')).data
 
 
 class GoodSearchSerializer(serializers.ModelSerializer):
