@@ -379,6 +379,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
     comment_images = serializers.SerializerMethodField()
     comment_name = serializers.SerializerMethodField()
     comment_reply = CommentReplySerializer(read_only=True)
+    avatarUrl = serializers.ReadOnlyField(source='sku_order.store_order.user.userinfo.avatarUrl')
     sku_order = SkuOrderSerializer(read_only=True)
 
     class Meta:
