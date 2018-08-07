@@ -369,16 +369,35 @@ class DwdOrderCommentSerializer(serializers.ModelSerializer):
         return instance
 
 
+class CommentReplySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CommentReply
+        fields = '__all__'
+
+
 class CommentContentSerializer(serializers.ModelSerializer):
-    comment_images = ImageCommentSerializer(many=True,required=False)
+    comment_images = serializers.SerializerMethodField()
+    comment_name = serializers.SerializerMethodField()
+    comment_reply = CommentReplySerializer(read_only=True)
+    sku_order = SkuOrderSerializer(read_only=True)
 
     class Meta:
         model = models.CommentContent
         fields = '__all__'
 
+    def get_comment_images(self, obj):
+        images = obj.comment_images.all()
+        return [image.image.url for image in images]
+
+    def get_comment_name(self, obj):
+        if obj.is_anonymous:
+            return '匿名用户'
+        else:
+            return obj.sku_order.store_order.user.userinfo.nickName
+
     def create(self, validated_data):
         order = validated_data.pop('order')
-        image_data = validated_data.pop('comment_images',[])
+        image_data = validated_data.pop('comment_images', [])
         image_ids = [image['image'] for image in image_data]
 
         instance, created = models.CommentContent.objects.get_or_create(defaults=validated_data,
@@ -473,3 +492,5 @@ class InitGoodDeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = InitGoodRefund
         fields =('dwd_status', 'rider_name', 'rider_mobile', 'status_name')
+
+

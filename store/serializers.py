@@ -10,6 +10,7 @@ from geopy.distance import VincentyDistance
 
 from . import models
 from order.models import CommentContent, Coupon, StoreActivity,SkuOrder
+from order.serializers import CommentContentSerializer
 from goods.models import GoodDetail
 
 
@@ -186,28 +187,6 @@ class StoreSearchSerializer(serializers.ModelSerializer):
             return obj.goods.values('title', 'master_graphs', 'min_price', 'id')[:3]
 
 
-class CommentContentSerializer(serializers.ModelSerializer):
-    comment_images =serializers.SerializerMethodField()
-    comment_name = serializers.SerializerMethodField()
-    sku_order = SkuOrderSerializer(read_only=True)
-
-    class Meta:
-        model = CommentContent
-        fields = ('id','comment_images','comment','score','comment_name','is_buyer_comment','comment_time','sku_order')
-
-    def get_comment_images(self,obj):
-        images = obj.comment_images.all()
-        return [image.image.url for image in images]
-
-    def get_comment_name(self,obj):
-        if obj.is_anonymous and obj.is_buyer_comment:
-            return '匿名用户'
-        elif obj.is_buyer_comment:
-            return obj.order_comment.order.user.userinfo.nickName
-        else:
-            return obj.order_comment.order.store.user.userinfo.nickName
-
-
 class StoreCommentSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
 
@@ -216,8 +195,8 @@ class StoreCommentSerializer(serializers.ModelSerializer):
         fields = ('comments','name','logo','id')
 
     def get_comments(self,obj):
-        com = CommentContent.objects.filter(order_comment__order__store=obj,order_comment__state=3)
+        com = CommentContent.objects.filter(sku_order__store_order__store=obj)
         com_data = CommentContentSerializer(com,many=True).data
-        if com_data:
-            sorted(com_data,key=lambda x:x['sku_order']['id'],reverse=True)
-            return [v for k,v in groupby(com_data,key=lambda x:x['sku_order']['id'])]
+        return com_data
+
+

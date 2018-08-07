@@ -17,5 +17,6 @@ router.register('unifyOrder',views.UnifyOrderView,base_name='unifyOrder')
 router.register('initialPayment',views.InitialPaymentView,base_name='initialPayment')
 router.register('storeOrder',views.StoreOrderView,base_name='storeOrder')
 router.register('orderRefund',views.OrderRefundView,base_name='orderRefund')
+router.register('commentContent',views.CommentContentView,base_name='commentContent')
 
 urlpatterns=router.urls

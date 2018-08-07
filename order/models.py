@@ -227,6 +227,12 @@ class CommentContent(models.Model):
     comment_time = models.DateTimeField(auto_now_add=True)
 
 
+class CommentReply(models.Model):
+    comment_content = models.OneToOneField(to='CommentContent',on_delete=models.CASCADE,editable=False,related_name='comment_reply')
+    comment = models.CharField(max_length=255, null=True)
+    comment_time = models.DateTimeField(auto_now_add=True)
+
+
 class CommentImage(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, editable=False)
     store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, editable=False)
