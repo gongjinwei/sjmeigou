@@ -172,6 +172,19 @@ class GoodDetailView(ModelViewSet):
 
         return Response(serializer.data)
 
+    @action(methods=['get'], detail=True, serializer_class=serializers.CommentContentSerializer)
+    def get_comment(self,request,pk=None):
+        instance = self.get_object()
+        queryset = serializers.CommentContent.objects.filter(sku_order__sku__color__good_detail=instance)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
+
 
 class GoodSearchView(ListOnlyViewSet):
     serializer_class = serializers.GoodSearchSerializer
