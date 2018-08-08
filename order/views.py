@@ -902,25 +902,30 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         return Response(ret)
 
 
-class CommentContentView(RetrieveOnlyViewSets):
+class UserCommentContentView(ListDetailDeleteViewSet):
     queryset = models.CommentContent.objects.all()
     serializer_class = serializers.CommentContentSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        op = self.request.query_params.get('op', '')
+
+        if op != 'backend' and hasattr(self.request,'user'):
+            return queryset.filter(sku_order__store_order__user=self.request.user)
+        elif op =='backend' and hasattr(self.request.user,'stores'):
+            return queryset.filter(sku_order__store_order__store=self.request.user.stores)
+        else:
+            return queryset.none()
+
     @action(methods=['post'], detail=True, serializer_class=serializers.CommentReplySerializer)
-    def add_reply(self,request,pk=None):
+    def add_reply(self, request, pk=None):
         obj = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if models.CommentReply.objects.filter(comment_content=obj).exists():
-            return Response({'code':4311,'msg':'已经回复过了'})
+            return Response({'code': 4311, 'msg': '已经回复过了'})
+        if obj.sku_order.store_order.stores == getattr(self.request.user,'stores',None):
+            return Response({'code':4312,'msg':'无权回复'})
 
         serializer.save(comment_content=obj)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def get_queryset(self):
-        queryset=self.queryset
-        op = self.request.query_params.get('op','')
-        if op == 'backend' and hasattr(self.request.user,'stores'):
-            return queryset.filter(sku_order__store_order__store=self.request.user.stores)
-        else:
-            return queryset.none()

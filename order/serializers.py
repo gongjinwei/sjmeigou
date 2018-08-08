@@ -426,7 +426,6 @@ class StoreOrderCommentSerializer(serializers.Serializer):
         comment_contents_data = validated_data.pop('comment_contents',[])
         dwd_order_comment_data = validated_data.pop('dwd_order_comment', {})
 
-
         # 判断是否有点我达订单且妥投
         if dwd_order_comment_data and models.DwdOrder.objects.filter(store_order=order, dwd_status=100).exists():
             dwd_order = models.DwdOrder.objects.get(store_order=order, dwd_status=100)
