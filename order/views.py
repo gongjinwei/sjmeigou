@@ -661,8 +661,12 @@ class StoreOrderView(ListDetailDeleteViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             op = request.query_params.get('op', '')
-            if store_order.state != 4 and op !='backend':
+            if store_order.state != 4:
                 return Response({"code": 4203, "msg": '该状态不能被评价', "success": "FAIL"})
+            if op =='backend' and store_order.user !=request.user:
+                return Response({'code':4204,'msg':'您无权评价此单'})
+            if models.CommentContent.objects.filter(sku_order__store_order=store_order).exists():
+                return Response({'code': 4205, 'msg': '已经评价过此单了'})
             serializer.save(order=store_order)
             return Response({"code": 1000, "msg": '评价成功', "success": "SUCCESS"}, status=status.HTTP_201_CREATED)
 

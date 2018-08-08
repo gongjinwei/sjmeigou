@@ -237,7 +237,6 @@ class GoodsTypeView(ListDeleteViewSet):
         serializer_class = serializers.GoodDetailSerializer
         try:
             store_id = int(store_id)
-            store = models.Stores.objects.get(pk=store_id)
             # 不加good_type返回类型，good_type=0返回所有，good_type=null返回未分类，其他返回筛选结果
             if good_type == '':
                 queryset = models.GoodsType.objects.filter(store_goods_type__store_id=store_id)
@@ -252,7 +251,6 @@ class GoodsTypeView(ListDeleteViewSet):
 
         except ValueError:
             queryset = GoodDetail.objects.none()
-            store_ret=None
 
         page = self.paginate_queryset(queryset)
         if page is not None:
