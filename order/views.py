@@ -901,7 +901,7 @@ class UserCommentContentView(ListDetailDeleteViewSet):
         queryset = self.queryset
         op = self.request.query_params.get('op', '')
 
-        if op != 'backend' and hasattr(self.request,'user'):
+        if op != 'backend' and self.request.user.is_authenticated and hasattr(self.request,'user'):
             return queryset.filter(sku_order__store_order__user=self.request.user)
         elif op =='backend' and hasattr(self.request.user,'stores'):
             return queryset.filter(sku_order__store_order__store=self.request.user.stores)
