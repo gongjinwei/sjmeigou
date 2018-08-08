@@ -919,6 +919,8 @@ class UserCommentContentView(ListDetailDeleteViewSet):
             return Response({'code':4312,'msg':'无权回复'})
 
         serializer.save(comment_content=obj)
+        obj.state =3
+        obj.save()
         return Response({'code':1000,'msg':'回复成功'}, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
