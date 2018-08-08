@@ -947,3 +947,16 @@ class UserCommentContentView(ListDetailDeleteViewSet):
         comment_content.save()
 
         return Response({'code': 1000, 'msg': '追评成功'})
+
+    @action(methods=['get'], detail=True, serializer_class=serializers.OrderReviewSerializer)
+    def get_review(self,request,pk=None):
+        comment_content = self.get_object()
+
+        queryset = comment_content.reviews.all()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
