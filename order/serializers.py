@@ -381,6 +381,8 @@ class CommentContentSerializer(serializers.ModelSerializer):
     comment_reply = CommentReplySerializer(read_only=True)
     avatarUrl = serializers.ReadOnlyField(source='sku_order.store_order.user.userinfo.avatarUrl')
     sku_order = SkuOrderSerializer()
+    good_id = serializers.ReadOnlyField(source='sku_order.sku.color.good_detail.id')
+    store_id = serializers.ReadOnlyField(source='sku_order.store_order.store.id')
 
     class Meta:
         model = models.CommentContent
