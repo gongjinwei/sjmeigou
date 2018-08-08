@@ -924,10 +924,8 @@ class UserCommentContentView(ListDetailDeleteViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         op = request.query_params.get('op','')
-        if op:
-            reply = instance.comment_reply.all()
-            if reply.exists():
-                self.perform_destroy(reply)
+        if op=='backend' and hasattr(instance,'comment_reply'):
+            self.perform_destroy(instance.comment_reply)
         else:
             self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
