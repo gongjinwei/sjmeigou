@@ -925,7 +925,7 @@ class UserCommentContentView(ListDetailDeleteViewSet):
         instance = self.get_object()
         op = request.query_params.get('op','')
         if op:
-            reply = instance.comment_reply
+            reply = instance.comment_reply.all()
             if reply.exists():
                 self.perform_destroy(reply)
         else:
@@ -935,6 +935,7 @@ class UserCommentContentView(ListDetailDeleteViewSet):
     @action(methods=['post'], detail=True, serializer_class=serializers.OrderReviewSerializer)
     def add_review(self, request, pk=None):
         comment_content = self.get_object()
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, comment_content=comment_content)

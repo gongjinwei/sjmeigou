@@ -226,7 +226,7 @@ class CommentContent(models.Model):
     comment = models.CharField(max_length=255,null=True)
     score = models.SmallIntegerField(choices=((1, '很差'), (2, '一般'), (3, '满意'), (4, '非常满意'), (5, '完美')))
     comment_time = models.DateTimeField(auto_now_add=True)
-    state = models.SmallIntegerField(choices=((1, '正常'), (2, '不可见')), default=1, editable=False)
+    state = models.SmallIntegerField(choices=((1, '买家已评价'), (2, '卖家已回复'),(3,'买家追评'),(4,'卖家回复追评')), default=1, editable=False)
 
 
 class CommentReply(models.Model):
