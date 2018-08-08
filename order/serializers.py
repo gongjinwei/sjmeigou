@@ -249,7 +249,7 @@ class DwdOrderInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.DwdOrder
-        fields = ('dwd_status', 'status_name')
+        fields = ('dwd_status', 'status_name','arrive_time')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
@@ -259,8 +259,10 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     dwd_order_info = DwdOrderInfoSerializer(read_only=True)
     delivery_name = serializers.ReadOnlyField(source='deliver_server.server.name')
     refund = serializers.SerializerMethodField()
-    comment_state_name = serializers.ReadOnlyField(source='ordercomment.get_state_display')
-    comment_state = serializers.ReadOnlyField(source='ordercomment.state')
+    delivery_to_address =serializers.ReadOnlyField(source='unify_order.address.address')
+    delivery_to_room=serializers.ReadOnlyField(source='unify_order.address.room_no')
+    delivery_to_contact=serializers.ReadOnlyField(source='unify_order.address.contact')
+    order_trades =serializers.SerializerMethodField()
 
     class Meta:
         model = models.StoreOrder
@@ -277,6 +279,10 @@ class StoreOrderSerializer(serializers.ModelSerializer):
         refunds= models.OrderRefund.objects.filter(result=1,store_order=obj)
         if refunds.exists():
             return refunds.values('id','state')
+
+    def get_order_trades(self,obj):
+        if obj.paid_time and obj.order_trades.exists():
+            return obj.order_trades.filter(paid_time__isnull=False).latest('paid_time').trade_no
 
 
 class UnifyOrderSerializer(serializers.ModelSerializer):
@@ -499,5 +505,12 @@ class InitGoodDeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = InitGoodRefund
         fields =('dwd_status', 'rider_name', 'rider_mobile', 'status_name')
+
+
+class OrderRetrieveSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.StoreOrder
+        fields = '__all__'
 
 

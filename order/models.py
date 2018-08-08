@@ -179,6 +179,7 @@ class StoreOrder(models.Model):
     store_to_pay = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00), editable=False)
     user_message = models.CharField(max_length=255, default='', blank=True)
     update_time = models.DateTimeField(auto_now=True)
+    create_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
 
     class Meta:
@@ -245,7 +246,7 @@ class CommentImage(models.Model):
 
 
 class OrderTrade(models.Model):
-    store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, null=True)
+    store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, null=True,related_name='order_trades')
     unify_order = models.ForeignKey(to='UnifyOrder', on_delete=models.CASCADE, null=True)
     recharge = models.ForeignKey(to='platforms.AccountRecharge', on_delete=models.CASCADE, null=True)
     good_refund = models.ForeignKey(to='delivery.InitDwdOrder',on_delete=models.CASCADE,null=True)
