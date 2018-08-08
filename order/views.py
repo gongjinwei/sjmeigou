@@ -950,7 +950,7 @@ class UserCommentContentView(ListDetailDeleteViewSet):
 
     @action(methods=['get'], detail=True, serializer_class=serializers.OrderReviewSerializer)
     def get_review(self,request,pk=None):
-        comment_content = self.get_object()
+        comment_content = models.CommentContent.objects.get(pk=pk)
 
         queryset = comment_content.reviews.all()
         page = self.paginate_queryset(queryset)
