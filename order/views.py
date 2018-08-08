@@ -929,3 +929,14 @@ class UserCommentContentView(ListDetailDeleteViewSet):
 
         serializer.save(comment_content=obj)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        op = request.query_params.get('op','')
+        if op:
+            reply = instance.comment_reply
+            if reply.exists():
+                self.perform_destroy(reply)
+        else:
+            self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
