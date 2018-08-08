@@ -262,6 +262,7 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     delivery_to_address =serializers.ReadOnlyField(source='unify_order.address.address')
     delivery_to_room=serializers.ReadOnlyField(source='unify_order.address.room_no')
     delivery_to_contact=serializers.ReadOnlyField(source='unify_order.address.contact')
+    delivery_to_phone=serializers.ReadOnlyField(source='unify_order.address.phone')
     order_trades =serializers.SerializerMethodField()
 
     class Meta:
