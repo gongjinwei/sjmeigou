@@ -915,7 +915,7 @@ class UserCommentContentView(ListDetailDeleteViewSet):
         serializer.is_valid(raise_exception=True)
         if models.CommentReply.objects.filter(comment_content=obj).exists():
             return Response({'code': 4311, 'msg': '已经回复过了'})
-        if obj.sku_order.store_order.store == getattr(self.request.user,'stores',None):
+        if obj.sku_order.store_order.store != getattr(self.request.user,'stores',None):
             return Response({'code':4312,'msg':'无权回复'})
 
         serializer.save(comment_content=obj)
