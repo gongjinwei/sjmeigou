@@ -684,15 +684,6 @@ class StoreOrderView(ListDetailDeleteViewSet):
         else:
             return Response({'code': 4206, 'msg': '您无此权限'})
 
-    @action(methods=['post'], detail=True, serializer_class=serializers.OrderReviewSerializer)
-    def add_review(self, request, pk=None):
-        store_order = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user, order=store_order)
-
-        return Response({'code': 1000, 'msg': '追评成功'})
-
 
 class InitialPaymentView(CreateOnlyViewSet):
     serializer_class = serializers.InitialTradeSerializer
@@ -940,3 +931,12 @@ class UserCommentContentView(ListDetailDeleteViewSet):
         else:
             self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['post'], detail=True, serializer_class=serializers.OrderReviewSerializer)
+    def add_review(self, request, pk=None):
+        comment_content = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user, comment_content=comment_content)
+
+        return Response({'code': 1000, 'msg': '追评成功'})

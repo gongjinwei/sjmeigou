@@ -484,7 +484,8 @@ class OrderReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        order = validated_data.get('order')
+        comment_content = validated_data.get('comment_content')
+        order = comment_content.sku_order.store_order
         image_data = validated_data.pop('review_images',[])
         image_ids = [image['image'] for image in image_data]
         order_review = models.OrderReview.objects.create(**validated_data)
