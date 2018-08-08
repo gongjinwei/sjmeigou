@@ -380,7 +380,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
     comment_name = serializers.SerializerMethodField()
     comment_reply = CommentReplySerializer(read_only=True)
     avatarUrl = serializers.ReadOnlyField(source='sku_order.store_order.user.userinfo.avatarUrl')
-    sku_order = SkuOrderSerializer(read_only=True)
+    sku_order = SkuOrderSerializer()
 
     class Meta:
         model = models.CommentContent
@@ -396,6 +396,10 @@ class CommentContentSerializer(serializers.ModelSerializer):
         else:
             return obj.sku_order.store_order.user.userinfo.nickName
 
+
+class CommentContentCreateSerializer(serializers.ModelSerializer):
+    comment_images =ImageCommentSerializer(many=True)
+
     def create(self, validated_data):
         order = validated_data.pop('order')
         image_data = validated_data.pop('comment_images', [])
@@ -408,23 +412,20 @@ class CommentContentSerializer(serializers.ModelSerializer):
 
         return instance
 
+    class Meta:
+        model = models.CommentContent
+        fields = '__all__'
+
 
 class StoreOrderCommentSerializer(serializers.Serializer):
     dwd_order_comment = DwdOrderCommentSerializer(required=False)
-    comment_contents = CommentContentSerializer(many=True)
+    comment_contents = CommentContentCreateSerializer(many=True)
 
     def create(self, validated_data):
         order = validated_data['order']
         comment_contents_data = validated_data.pop('comment_contents',[])
-        dwd_order_comment_data = validated_data.pop('dwd_order_comment', [])
+        dwd_order_comment_data = validated_data.pop('dwd_order_comment', {})
 
-        request = self.context.get('request')
-        user = request.user
-        op = request.query_params.get('op', '')
-
-        if order.user == user and op != 'backend':
-            order.state = 5
-            order.save()
 
         # 判断是否有点我达订单且妥投
         if dwd_order_comment_data and models.DwdOrder.objects.filter(store_order=order, dwd_status=100).exists():
@@ -434,7 +435,11 @@ class StoreOrderCommentSerializer(serializers.Serializer):
 
         for comment_contents in comment_contents_data:
             comment_contents.update({'order':order})
-            CommentContentSerializer().create(comment_contents)
+            CommentContentCreateSerializer().create(comment_contents)
+
+        order.state = 5
+        order.save()
+
         return order
 
 
