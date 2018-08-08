@@ -939,6 +939,9 @@ class UserCommentContentView(ListDetailDeleteViewSet):
         serializer.save(user=request.user, comment_content=comment_content)
         op = self.request.query_params.get('op','')
         if not op:
-            comment_content.state=1
+            comment_content.state=2
+        else:
+            comment_content.state=3
+        comment_content.save()
 
         return Response({'code': 1000, 'msg': '追评成功'})
