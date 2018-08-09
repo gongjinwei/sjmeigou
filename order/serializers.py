@@ -460,6 +460,7 @@ class ChangeDwdArriveTimeSerializer(serializers.Serializer):
 class OrderRefundSerializer(serializers.ModelSerializer):
     refund_images = ImageCommentSerializer(many=True,required=False)
     state_name = serializers.ReadOnlyField(source='get_state_display')
+    reason_name = serializers.ReadOnlyField(source='reason.reason_name')
     sku_orders = serializers.SerializerMethodField()
     store_name = serializers.ReadOnlyField(source='store_order.store.name')
     logo = serializers.ReadOnlyField(source='store_order.store.logo')

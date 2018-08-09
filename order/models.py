@@ -255,6 +255,7 @@ class OrderTrade(models.Model):
     paid_time = models.DateTimeField(null=True, editable=False)
     paid_money = models.DecimalField(default=Decimal(0.00), max_digits=30, decimal_places=2, editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
+    deal_time = models.DateTimeField(null=True,editable=False)
 
     @property
     def trade_number(self):
