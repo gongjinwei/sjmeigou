@@ -527,9 +527,19 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
 
 
 class RefundProofSerializer(serializers.ModelSerializer):
+    proof_images = ImageCommentSerializer(many=True, required=False)
 
     class Meta:
         model = models.RefundProof
         fields = '__all__'
+
+    def create(self, validated_data):
+        order_refund = validated_data.get('order_refund')
+        order = order_refund.store_order
+        image_data = validated_data.pop('proof_images',[])
+        image_ids = [image['image'] for image in image_data]
+        refund_proof = models.RefundProof.objects.create(**validated_data)
+        models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(refund_proof=refund_proof)
+        return refund_proof
 
 
