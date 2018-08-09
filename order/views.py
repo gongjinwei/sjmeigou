@@ -894,6 +894,13 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         ret.update(ori_dis)
         return Response(ret)
 
+    @action(methods=['post'], detail=True,serializer_class=serializers.RefundProofSerializer)
+    def add_proof(self,request,pk=None):
+        object=self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(order_refund=object)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
 
 class UserCommentContentView(ListDetailDeleteViewSet):
     queryset = models.CommentContent.objects.all()

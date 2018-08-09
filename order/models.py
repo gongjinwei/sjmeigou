@@ -345,3 +345,14 @@ class OrderRefund(models.Model):
     result = models.SmallIntegerField(choices=((1,'进行中'),(2,'关闭')),editable=False,default=1)
     create_time =models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
+
+
+class RefundProof(models.Model):
+    order_refund = models.ForeignKey(to='OrderRefund',on_delete=models.CASCADE)
+    delivery_company = models.CharField(max_length=100)
+    delivery_no = models.CharField(max_length=50)
+    contract_phone = models.CharField(max_length=12)
+    refund_desc = models.CharField(max_length=128,null=True)
+    state = models.SmallIntegerField(choices=((1,'买家发起退货'),(2,'商家确认退款')))
+    create_time = models.DateTimeField(auto_now_add=True)
+

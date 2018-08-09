@@ -526,3 +526,10 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RefundProofSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.RefundProof
+        fields = '__all__'
+
+
