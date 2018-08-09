@@ -323,7 +323,7 @@ class OrderRefundResult(models.Model):
 
 class OrderReview(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
-    is_buyer = models.BooleanField(default=True)
+    is_buyer = models.BooleanField(default=True,editable=False)
     comment_content = models.ForeignKey(to='CommentContent',on_delete=models.CASCADE,editable=False,related_name='reviews')
     content = models.CharField(max_length=255)
     state = models.SmallIntegerField(choices=((1,'正常'),(2,'不可见')),default=1,editable=False)

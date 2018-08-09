@@ -938,12 +938,15 @@ class UserCommentContentView(ListDetailDeleteViewSet):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user, comment_content=comment_content)
-        op = self.request.query_params.get('op','')
+        op = self.request.query_params.get('op', '')
         if not op:
-            comment_content.state=2
+            comment_content.state = 2
+            is_buyer =True
         else:
-            comment_content.state=3
+            comment_content.state = 3
+            is_buyer = False
+        serializer.save(user=request.user, comment_content=comment_content,is_buyer=is_buyer)
+
         comment_content.save()
 
         return Response({'code': 1000, 'msg': '追评成功'})
