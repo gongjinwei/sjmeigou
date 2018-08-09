@@ -461,6 +461,8 @@ class OrderRefundSerializer(serializers.ModelSerializer):
     refund_images = ImageCommentSerializer(many=True,required=False)
     state_name = serializers.ReadOnlyField(source='get_state_display')
     sku_orders = serializers.SerializerMethodField()
+    store_name = serializers.ReadOnlyField(source='store_order.store.name')
+    logo = serializers.ReadOnlyField(source='store_order.store.logo')
 
     class Meta:
         model = models.OrderRefund
