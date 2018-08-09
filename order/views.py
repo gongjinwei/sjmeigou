@@ -818,6 +818,8 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         elif op == 'backend':
             if operation == 1 and instance.state in [4, 5]:
                 instance.state = 1
+                if instance.order_trades.filter(paid_time__isnull=False).exists():
+                    instance.order_trades.filter(paid_time__isnull=False).update(deal_time=datetime.datetime.now())
                 instance.save()
                 return Response({'code': 1000, 'msg': '确认收货成功'})
             if operation == 3 and instance.state in [1, 4, 5, 7]:
