@@ -1,6 +1,8 @@
 # -*- coding:UTF-8 -*-
 import datetime
 from rest_framework import serializers
+from rest_framework.utils import model_meta
+
 
 from django.db.models import F
 
@@ -552,7 +554,6 @@ class RefundProofSerializer(serializers.ModelSerializer):
         image_ids = [image['image'] for image in image_data]
         models.CommentImage.objects.filter(refund_proof=instance).update(refund_proof=None)
         models.CommentImage.objects.filter(id__in=image_ids).update(refund_proof=instance)
-        model_meta=self.Meta.model
         info = model_meta.get_field_info(instance)
 
         # Simply set each attribute on the instance, and then save it.
