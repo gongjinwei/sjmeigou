@@ -919,7 +919,8 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         elif request.method == 'PUT':
             object = self.get_object()
             instance = object.refund_proof.filter(order_refund=object, state=1)
-            if instance.exists():
+            op = request.query_params.get('op','')
+            if not op and instance.exists():
                 serializer = self.get_serializer(instance,data=request.data,partial=False)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
