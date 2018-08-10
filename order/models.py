@@ -343,7 +343,7 @@ class OrderRefund(models.Model):
     refund_money = models.DecimalField(help_text='退款金额（元）',decimal_places=2,max_digits=30)
     refund_desc = models.CharField(max_length=1024,null=True)
     state = models.SmallIntegerField(choices=((1,'等待卖家退款'),(2,'退款成功'),(3,'卖家拒绝退款'),(4,'等待买家发货'),(5,'等待商家收货'),(6,'取消退款'),(7,'等待卖家同意退货')),editable=False)
-    result = models.SmallIntegerField(choices=((1,'进行中'),(2,'关闭')),editable=False,default=1)
+    result = models.SmallIntegerField(choices=((1,'进行中'),(2,'关闭'),(3,'存在单据')),editable=False,default=1)
     create_time =models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
 

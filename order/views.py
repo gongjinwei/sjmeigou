@@ -820,6 +820,9 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 instance.state = 1
                 if instance.order_trades.filter(paid_time__isnull=False).exists():
                     instance.order_trades.filter(paid_time__isnull=False).update(deal_time=datetime.datetime.now())
+                if instance.refund_proof.filter(state=1).exists():
+                    instance.refund_proof.filter(state=1).update(state=2)
+                instance.result=1
                 instance.save()
                 return Response({'code': 1000, 'msg': '确认收货成功'})
             if operation == 3 and instance.state in [1, 4, 5, 7]:
@@ -907,6 +910,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 return Response({'code':3004,'msg':'存在进行中的凭据'})
             serializer.save(order_refund=object)
             object.state=5
+            object.result=3
             object.save()
             return Response({'code':1000,'msg':'添加成功'},status=status.HTTP_201_CREATED)
         elif request.method =='GET':
