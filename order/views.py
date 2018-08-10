@@ -894,19 +894,28 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         ret.update(ori_dis)
         return Response(ret)
 
-    @action(methods=['post'], detail=True,serializer_class=serializers.RefundProofSerializer)
+    @action(methods=['get','post'], detail=True,serializer_class=serializers.RefundProofSerializer)
     def add_proof(self,request,pk=None):
-        object=self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if object.state !=4:
-            return Response({'code':3003,'msg':'此状态不允许添加凭据'})
-        if models.RefundProof.objects.filter(order_refund=object,state=1).exists():
-            return Response({'code':3004,'msg':'存在进行中的凭据'})
-        serializer.save(order_refund=object)
-        object.state=5
-        object.save()
-        return Response(serializer.data,status=status.HTTP_201_CREATED)
+
+        if request.method=='POST':
+            object=self.get_object()
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            if object.state !=4:
+                return Response({'code':3003,'msg':'此状态不允许添加凭据'})
+            if models.RefundProof.objects.filter(order_refund=object,state=1).exists():
+                return Response({'code':3004,'msg':'存在进行中的凭据'})
+            serializer.save(order_refund=object)
+            object.state=5
+            object.save()
+            return Response({'code':1000,'msg':'添加成功'},status=status.HTTP_201_CREATED)
+        elif request.method =='GET':
+            object=self.get_object()
+            instance = object.refund_proof.filter(order_refund=object,state=1)
+            if instance.exists():
+                return Response(self.get_serializer(instance[0]).data)
+            else:
+                return Response()
 
 
 class UserCommentContentView(ListDetailDeleteViewSet):

@@ -528,6 +528,7 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
 
 class RefundProofSerializer(serializers.ModelSerializer):
     proof_images = ImageCommentSerializer(many=True, required=False)
+    state_name = serializers.ReadOnlyField(source='get_state_display')
 
     class Meta:
         model = models.RefundProof
