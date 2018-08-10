@@ -361,7 +361,8 @@ class ImageCommentSerializer(serializers.Serializer):
     image = serializers.IntegerField(validators=[check_image_id])
 
     def to_representation(self, instance):
-        return instance.image.url
+        return {'id':instance.id,
+                'image':instance.image.url}
 
 
 class DwdOrderCommentSerializer(serializers.ModelSerializer):
