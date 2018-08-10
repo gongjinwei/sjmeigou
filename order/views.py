@@ -922,7 +922,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             instance = object.refund_proof.filter(order_refund=object, state=1)
             op = request.query_params.get('op','')
             if not op and instance.exists():
-                serializer = self.get_serializer(instance,data=request.data,partial=False)
+                serializer = self.get_serializer(instance[0],data=request.data,partial=False)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
                 return Response({'code':1000,'msg':'修改成功'})
