@@ -899,7 +899,13 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         object=self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if object.state !=4:
+            return Response({'code':3003,'msg':'此状态不允许添加凭据'})
+        if models.RefundProof.objects.filter(order_refund=object,state=1).exists():
+            return Response({'code':3004,'msg':'存在进行中的凭据'})
         serializer.save(order_refund=object)
+        object.state=5
+        object.save()
         return Response(serializer.data,status=status.HTTP_201_CREATED)
 
 
