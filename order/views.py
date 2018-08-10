@@ -894,7 +894,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         ret.update(ori_dis)
         return Response(ret)
 
-    @action(methods=['get','post'], detail=True,serializer_class=serializers.RefundProofSerializer)
+    @action(methods=['get','post','put'], detail=True,serializer_class=serializers.RefundProofSerializer)
     def add_proof(self,request,pk=None):
 
         if request.method=='POST':
@@ -916,6 +916,16 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 return Response(self.get_serializer(instance[0]).data)
             else:
                 return Response()
+        elif request.method == 'PUT':
+            object = self.get_object()
+            instance = object.refund_proof.filter(order_refund=object, state=1)
+            if instance.exists():
+                serializer = self.get_serializer(instance,data=request.data,partial=False)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response({'code':1000,'msg':'修改成功'})
+            else:
+                return Response({'code':3005,'msg':'不存在可修改凭据'})
 
 
 class UserCommentContentView(ListDetailDeleteViewSet):
