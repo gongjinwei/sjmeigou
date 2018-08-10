@@ -899,9 +899,8 @@ class OrderRefundView(ListRetrieveCreateViewSets):
 
     @action(methods=['get','post','put'], detail=True,serializer_class=serializers.RefundProofSerializer)
     def add_proof(self,request,pk=None):
-
+        object = self.get_object()
         if request.method=='POST':
-            object=self.get_object()
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             if object.state !=4:
@@ -914,14 +913,12 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             object.save()
             return Response({'code':1000,'msg':'添加成功'},status=status.HTTP_201_CREATED)
         elif request.method =='GET':
-            object=self.get_object()
             instance = object.refund_proof.filter(order_refund=object,state=1)
             if instance.exists():
                 return Response(self.get_serializer(instance[0]).data)
             else:
                 return Response()
         elif request.method == 'PUT':
-            object = self.get_object()
             instance = object.refund_proof.filter(order_refund=object, state=1)
             op = request.query_params.get('op','')
             if not op and instance.exists():

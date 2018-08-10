@@ -360,6 +360,9 @@ def check_image_id(value):
 class ImageCommentSerializer(serializers.Serializer):
     image = serializers.IntegerField(validators=[check_image_id])
 
+    def to_representation(self, instance):
+        return instance.image.url
+
 
 class DwdOrderCommentSerializer(serializers.ModelSerializer):
     satisfied_reasons=serializers.PrimaryKeyRelatedField(queryset=DeliveryReason.objects.all(),many=True)
@@ -542,5 +545,6 @@ class RefundProofSerializer(serializers.ModelSerializer):
         refund_proof = models.RefundProof.objects.create(**validated_data)
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(refund_proof=refund_proof)
         return refund_proof
+
 
 
