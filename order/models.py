@@ -354,6 +354,6 @@ class RefundProof(models.Model):
     delivery_no = models.CharField(max_length=50)
     contract_phone = models.CharField(max_length=12)
     refund_desc = models.CharField(max_length=128,null=True)
-    state = models.SmallIntegerField(choices=((1,'买家发起退货'),(2,'商家确认退款')),editable=False)
+    state = models.SmallIntegerField(choices=((1,'买家发起退货'),(2,'商家确认退款')),editable=False,default=1)
     create_time = models.DateTimeField(auto_now_add=True)
 
