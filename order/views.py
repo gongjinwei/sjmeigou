@@ -548,12 +548,15 @@ class StoreOrderView(ListDetailDeleteViewSet):
         if op == 1 and order.user == user:
             if order.state == 2 or order.state == 3:
                 order.state = 4
+                if order.order_trades.filter(paid_time__isnull=False).exists():
+                    order.order_trades.filter(paid_time__isnull=False).update(deal_time=datetime.datetime.now())
                 order.save()
                 # 商家将收到余额
                 return Response({'code': 1000, 'msg': '收货成功', "return_code": "SUCCESS"})
             else:
                 return Response({'code': 4201, 'msg': '此状态无法收货', "return_code": "FAIL"})
         elif op == 2 and order.user == user and order.state == 1:
+
             order.state = 8
             order.save()
             return Response({'code': 1000, 'msg': '取消成功', "return_code": "SUCCESS"})
@@ -818,8 +821,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         elif op == 'backend':
             if operation == 1 and instance.state in [4, 5]:
                 instance.state = 1
-                if instance.order_trades.filter(paid_time__isnull=False).exists():
-                    instance.order_trades.filter(paid_time__isnull=False).update(deal_time=datetime.datetime.now())
+
                 if instance.refund_proof.filter(state=1).exists():
                     instance.refund_proof.filter(state=1).update(state=2)
                 instance.result=1
