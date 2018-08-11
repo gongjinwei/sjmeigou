@@ -357,3 +357,5 @@ class RefundProof(models.Model):
     state = models.SmallIntegerField(choices=((1,'退货进行中'),(2,'退货成功')),editable=False,default=1)
     create_time = models.DateTimeField(auto_now_add=True)
 
+
+

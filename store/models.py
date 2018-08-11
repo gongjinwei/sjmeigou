@@ -20,6 +20,7 @@ class Stores(models.Model):
     receive_address=models.CharField(null=True,max_length=128)
     longitude = models.FloatField(null=True)
     latitude = models.FloatField(null=True)
+    profile = models.CharField(max_length=1024,null=True)
     adcode = models.CharField(max_length=6,default='330700')
     take_off = models.DecimalField(max_digits=10,decimal_places=1,default=Decimal(50.0),help_text='起送价')
     store_phone=models.CharField(max_length=12,null=True)
