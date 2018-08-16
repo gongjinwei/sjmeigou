@@ -102,7 +102,7 @@ class AfterSaleServicesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=models.AfterSaleServices
-        fields = ('server', 'server_name')
+        fields = ('server', 'server_name','id')
 
 
 class GoodDeliverSerializer(serializers.ModelSerializer):
@@ -111,7 +111,7 @@ class GoodDeliverSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.GoodDeliver
-        fields = ('server','server_name','deliver_name')
+        fields = ('server','server_name','deliver_name','id')
 
 
 class SKUColorSerializer(serializers.ModelSerializer):
