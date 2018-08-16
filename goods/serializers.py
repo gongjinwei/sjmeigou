@@ -90,6 +90,7 @@ class ItemsGroupDescSerializer(serializers.ModelSerializer):
 
 class SKUSerializer(serializers.ModelSerializer):
     size_name = serializers.ReadOnlyField(source='size.size_name')
+    size_group_name = serializers.ReadOnlyField(source='size.size_group.group_name')
 
     class Meta:
         model=models.SKU
@@ -125,6 +126,7 @@ class SKUColorSerializer(serializers.ModelSerializer):
         instance=models.SKUColor.objects.create(**validated_data)
         for sku in skus:
             models.SKU.objects.create(color=instance, **sku)
+
 
 class CommentFirstSerializer(serializers.ModelSerializer):
     avatarUrl = serializers.ReadOnlyField(source='sku_order.store_order.user.userinfo.avatarUrl')
