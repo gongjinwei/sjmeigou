@@ -179,6 +179,40 @@ class GoodDetailSerializer(serializers.ModelSerializer):
 
         return instance
 
+    def update(self, instance, validated_data):
+        colors = validated_data.pop('colors')
+        after_sale_services = validated_data.pop('after_sale_services')
+        delivers = validated_data.pop('delivers')
+
+        for service in after_sale_services:
+            pk = service.get('id',None)
+            if pk:
+                models.AfterSaleServices.objects.filter(pk=pk).update(**service)
+            else:
+                models.AfterSaleServices.objects.create(good_detail=instance,**service)
+        for deliver in delivers:
+            pk = deliver.get('id', None)
+            if pk:
+                models.GoodDeliver.objects.filter(pk=pk).update(**deliver)
+            else:
+                models.GoodDeliver.objects.create(good_detail=instance,**deliver)
+
+        for color_data in colors:
+            skus = color_data.pop('skus')
+            color_pk = color_data.get('id',None)
+            if color_pk:
+                models.SKUColor.objects.filter(pk=color_pk).update(**color_data)
+            else:
+                models.SKUColor.objects.create(**color_data)
+
+            for sku in skus:
+                sku_pk = sku.get('id',None)
+                if sku_pk:
+                    models.SKU.objects.filter(pk=sku_pk).update(**sku)
+                else:
+                    models.SKU.objects.create(**sku)
+        return super().update(instance,validated_data)
+
     def get_latest_comment(self,obj):
         content = CommentContent.objects.filter(sku_order__sku__color__good_detail=obj)
         if content.exists():
