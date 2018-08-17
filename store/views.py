@@ -369,7 +369,10 @@ class GoodFavoritesViewSets(CreateListDeleteViewSet):
     serializer_class = serializers.GoodFavoritesSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        if models.GoodFavorites.objects.filter(good=serializer.validated_data['good'],user=self.request.user).exists():
+            models.GoodFavorites.objects.filter(good=serializer.validated_data['good'], user=self.request.user).delete()
+        else:
+            serializer.save(user=self.request.user)
 
     def get_queryset(self):
         queryset= self.queryset
