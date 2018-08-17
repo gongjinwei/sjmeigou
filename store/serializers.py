@@ -204,6 +204,7 @@ class GoodFavoritesSerializer(serializers.ModelSerializer):
     master_graph = serializers.SerializerMethodField()
     min_price = serializers.ReadOnlyField(source='good.min_price')
     favorites_num = serializers.SerializerMethodField()
+    store_id = serializers.ReadOnlyField(source='good.store.id')
 
     class Meta:
         model = models.GoodFavorites
