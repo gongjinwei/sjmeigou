@@ -30,5 +30,6 @@ urlpatterns = [
     path('store/',include('store.urls',namespace='store')),
     path('order/',include('order.urls',namespace='order')),
     path('platforms/',include('platforms.urls',namespace='platforms')),
+    path('activities/',include('activities.urls',namespace='activities'))
 
 ]
