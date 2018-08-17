@@ -356,8 +356,8 @@ class StoreFavoritesViewSets(CreateListViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if models.StoreFavorites.objects.filter(good=serializer.validated_data['store'],user=self.request.user).exists():
-            models.StoreFavorites.objects.filter(good=serializer.validated_data['store'], user=self.request.user).delete()
+        if models.StoreFavorites.objects.filter(store=serializer.validated_data['store'],user=self.request.user).exists():
+            models.StoreFavorites.objects.filter(store=serializer.validated_data['store'], user=self.request.user).delete()
             return Response({'code':1000,'msg':'成功取消关注'})
         else:
             serializer.save(user=self.request.user)
