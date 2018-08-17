@@ -91,21 +91,40 @@ class ItemsGroupDescSerializer(serializers.ModelSerializer):
 class SKUSerializer(serializers.ModelSerializer):
     size_name = serializers.ReadOnlyField(source='size.size_name')
     size_group_name = serializers.ReadOnlyField(source='size.size_group.group_name')
+    id = serializers.IntegerField(required=False)
 
     class Meta:
         model=models.SKU
         exclude = ('color',)
 
+    def create(self, validated_data):
+        validated_data.pop('id',None)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data.pop('id',None)
+        return super().update(instance,validated_data)
+
 
 class AfterSaleServicesSerializer(serializers.ModelSerializer):
     server_name = serializers.ReadOnlyField(source='get_server_display')
+    id = serializers.IntegerField(required=False)
 
     class Meta:
         model=models.AfterSaleServices
         fields = ('server', 'server_name','id')
 
+    def create(self, validated_data):
+        validated_data.pop('id',None)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data.pop('id',None)
+        return super().update(instance,validated_data)
+
 
 class GoodDeliverSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
     deliver_name = serializers.ReadOnlyField(source='server.name')
     server_name = serializers.ReadOnlyField(source='server.deliver_server.name')
 
@@ -113,19 +132,33 @@ class GoodDeliverSerializer(serializers.ModelSerializer):
         model = models.GoodDeliver
         fields = ('server','server_name','deliver_name','id')
 
+    def create(self, validated_data):
+        validated_data.pop('id',None)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data.pop('id',None)
+        return super().update(instance,validated_data)
+
 
 class SKUColorSerializer(serializers.ModelSerializer):
     skus=SKUSerializer(many=True)
+    id = serializers.IntegerField(required=False)
 
     class Meta:
         model = models.SKUColor
         exclude=('good_detail',)
 
     def create(self, validated_data):
+        validated_data.pop('id', None)
         skus = validated_data.pop('skus')
         instance=models.SKUColor.objects.create(**validated_data)
         for sku in skus:
             models.SKU.objects.create(color=instance, **sku)
+
+    def update(self, instance, validated_data):
+        validated_data.pop('id',None)
+        return super().update(instance,validated_data)
 
 
 class CommentFirstSerializer(serializers.ModelSerializer):
@@ -144,6 +177,7 @@ class CommentFirstSerializer(serializers.ModelSerializer):
 
 
 class GoodDetailSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
     class_name=serializers.SerializerMethodField()
     relate_desc=serializers.ReadOnlyField(source='item_desc.items')
     params=serializers.JSONField()
