@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
 
 
-from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet,CreateListDeleteViewSet,CreateListViewSet
+from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet,CreateListViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
 from tools.contrib import look_up_adocode
 
@@ -349,12 +349,19 @@ class StoreMessageView(RetrieveOnlyViewSets):
     serializer_class = serializers.StoreMessageSerializer
 
 
-class StoreFavoritesViewSets(CreateListDeleteViewSet):
+class StoreFavoritesViewSets(CreateListViewSet):
     queryset = models.StoreFavorites.objects.all()
     serializer_class = serializers.StoreFavoritesSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if models.GoodFavorites.objects.filter(good=serializer.validated_data['store'],user=self.request.user).exists():
+            models.GoodFavorites.objects.filter(good=serializer.validated_data['store'], user=self.request.user).delete()
+            return Response({'code':1000,'msg':'成功取消关注'})
+        else:
+            serializer.save(user=self.request.user)
+            return Response({'code': 1000, 'msg': '关注成功'})
 
     def get_queryset(self):
         queryset = self.queryset
@@ -371,8 +378,8 @@ class GoodFavoritesViewSets(CreateListViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if models.GoodFavorites.objects.filter(good=serializer.validated_data['good'],user=self.request.user).exists():
-            models.GoodFavorites.objects.filter(good=serializer.validated_data['good'], user=self.request.user).delete()
+        if models.StoreFavorites.objects.filter(good=serializer.validated_data['good'],user=self.request.user).exists():
+            models.StoreFavorites.objects.filter(good=serializer.validated_data['good'], user=self.request.user).delete()
             return Response({'code':1000,'msg':'成功取消收藏'})
         else:
             serializer.save(user=self.request.user)
