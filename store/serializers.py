@@ -4,7 +4,7 @@ from itertools import groupby
 
 from rest_framework import serializers
 
-from django.db.models import Avg
+from django.db.models import Avg,Count
 
 from geopy.distance import VincentyDistance
 
@@ -200,10 +200,23 @@ class StoreFavoritesSerializer(serializers.ModelSerializer):
 
 
 class GoodFavoritesSerializer(serializers.ModelSerializer):
+    title = serializers.ReadOnlyField(source='good.title')
+    master_graph = serializers.SerializerMethodField()
+    min_price = serializers.ReadOnlyField(source='good.min_price')
+    favorites_num = serializers.SerializerMethodField()
 
     class Meta:
         model = models.GoodFavorites
         fields = '__all__'
+
+    def get_master_graph(self,obj):
+        if obj.master_map:
+            return obj.master_map
+        else:
+            return obj.master_graphs[0]
+
+    def get_favorites_num(self,obj):
+        return models.GoodFavorites.objects.filter(good=obj.good).aggregate(Count('user'))['user_count']
 
     def create(self, validated_data):
         instance,created=self.Meta.model.objects.get_or_create(**validated_data)
