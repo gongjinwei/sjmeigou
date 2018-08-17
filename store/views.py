@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
 
 
-from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet
+from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet,CreateListDeleteViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
 from tools.contrib import look_up_adocode
 
@@ -347,3 +347,33 @@ class StoreSearchView(ListOnlyViewSet):
 class StoreMessageView(RetrieveOnlyViewSets):
     queryset = models.Stores.objects.filter(active_state=1)
     serializer_class = serializers.StoreMessageSerializer
+
+
+class StoreFavoritesViewSets(ModelViewSet):
+    queryset = models.StoreFavorites.objects.all()
+    serializer_class = serializers.StoreFavoritesSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        queryset = self.queryset
+        if hasattr(self.request, 'user') and self.request.user.is_authenticated:
+            return queryset.filter(user=self.request.user)
+        else:
+            return queryset.none()
+
+
+class GoodFavoritesViewSets(CreateListDeleteViewSet):
+    queryset = models.GoodFavorites.objects.all()
+    serializer_class = serializers.GoodFavoritesSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        queryset= self.queryset
+        if hasattr(self.request,'user') and self.request.user.is_authenticated:
+            return queryset.filter(user=self.request.user)
+        else:
+            return queryset.none()

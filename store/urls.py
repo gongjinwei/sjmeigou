@@ -15,5 +15,7 @@ router.register('storeGoodType',views.StoreGoodsTypeView,base_name='storeGoodTyp
 router.register('goodType',views.GoodsTypeView,base_name='goodType')
 router.register('storeSearch',views.StoreSearchView,base_name='storeSearch')
 router.register('storeMessage',views.StoreMessageView,base_name='storeMessage')
+router.register('storeFavorites',views.StoreFavoritesViewSets,base_name='storeFavorites')
+router.register('goodFavorites',views.GoodFavoritesViewSets,base_name='goodFavorites')
 
 urlpatterns=router.urls

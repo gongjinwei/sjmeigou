@@ -186,4 +186,24 @@ class StoreSearchSerializer(serializers.ModelSerializer):
             return obj.goods.values('title', 'master_graphs', 'min_price', 'id')[:3]
 
 
+class StoreFavoritesSerializer(serializers.ModelSerializer):
 
+
+    class Meta:
+        model = models.StoreFavorites
+        fields = '__all__'
+
+    def create(self, validated_data):
+        instance,created=self.Meta.model.objects.get_or_create(**validated_data)
+        return instance
+
+
+class GoodFavoritesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.GoodFavorites
+        fields = '__all__'
+
+    def create(self, validated_data):
+        instance,created=self.Meta.model.objects.get_or_create(**validated_data)
+        return instance
