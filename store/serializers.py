@@ -192,7 +192,7 @@ class StoreFavoritesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.StoreFavorites
-        fields = '__all__'
+        exclude = ('user',)
 
     def create(self, validated_data):
         instance,created=self.Meta.model.objects.get_or_create(**validated_data)
@@ -207,16 +207,16 @@ class GoodFavoritesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.GoodFavorites
-        fields = '__all__'
+        exclude=('user',)
 
     def get_master_graph(self,obj):
-        if obj.master_map:
-            return obj.master_map
+        if obj.good.master_map:
+            return obj.good.master_map
         else:
-            return obj.master_graphs[0]
+            return obj.good.master_graphs[0]
 
     def get_favorites_num(self,obj):
-        return models.GoodFavorites.objects.filter(good=obj.good).aggregate(Count('user'))['user_count']
+        return models.GoodFavorites.objects.filter(good=obj.good).aggregate(Count('user'))['user__count']
 
     def create(self, validated_data):
         instance,created=self.Meta.model.objects.get_or_create(**validated_data)
