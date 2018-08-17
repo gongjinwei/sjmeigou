@@ -187,7 +187,8 @@ class StoreSearchSerializer(serializers.ModelSerializer):
 
 
 class StoreFavoritesSerializer(serializers.ModelSerializer):
-
+    store_name = serializers.ReadOnlyField(source='store.name')
+    store_logo = serializers.ReadOnlyField(source='store.logo')
 
     class Meta:
         model = models.StoreFavorites
