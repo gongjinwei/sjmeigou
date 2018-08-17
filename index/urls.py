@@ -9,5 +9,6 @@ router.register('banner',views.BannerView,base_name='banner')
 router.register('recruit',views.RecruitView,base_name='recruit')
 router.register('um',views.UmViewSets,base_name='Um')
 router.register('application',views.ApplicationViewSets,base_name='application')
+router.register('messageOfMine',views.MessageOfMineView,base_name='messageOfMine')
 
 urlpatterns=router.urls

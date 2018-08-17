@@ -68,7 +68,7 @@ class StoreGoodsType(models.Model):
 
 class StoreFavorites(models.Model):
     store = models.ForeignKey(to="Stores", on_delete=models.CASCADE,related_name='favorites')
-    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False,related_name='store_favorites')
     update_time = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -77,7 +77,7 @@ class StoreFavorites(models.Model):
 
 class GoodFavorites(models.Model):
     good = models.ForeignKey(to="goods.GoodDetail", on_delete=models.CASCADE,related_name='favorites')
-    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False,related_name='good_favorites')
     update_time = models.DateTimeField(auto_now=True)
 
     class Meta:

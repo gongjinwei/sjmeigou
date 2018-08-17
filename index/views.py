@@ -1,6 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import Response,status
 
+from django.db.models import Count
+
 from tools.viewset import ListOnlyViewSet
 
 from . import models,serializers
@@ -9,6 +11,9 @@ from goods.models import FirstClass
 from platforms.models import DeliverAdcode
 from tools.contrib import look_up_adocode
 # Create your views here.
+
+from store.models import StoreFavorites,GoodFavorites
+from order.models import StoreOrder
 
 
 class BannerView(ModelViewSet):
@@ -70,3 +75,16 @@ class ApplicationViewSets(ModelViewSet):
             return models.Application.objects.filter(application_user=self.request.user)
 
         return models.Application.objects.none()
+
+
+class MessageOfMineView(ListOnlyViewSet):
+    def list(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({'data':None})
+        else:
+            data={}
+            data.update(GoodFavorites.objects.filter(user=request.user).aggregate(good_favorites_num=Count('good')))
+            data.update(StoreFavorites.objects.filter(user=request.user).aggregate(store_favorites_num=Count('store')))
+
+            data.update({'orders':StoreOrder.objects.filter(user=request.user,state__in=[1,2,3,4,7]).values('state',state_num=Count('store_order_no'))})
+            return Response({'data':data})
