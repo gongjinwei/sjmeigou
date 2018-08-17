@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
 
 
-from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet,CreateListDeleteViewSet
+from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet,CreateListDeleteViewSet,CreateListViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
 from tools.contrib import look_up_adocode
 
@@ -349,7 +349,7 @@ class StoreMessageView(RetrieveOnlyViewSets):
     serializer_class = serializers.StoreMessageSerializer
 
 
-class StoreFavoritesViewSets(ModelViewSet):
+class StoreFavoritesViewSets(CreateListDeleteViewSet):
     queryset = models.StoreFavorites.objects.all()
     serializer_class = serializers.StoreFavoritesSerializer
 
@@ -364,7 +364,7 @@ class StoreFavoritesViewSets(ModelViewSet):
             return queryset.none()
 
 
-class GoodFavoritesViewSets(CreateListDeleteViewSet):
+class GoodFavoritesViewSets(CreateListViewSet):
     queryset = models.GoodFavorites.objects.all()
     serializer_class = serializers.GoodFavoritesSerializer
 
@@ -377,8 +377,6 @@ class GoodFavoritesViewSets(CreateListDeleteViewSet):
         else:
             serializer.save(user=self.request.user)
             return Response({'code': 1000, 'msg': '收藏成功'})
-
-
 
     def get_queryset(self):
         queryset= self.queryset
