@@ -100,6 +100,8 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                             if hasattr(order, 'sku_orders'):
                                 for sku_data in order.sku_orders.all():
                                     sku_data.sku.stock -= sku_data.num
+                                    sku_data.sku.color.good_detail.total_stock -=sku_data.num
+                                    sku_data.sku.color.good_detail.save()
                                     sku_data.sku.save()
 
                         # 处理充值
