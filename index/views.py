@@ -105,7 +105,7 @@ class GoodTrackViewSets(CreateListViewSet):
     serializer_class = serializers.GoodTrackSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user,date=datetime.date.today(),latest_time=datetime.datetime.now())
 
     def get_queryset(self):
         queryset = self.queryset
