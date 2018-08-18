@@ -222,3 +222,7 @@ class GoodFavoritesSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance,created=self.Meta.model.objects.get_or_create(**validated_data)
         return instance
+
+
+class HistoryDeleteSerializer(serializers.Serializer):
+    ids = serializers.ListField()

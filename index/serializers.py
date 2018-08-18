@@ -41,4 +41,27 @@ class ApplicationSerializer(serializers.ModelSerializer):
         return application
 
 
+class GoodTrackSerializer(serializers.ModelSerializer):
+    master_graph = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.GoodTrack
+        exclude = ('user',)
+
+    def create(self, validated_data):
+        instance,created = self.Meta.model.objects.update_or_create(defaults=validated_data,
+                                                                    user=validated_data['user'],
+                                                                    good=validated_data['good'],
+                                                                    date=validated_data['date'])
+        return instance
+
+    def get_master_graph(self,obj):
+        if obj.good.master_map:
+            return obj.good.master_map
+        else:
+            return obj.good.master_graphs[0]
+
+
+
+
 

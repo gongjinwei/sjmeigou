@@ -370,6 +370,19 @@ class StoreFavoritesViewSets(CreateListViewSet):
         else:
             return queryset.none()
 
+    @action(methods=['post'],detail=True,serializer_class=serializers.HistoryDeleteSerializer)
+    def bulk_delete(self,request,pk=None):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ids = serializer.validated_data['ids']
+        user_ids = list(self.queryset.filter(user=request.user).values_list('id',flat=True))
+        if set(ids).issubset(user_ids):
+            self.queryset.filter(id__in=ids).delete()
+            return Response({'code':1000,'msg':'删除成功'})
+        else:
+            return Response({'code':4150,'msg':'删除错误'})
+
 
 class GoodFavoritesViewSets(CreateListViewSet):
     queryset = models.GoodFavorites.objects.all()
@@ -391,3 +404,16 @@ class GoodFavoritesViewSets(CreateListViewSet):
             return queryset.filter(user=self.request.user)
         else:
             return queryset.none()
+
+    @action(methods=['post'], detail=True, serializer_class=serializers.HistoryDeleteSerializer)
+    def bulk_delete(self, request, pk=None):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ids = serializer.validated_data['ids']
+        user_ids = list(self.queryset.filter(user=request.user).values_list('id', flat=True))
+        if set(ids).issubset(user_ids):
+            self.queryset.filter(id__in=ids).delete()
+            return Response({'code': 1000, 'msg': '删除成功'})
+        else:
+            return Response({'code': 4150, 'msg': '删除错误'})

@@ -74,3 +74,15 @@ class StoreImage(models.Model):
     application = models.ForeignKey(to='Application', on_delete=models.CASCADE, related_name='store_images',
                                     editable=False, null=True, blank=True)
     store_image = models.URLField(blank=True, null=True)
+
+
+class GoodTrack(models.Model):
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,related_name='good_tracks',editable=False)
+    good = models.ForeignKey(to='goods.GoodDetail',on_delete=models.CASCADE,related_name='tracks')
+    date = models.DateField(auto_now=True)
+    latest_time = models.DateTimeField(auto_now=True)
+    visible = models.BooleanField(default=True,editable=False)
+
+    class Meta:
+        ordering=('-latest_time',)
+

@@ -3,7 +3,7 @@ from rest_framework.views import Response,status
 
 from django.db.models import Count
 
-from tools.viewset import ListOnlyViewSet
+from tools.viewset import ListOnlyViewSet,CreateListDeleteViewSet
 
 from . import models,serializers
 from goods.serializers import FirstClassSerializer
@@ -88,3 +88,22 @@ class MessageOfMineView(ListOnlyViewSet):
 
             data.update({'orders':StoreOrder.objects.filter(user=request.user,state__in=[1,2,3,4,7]).values('state',state_num=Count('store_order_no'))})
             return Response({'data':data})
+
+
+class GoodTrackViewSets(CreateListDeleteViewSet):
+    queryset = models.GoodTrack.objects.filter(visible=True)
+    serializer_class = serializers.GoodTrackSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        queryset=self.queryset
+        if hasattr(self.request,'user') and self.request.user.is_authenticated:
+            return queryset.filter(user=self.request.user)
+        else:
+            return queryset.none()
+
+    def perform_destroy(self, instance):
+        instance.visible=False
+        instance.save()

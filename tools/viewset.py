@@ -17,33 +17,49 @@ class CreateListDeleteViewSet(mixins.CreateModelMixin,
     pass
 
 
-class ListOnlyViewSet(mixins.ListModelMixin, GenericViewSet):
+class ListOnlyViewSet(mixins.ListModelMixin,
+                      GenericViewSet):
     pass
 
 
-class CreateListViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericViewSet):
+class CreateListViewSet(mixins.CreateModelMixin,
+                        mixins.ListModelMixin,
+                        GenericViewSet):
     pass
 
 
-class RetrieveUpdateViewSets(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, GenericViewSet):
+class RetrieveUpdateViewSets(mixins.RetrieveModelMixin,
+                             mixins.UpdateModelMixin,
+                             GenericViewSet):
     pass
 
 
-class RetrieveOnlyViewSets(mixins.RetrieveModelMixin, GenericViewSet):
+class RetrieveOnlyViewSets(mixins.RetrieveModelMixin,
+                           GenericViewSet):
     pass
 
 
-class ListRetrieveDeleteViewSets(mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.DestroyModelMixin):
+class ListRetrieveDeleteViewSets(mixins.ListModelMixin,
+                                 mixins.RetrieveModelMixin,
+                                 mixins.DestroyModelMixin):
     pass
 
 
-class ListDeleteViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericViewSet):
+class ListDeleteViewSet(mixins.ListModelMixin,
+                        mixins.DestroyModelMixin,
+                        GenericViewSet):
     pass
 
 
-class ListDetailDeleteViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin,
-                                GenericViewSet):
+class ListDetailDeleteViewSet(mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.DestroyModelMixin,
+                              GenericViewSet):
     pass
 
-class ListRetrieveCreateViewSets(mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.CreateModelMixin,GenericViewSet):
+
+class ListRetrieveCreateViewSets(mixins.ListModelMixin,
+                                 mixins.RetrieveModelMixin,
+                                 mixins.CreateModelMixin,
+                                 GenericViewSet):
     pass
