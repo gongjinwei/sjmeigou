@@ -114,9 +114,8 @@ class GoodTrackViewSets(CreateListViewSet):
         else:
             return queryset.none()
 
-    @action(methods=['post'], detail=True, serializer_class=HistoryDeleteSerializer)
-    def bulk_delete(self, request, pk=None):
-        instance = self.get_object()
+    @action(methods=['post'], detail=False, serializer_class=HistoryDeleteSerializer)
+    def bulk_delete(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         ids = serializer.validated_data['ids']

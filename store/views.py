@@ -370,9 +370,8 @@ class StoreFavoritesViewSets(CreateListViewSet):
         else:
             return queryset.none()
 
-    @action(methods=['post'],detail=True,serializer_class=serializers.HistoryDeleteSerializer)
-    def bulk_delete(self,request,pk=None):
-        instance = self.get_object()
+    @action(methods=['post'],detail=False,serializer_class=serializers.HistoryDeleteSerializer)
+    def bulk_delete(self,request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         ids = serializer.validated_data['ids']
@@ -405,9 +404,8 @@ class GoodFavoritesViewSets(CreateListViewSet):
         else:
             return queryset.none()
 
-    @action(methods=['post'], detail=True, serializer_class=serializers.HistoryDeleteSerializer)
-    def bulk_delete(self, request, pk=None):
-        instance = self.get_object()
+    @action(methods=['post'], detail=False, serializer_class=serializers.HistoryDeleteSerializer)
+    def bulk_delete(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         ids = serializer.validated_data['ids']
