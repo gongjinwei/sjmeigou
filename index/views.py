@@ -1,9 +1,10 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import Response,status
+from rest_framework.decorators import action
 
 from django.db.models import Count
 
-from tools.viewset import ListOnlyViewSet,CreateListDeleteViewSet
+from tools.viewset import ListOnlyViewSet,CreateListViewSet
 
 from . import models,serializers
 from goods.serializers import FirstClassSerializer
@@ -14,6 +15,7 @@ from tools.contrib import look_up_adocode
 
 from store.models import StoreFavorites,GoodFavorites
 from order.models import StoreOrder
+from store.serializers import HistoryDeleteSerializer
 
 
 class BannerView(ModelViewSet):
@@ -90,7 +92,7 @@ class MessageOfMineView(ListOnlyViewSet):
             return Response({'data':data})
 
 
-class GoodTrackViewSets(CreateListDeleteViewSet):
+class GoodTrackViewSets(CreateListViewSet):
     queryset = models.GoodTrack.objects.filter(visible=True)
     serializer_class = serializers.GoodTrackSerializer
 
@@ -104,6 +106,15 @@ class GoodTrackViewSets(CreateListDeleteViewSet):
         else:
             return queryset.none()
 
-    def perform_destroy(self, instance):
-        instance.visible=False
-        instance.save()
+    @action(methods=['post'], detail=True, serializer_class=HistoryDeleteSerializer)
+    def bulk_delete(self, request, pk=None):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ids = serializer.validated_data['ids']
+        user_ids = list(self.queryset.filter(user=request.user).values_list('id', flat=True))
+        if set(ids).issubset(user_ids):
+            self.queryset.filter(id__in=ids).update(visible=False)
+            return Response({'code': 1000, 'msg': '删除成功'})
+        else:
+            return Response({'code': 4150, 'msg': '删除错误'})
