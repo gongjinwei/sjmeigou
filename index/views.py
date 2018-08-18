@@ -80,6 +80,10 @@ class ApplicationViewSets(ModelViewSet):
         return models.Application.objects.none()
 
 
+this_month = datetime.datetime.now().month
+last_month = this_month - 1 if this_month - 1 > 0 else this_month + 11
+
+
 class MessageOfMineView(ListOnlyViewSet):
     def list(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -88,18 +92,16 @@ class MessageOfMineView(ListOnlyViewSet):
             data = {}
             data.update(GoodFavorites.objects.filter(user=request.user).aggregate(good_favorites_num=Count('good')))
             data.update(StoreFavorites.objects.filter(user=request.user).aggregate(store_favorites_num=Count('store')))
-            data.update(models.GoodTrack.objects.filter(user=request.user).aggregate(good_tracks_num=Count('good')))
+            data.update(models.GoodTrack.objects.filter(user=request.user, visible=True,
+                                                        date__month__in=[this_month, last_month]).aggregate(
+                                                        good_tracks_num=Count('good')))
             data.update({'orders': StoreOrder.objects.filter(user=request.user, state__in=[1, 2, 3, 4, 7]).values(
                 'state', state_num=Count('store_order_no'))})
             return Response({'data': data})
 
 
-this_month = datetime.datetime.now().month
-last_month = this_month-1 if this_month-1>0 else this_month+11
-
-
 class GoodTrackViewSets(CreateListViewSet):
-    queryset = models.GoodTrack.objects.filter(visible=True,date__month__in=[this_month,last_month])
+    queryset = models.GoodTrack.objects.filter(visible=True, date__month__in=[this_month, last_month])
     serializer_class = serializers.GoodTrackSerializer
 
     def perform_create(self, serializer):
