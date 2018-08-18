@@ -43,6 +43,8 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 class GoodTrackSerializer(serializers.ModelSerializer):
     master_graph = serializers.SerializerMethodField()
+    store_id = serializers.ReadOnlyField(source='good.store.id')
+    min_price = serializers.ReadOnlyField(source='good.min_price')
 
     class Meta:
         model = models.GoodTrack
