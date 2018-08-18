@@ -2,6 +2,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import Response, status
 from rest_framework.decorators import action
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 from django.db.models import Count
 import datetime
 
@@ -103,6 +105,8 @@ class MessageOfMineView(ListOnlyViewSet):
 class GoodTrackViewSets(CreateListViewSet):
     queryset = models.GoodTrack.objects.filter(visible=True, date__month__in=[this_month, last_month])
     serializer_class = serializers.GoodTrackSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('date',)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user,date=datetime.date.today(),latest_time=datetime.datetime.now())
