@@ -8,9 +8,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from django_redis import get_redis_connection
 from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import FilterSet,BooleanFilter
+from django_filters import FilterSet, BooleanFilter
 from django.db.models.query import EmptyQuerySet
-
 
 # Create your views here.
 
@@ -19,11 +18,11 @@ from goods.models import SKU
 from store.models import GoodFavorites
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
-    ListDetailDeleteViewSet, ListRetrieveCreateViewSets,RetrieveOnlyViewSets
+    ListDetailDeleteViewSet, ListRetrieveCreateViewSets, RetrieveOnlyViewSets
 from tools.contrib import get_deliver_pay, store_order_refund, prepare_dwd_order
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
-from delivery.models import InitDwdOrder,InitGoodRefund
+from delivery.models import InitDwdOrder, InitGoodRefund
 
 client = get_redis_connection()
 
@@ -98,12 +97,15 @@ class ShoppingCarView(ListOnlyViewSet):
         serializer.is_valid(raise_exception=True)
         car_items = serializer.validated_data['car_items']
         for car_item in car_items:
-            car=car_item['car']
-            if car.shopping_car.user == request.user:
-                good=car.sku.color.good_detail
-                defaults = {'user': request.user, 'good': good,"update_time":datetime.datetime.now()}
-                GoodFavorites.objects.update_or_create(defaults=defaults,user=request.user,good=good)
+            car = car_item['car']
+            shopping_car = car.shopping_car
+            if shopping_car.user == request.user:
+                good = car.sku.color.good_detail
+                defaults = {'user': request.user, 'good': good, "update_time": datetime.datetime.now()}
+                GoodFavorites.objects.update_or_create(defaults=defaults, user=request.user, good=good)
                 car.delete()
+                if len(shopping_car.items.all()) == 0:
+                    shopping_car.delete()
         return Response({'code': 1000, 'msg': '移入成功'})
 
 
@@ -522,7 +524,7 @@ class UnifyOrderView(CreateOnlyViewSet):
 
         # 生成总的待付款信息
 
-        ret = prepare_payment(self.request.user, body,order_money, order_no, order_type='unify_order')
+        ret = prepare_payment(self.request.user, body, order_money, order_no, order_type='unify_order')
 
         return Response({"code": 1000, 'msg': '下单成功', "data": ret})
 
@@ -600,11 +602,11 @@ class StoreOrderView(ListDetailDeleteViewSet):
     @action(methods=['get'], detail=True)
     def check_delivery(self, request, pk=None):
         order = self.get_object()
-        init_order = InitDwdOrder.objects.filter(dwd_store_order__store_order=order,has_paid=True)
+        init_order = InitDwdOrder.objects.filter(dwd_store_order__store_order=order, has_paid=True)
         if init_order.exists():
             init_id = init_order[0].order_original_id
         else:
-            return Response({'code':3002,'msg':'无物流单'})
+            return Response({'code': 3002, 'msg': '无物流单'})
         te = request.query_params.get('test', '')
         te_option = {
             'accept': 'order_accept_test',
@@ -658,8 +660,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
         if request.method == 'GET':
             ret = {}
             sku_orders = store_order.sku_orders.all()
-            sku_order_serializer = serializers.SkuOrderSerializer(sku_orders,many=True)
-            ret.update({'skus':sku_order_serializer.data})
+            sku_order_serializer = serializers.SkuOrderSerializer(sku_orders, many=True)
+            ret.update({'skus': sku_order_serializer.data})
             dwd_order = getattr(store_order, 'dwd_order_info', None)
             if dwd_order and request.query_params.get('op', '') != 'backend':
                 ret['dwd_order'] = {
@@ -683,8 +685,8 @@ class StoreOrderView(ListDetailDeleteViewSet):
             op = request.query_params.get('op', '')
             if store_order.state != 4:
                 return Response({"code": 4203, "msg": '该状态不能被评价', "success": "FAIL"})
-            if op =='backend' and store_order.user !=request.user:
-                return Response({'code':4204,'msg':'您无权评价此单'})
+            if op == 'backend' and store_order.user != request.user:
+                return Response({'code': 4204, 'msg': '您无权评价此单'})
             if models.CommentContent.objects.filter(sku_order__store_order=store_order).exists():
                 return Response({'code': 4205, 'msg': '已经评价过此单了'})
             serializer.save(order=store_order)
@@ -805,7 +807,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             serializer.is_valid(raise_exception=True)
             store_order = instance.store_order
             init_order = prepare_dwd_order(store_order, request.user, op)
-            origin = '%6f,%6f' % (init_order.seller_lng,init_order.seller_lat)
+            origin = '%6f,%6f' % (init_order.seller_lng, init_order.seller_lat)
             destination = '%6f,%6f' % (init_order.consignee_lng, init_order.consignee_lat)
             A, B, C = get_deliver_pay(origin, destination)
             price = serializer.validated_data['price']
@@ -841,7 +843,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
 
                 if instance.refund_proof.filter(state=1).exists():
                     instance.refund_proof.filter(state=1).update(state=2)
-                instance.result=1
+                instance.result = 1
                 instance.save()
                 return Response({'code': 1000, 'msg': '确认收货成功'})
             if operation == 3 and instance.state in [1, 4, 5, 7]:
@@ -857,7 +859,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 return Response({'code': 1000, 'msg': '同意退货成功'})
             if operation == 2 and instance.state == 1:
                 # 发起微信退款
-                code, msg = store_order_refund(instance.store_order,instance.refund_money)
+                code, msg = store_order_refund(instance.store_order, instance.refund_money)
                 if code == 1000:
                     instance.state = 2
                     instance.result = 2
@@ -897,7 +899,7 @@ class OrderRefundView(ListRetrieveCreateViewSets):
             init_order = init_order[0]
         else:
             return Response({'code': 3002, 'msg': '无物流单'})
-        dwd_order = InitGoodRefund.objects.filter(refund=refund,state=2,user=request.user)
+        dwd_order = InitGoodRefund.objects.filter(refund=refund, state=2, user=request.user)
         ret = dwd.order_rider_position(init_order.order_original_id, dwd_order.rider_code)
         # 只有骑手位置正确返回时才返回相应结果
         if ret.get("errorCode", '') == "0" and dwd_order.exists():
@@ -916,60 +918,60 @@ class OrderRefundView(ListRetrieveCreateViewSets):
         ret.update(ori_dis)
         return Response(ret)
 
-    @action(methods=['get','post','put'], detail=True,serializer_class=serializers.RefundProofSerializer)
-    def add_proof(self,request,pk=None):
+    @action(methods=['get', 'post', 'put'], detail=True, serializer_class=serializers.RefundProofSerializer)
+    def add_proof(self, request, pk=None):
         object = self.get_object()
-        if request.method=='POST':
+        if request.method == 'POST':
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            if object.state !=4:
-                return Response({'code':3003,'msg':'此状态不允许添加凭据'})
-            if models.RefundProof.objects.filter(order_refund=object,state=1).exists():
-                return Response({'code':3004,'msg':'存在进行中的凭据'})
+            if object.state != 4:
+                return Response({'code': 3003, 'msg': '此状态不允许添加凭据'})
+            if models.RefundProof.objects.filter(order_refund=object, state=1).exists():
+                return Response({'code': 3004, 'msg': '存在进行中的凭据'})
             serializer.save(order_refund=object)
-            object.state=5
-            object.result=3
+            object.state = 5
+            object.result = 3
             object.save()
-            return Response({'code':1000,'msg':'添加成功'},status=status.HTTP_201_CREATED)
-        elif request.method =='GET':
-            instance = object.refund_proof.filter(order_refund=object,state=1)
+            return Response({'code': 1000, 'msg': '添加成功'}, status=status.HTTP_201_CREATED)
+        elif request.method == 'GET':
+            instance = object.refund_proof.filter(order_refund=object, state=1)
             if instance.exists():
                 return Response(self.get_serializer(instance[0]).data)
             else:
                 return Response()
         elif request.method == 'PUT':
             instance = object.refund_proof.filter(order_refund=object, state=1)
-            op = request.query_params.get('op','')
+            op = request.query_params.get('op', '')
             if not op and instance.exists():
-                serializer = self.get_serializer(instance[0],data=request.data,partial=False)
+                serializer = self.get_serializer(instance[0], data=request.data, partial=False)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
-                return Response({'code':1000,'msg':'修改成功'})
+                return Response({'code': 1000, 'msg': '修改成功'})
             else:
-                return Response({'code':3005,'msg':'不存在可修改凭据'})
+                return Response({'code': 3005, 'msg': '不存在可修改凭据'})
 
 
 class CommentHasImageFilter(FilterSet):
-    has_image = BooleanFilter(lookup_expr='isnull',field_name='comment_images')
+    has_image = BooleanFilter(lookup_expr='isnull', field_name='comment_images')
 
     class Meta:
         model = models.CommentContent
-        fields =['has_image']
+        fields = ['has_image']
 
 
 class UserCommentContentView(ListDetailDeleteViewSet):
     queryset = models.CommentContent.objects.all()
     serializer_class = serializers.CommentContentSerializer
     filter_backends = (DjangoFilterBackend,)
-    filter_class=CommentHasImageFilter
+    filter_class = CommentHasImageFilter
 
     def get_queryset(self):
         queryset = self.queryset
         op = self.request.query_params.get('op', '')
 
-        if op != 'backend' and self.request.user.is_authenticated and hasattr(self.request,'user'):
+        if op != 'backend' and self.request.user.is_authenticated and hasattr(self.request, 'user'):
             return queryset.filter(sku_order__store_order__user=self.request.user)
-        elif op =='backend' and self.request.user.is_authenticated and hasattr(self.request.user,'stores'):
+        elif op == 'backend' and self.request.user.is_authenticated and hasattr(self.request.user, 'stores'):
             return queryset.filter(sku_order__store_order__store=self.request.user.stores)
         else:
             return queryset.none()
@@ -981,18 +983,18 @@ class UserCommentContentView(ListDetailDeleteViewSet):
         serializer.is_valid(raise_exception=True)
         if models.CommentReply.objects.filter(comment_content=obj).exists():
             return Response({'code': 4311, 'msg': '已经回复过了'})
-        if obj.sku_order.store_order.store != getattr(self.request.user,'stores',None):
-            return Response({'code':4312,'msg':'无权回复'})
+        if obj.sku_order.store_order.store != getattr(self.request.user, 'stores', None):
+            return Response({'code': 4312, 'msg': '无权回复'})
 
         serializer.save(comment_content=obj)
-        obj.state =3
+        obj.state = 3
         obj.save()
-        return Response({'code':1000,'msg':'回复成功'}, status=status.HTTP_201_CREATED)
+        return Response({'code': 1000, 'msg': '回复成功'}, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        op = request.query_params.get('op','')
-        if op=='backend' and hasattr(instance,'comment_reply'):
+        op = request.query_params.get('op', '')
+        if op == 'backend' and hasattr(instance, 'comment_reply'):
             self.perform_destroy(instance.comment_reply)
         else:
             self.perform_destroy(instance)
@@ -1007,18 +1009,18 @@ class UserCommentContentView(ListDetailDeleteViewSet):
         op = self.request.query_params.get('op', '')
         if not op:
             comment_content.state = 2
-            is_buyer =True
+            is_buyer = True
         else:
             comment_content.state = 3
             is_buyer = False
-        serializer.save(user=request.user, comment_content=comment_content,is_buyer=is_buyer)
+        serializer.save(user=request.user, comment_content=comment_content, is_buyer=is_buyer)
 
         comment_content.save()
 
         return Response({'code': 1000, 'msg': '追评成功'})
 
     @action(methods=['get'], detail=True, serializer_class=serializers.OrderReviewSerializer)
-    def get_review(self,request,pk=None):
+    def get_review(self, request, pk=None):
         comment_content = models.CommentContent.objects.get(pk=pk)
 
         queryset = comment_content.reviews.all()
@@ -1029,4 +1031,3 @@ class UserCommentContentView(ListDetailDeleteViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-
