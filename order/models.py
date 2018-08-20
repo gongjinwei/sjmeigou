@@ -239,7 +239,7 @@ class CommentImage(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, editable=False)
     store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, editable=False)
     comment_content = models.ForeignKey(to='CommentContent', on_delete=models.CASCADE, null=True, editable=False,
-                                        related_name='')
+                                        related_name='comment_images')
     review_content = models.ForeignKey(to='OrderReview',on_delete=models.CASCADE,null=True,editable=False,related_name='review_images')
     refund = models.ForeignKey(to='OrderRefund',on_delete=models.CASCADE,null=True,editable=False,related_name='refund_images')
     refund_proof = models.ForeignKey(to='RefundProof',on_delete=models.CASCADE,null=True,editable=False,related_name='proof_images')
