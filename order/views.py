@@ -99,10 +99,11 @@ class ShoppingCarView(ListOnlyViewSet):
         car_items = serializer.validated_data['car_items']
         for car_item in car_items:
             car=car_item['car']
-            good=car.sku.color.good_detail
-            defaults = {'user': request.user, 'good': good,"update_time":datetime.datetime.now()}
-            GoodFavorites.objects.update_or_create(defaults=defaults,user=request.user,good=good)
-            car.delete()
+            if car.user == request.user:
+                good=car.sku.color.good_detail
+                defaults = {'user': request.user, 'good': good,"update_time":datetime.datetime.now()}
+                GoodFavorites.objects.update_or_create(defaults=defaults,user=request.user,good=good)
+                car.delete()
         return Response({'code': 1000, 'msg': '移入成功'})
 
 
