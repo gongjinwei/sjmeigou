@@ -7,10 +7,11 @@ from django.db.models import F
 from . import models
 from store.models import Stores
 
-from goods.models import SKU, GoodDeliver
+from goods.models import SKU, GoodDeliver,GoodDetail
 from tools.contrib import get_deliver_pay
 from platforms.models import DeliveryReason
 from delivery.models import InitGoodRefund
+
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -556,6 +557,11 @@ class RefundProofSerializer(serializers.ModelSerializer):
 
         return instance
 
+class CarItemsPKSerializer(serializers.Serializer):
+    car = serializers.PrimaryKeyRelatedField(queryset=models.ShoppingCarItem.objects.all())
+
+class AddToFavorSerializer(serializers.Serializer):
+    car_items=CarItemsPKSerializer(many=True)
 
 
 

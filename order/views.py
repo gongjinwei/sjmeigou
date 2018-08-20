@@ -11,10 +11,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet,BooleanFilter
 from django.db.models.query import EmptyQuerySet
 
+
 # Create your views here.
 
 from . import serializers, models
 from goods.models import SKU
+from store.models import GoodFavorites
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet, ListRetrieveCreateViewSets,RetrieveOnlyViewSets
@@ -89,6 +91,19 @@ class ShoppingCarView(ListOnlyViewSet):
             return models.ShoppingCar.objects.none()
 
         return queryset
+
+    @action(methods=['post'], detail=False, serializer_class=serializers.AddToFavorSerializer)
+    def add_to_favor(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        car_items = serializer.validated_data['car_items']
+        for car_item in car_items:
+            car=car_item['car']
+            good=car.sku.color.good_detail
+            defaults = {'user': request.user, 'good': good,"update_time":datetime.datetime.now()}
+            GoodFavorites.objects.update_or_create(defaults=defaults,user=request.user,good=good)
+            car.delete()
+        return Response({'code': 1000, 'msg': '移入成功'})
 
 
 class CouponView(CreateListDeleteViewSet):
@@ -604,7 +619,7 @@ class StoreOrderView(ListDetailDeleteViewSet):
     @action(methods=['get'], detail=True)
     def check_rider(self, request, pk=None):
         store_order = self.get_object()
-        init_order = InitDwdOrder.objects.filter(dwd_store_order__store_order=order, has_paid=True)
+        init_order = InitDwdOrder.objects.filter(dwd_store_order__store_order=store_order, has_paid=True)
         if init_order.exists():
             init_id = init_order[0].order_original_id
         else:
