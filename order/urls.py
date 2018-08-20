@@ -18,5 +18,6 @@ router.register('initialPayment',views.InitialPaymentView,base_name='initialPaym
 router.register('storeOrder',views.StoreOrderView,base_name='storeOrder')
 router.register('orderRefund',views.OrderRefundView,base_name='orderRefund')
 router.register('userCommentContent',views.UserCommentContentView,base_name='userCommentContent')
+router.register('shoppingConsult',views.ShoppingConsultViewSets,base_name='shoppingConsult')
 
 urlpatterns=router.urls

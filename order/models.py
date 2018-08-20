@@ -28,6 +28,14 @@ class ShoppingCar(models.Model):
     store = models.ForeignKey(to='store.Stores', on_delete=models.CASCADE)
 
 
+class ShoppingConsult(models.Model):
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,related_name='consults',editable=False)
+    price_of_added = models.DecimalField(decimal_places=2, max_digits=30, editable=False)
+    sku = models.ForeignKey(to='goods.SKU', on_delete=models.CASCADE)
+    state = models.SmallIntegerField(choices=((0, '正常'), (1, '失效')), default=0, editable=False)
+    update_time = models.DateTimeField(auto_now=True)
+
+
 class Coupon(models.Model):
     store = models.ForeignKey(to='store.Stores', on_delete=models.CASCADE, related_name='coupons', editable=False)
     name = models.CharField(max_length=10)

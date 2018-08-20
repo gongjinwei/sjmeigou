@@ -1031,3 +1031,19 @@ class UserCommentContentView(ListDetailDeleteViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class ShoppingConsultViewSets(CreateListDeleteViewSet):
+    queryset = models.ShoppingConsult.objects.filter(state=0)
+    serializer_class = serializers.ShoppingConsultSerializer
+
+    def perform_create(self, serializer):
+        price_added = serializer.validated_data['sku'].price
+        serializer.save(user=self.request.user,price_of_added=price_added,update_time=datetime.datetime.now())
+
+    def get_queryset(self):
+        queryset=self.queryset
+        if hasattr(self.request,'user') and self.request.user.is_authenticated:
+            return queryset.filter(user=self.request.user)
+        else:
+            return queryset.none()

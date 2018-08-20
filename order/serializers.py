@@ -7,11 +7,10 @@ from django.db.models import F
 from . import models
 from store.models import Stores
 
-from goods.models import SKU, GoodDeliver,GoodDetail
+from goods.models import SKU, GoodDeliver, GoodDetail
 from tools.contrib import get_deliver_pay
 from platforms.models import DeliveryReason
 from delivery.models import InitGoodRefund
-
 
 
 class ShoppingCarItemSerializer(serializers.ModelSerializer):
@@ -242,7 +241,7 @@ class SkuOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.SkuOrder
-        fields = ('sku', 'num', 'title', 'color', 'size', 'price', 'color_pic','id')
+        fields = ('sku', 'num', 'title', 'color', 'size', 'price', 'color_pic', 'id')
 
 
 class DwdOrderInfoSerializer(serializers.ModelSerializer):
@@ -250,7 +249,7 @@ class DwdOrderInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.DwdOrder
-        fields = ('dwd_status', 'status_name','arrive_time')
+        fields = ('dwd_status', 'status_name', 'arrive_time')
 
 
 class StoreOrderSerializer(serializers.ModelSerializer):
@@ -260,11 +259,11 @@ class StoreOrderSerializer(serializers.ModelSerializer):
     dwd_order_info = DwdOrderInfoSerializer(read_only=True)
     delivery_name = serializers.ReadOnlyField(source='deliver_server.server.name')
     refund = serializers.SerializerMethodField()
-    delivery_to_address =serializers.ReadOnlyField(source='unify_order.address.address')
-    delivery_to_room=serializers.ReadOnlyField(source='unify_order.address.room_no')
-    delivery_to_contact=serializers.ReadOnlyField(source='unify_order.address.contact')
-    delivery_to_phone=serializers.ReadOnlyField(source='unify_order.address.phone')
-    order_trades =serializers.SerializerMethodField()
+    delivery_to_address = serializers.ReadOnlyField(source='unify_order.address.address')
+    delivery_to_room = serializers.ReadOnlyField(source='unify_order.address.room_no')
+    delivery_to_contact = serializers.ReadOnlyField(source='unify_order.address.contact')
+    delivery_to_phone = serializers.ReadOnlyField(source='unify_order.address.phone')
+    order_trades = serializers.SerializerMethodField()
 
     class Meta:
         model = models.StoreOrder
@@ -277,12 +276,12 @@ class StoreOrderSerializer(serializers.ModelSerializer):
             models.SkuOrder.objects.create(store_order=store_order, **sku)
         return store_order
 
-    def get_refund(self,obj):
-        refunds= models.OrderRefund.objects.filter(result=1,store_order=obj)
+    def get_refund(self, obj):
+        refunds = models.OrderRefund.objects.filter(result=1, store_order=obj)
         if refunds.exists():
-            return refunds.values('id','state')
+            return refunds.values('id', 'state')
 
-    def get_order_trades(self,obj):
+    def get_order_trades(self, obj):
         if obj.paid_time and obj.order_trades.exists():
             return obj.order_trades.filter(paid_time__isnull=False).latest('paid_time').trade_no
 
@@ -362,19 +361,19 @@ class ImageCommentSerializer(serializers.Serializer):
     image = serializers.IntegerField(validators=[check_image_id])
 
     def to_representation(self, instance):
-        return {'id':instance.id,
-                'image':instance.image.url}
+        return {'id': instance.id,
+                'image': instance.image.url}
 
 
 class DwdOrderCommentSerializer(serializers.ModelSerializer):
-    satisfied_reasons=serializers.PrimaryKeyRelatedField(queryset=DeliveryReason.objects.all(),many=True)
+    satisfied_reasons = serializers.PrimaryKeyRelatedField(queryset=DeliveryReason.objects.all(), many=True)
 
     class Meta:
         model = models.DwdOrderComment
         fields = '__all__'
 
     def create(self, validated_data):
-        sats = validated_data.pop('satisfied_reasons',[])
+        sats = validated_data.pop('satisfied_reasons', [])
         instance = self.Meta.model.objects.create(**validated_data)
         for sat in sats:
             instance.satisfied_reasons.add(sat)
@@ -413,7 +412,7 @@ class CommentContentSerializer(serializers.ModelSerializer):
 
 
 class CommentContentCreateSerializer(serializers.ModelSerializer):
-    comment_images =ImageCommentSerializer(many=True)
+    comment_images = ImageCommentSerializer(many=True)
 
     def create(self, validated_data):
         order = validated_data.pop('order')
@@ -438,7 +437,7 @@ class StoreOrderCommentSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         order = validated_data['order']
-        comment_contents_data = validated_data.pop('comment_contents',[])
+        comment_contents_data = validated_data.pop('comment_contents', [])
         dwd_order_comment_data = validated_data.pop('dwd_order_comment', {})
 
         # 判断是否有点我达订单且妥投
@@ -448,7 +447,7 @@ class StoreOrderCommentSerializer(serializers.Serializer):
             DwdOrderCommentSerializer().create(dwd_order_comment_data)
 
         for comment_contents in comment_contents_data:
-            comment_contents.update({'order':order})
+            comment_contents.update({'order': order})
             CommentContentCreateSerializer().create(comment_contents)
 
         order.state = 5
@@ -458,12 +457,13 @@ class StoreOrderCommentSerializer(serializers.Serializer):
 
 
 class ChangeDwdArriveTimeSerializer(serializers.Serializer):
-    arrive_time=serializers.DateTimeField()
-    dwd_order = serializers.PrimaryKeyRelatedField(queryset=models.DwdOrder.objects.filter(user_arrive_time__isnull=True))
+    arrive_time = serializers.DateTimeField()
+    dwd_order = serializers.PrimaryKeyRelatedField(
+        queryset=models.DwdOrder.objects.filter(user_arrive_time__isnull=True))
 
 
 class OrderRefundSerializer(serializers.ModelSerializer):
-    refund_images = ImageCommentSerializer(many=True,required=False)
+    refund_images = ImageCommentSerializer(many=True, required=False)
     state_name = serializers.ReadOnlyField(source='get_state_display')
     reason_name = serializers.ReadOnlyField(source='reason.reason_name')
     sku_orders = serializers.SerializerMethodField()
@@ -476,24 +476,25 @@ class OrderRefundSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         order = validated_data.get('store_order')
-        image_data = validated_data.pop('refund_images',[])
+        image_data = validated_data.pop('refund_images', [])
         image_ids = [image['image'] for image in image_data]
         order_refund = models.OrderRefund.objects.create(**validated_data)
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(refund=order_refund)
         return order_refund
 
-    def get_sku_orders(self,obj):
+    def get_sku_orders(self, obj):
         orders = obj.store_order.sku_orders.all()
         if orders.exists():
-            return SkuOrderSerializer(orders,many=True).data
+            return SkuOrderSerializer(orders, many=True).data
 
 
 class GoodRefundStateChange(serializers.Serializer):
-    operation = serializers.ChoiceField(choices=((1,'卖家确认收货'),(2,'卖家同意退款'),(3,'卖家拒绝退款'),(4,'买家取消退款'),(5,'卖家同意退货')))
+    operation = serializers.ChoiceField(
+        choices=((1, '卖家确认收货'), (2, '卖家同意退款'), (3, '卖家拒绝退款'), (4, '买家取消退款'), (5, '卖家同意退货')))
 
 
 class OrderReviewSerializer(serializers.ModelSerializer):
-    review_images = ImageCommentSerializer(many=True,required=False)
+    review_images = ImageCommentSerializer(many=True, required=False)
 
     class Meta:
         model = models.OrderReview
@@ -502,7 +503,7 @@ class OrderReviewSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         comment_content = validated_data.get('comment_content')
         order = comment_content.sku_order.store_order
-        image_data = validated_data.pop('review_images',[])
+        image_data = validated_data.pop('review_images', [])
         image_ids = [image['image'] for image in image_data]
         order_review = models.OrderReview.objects.create(**validated_data)
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(review_content=order_review)
@@ -510,7 +511,6 @@ class OrderReviewSerializer(serializers.ModelSerializer):
 
 
 class InitGoodRefundSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = InitGoodRefund
         fields = '__all__'
@@ -521,11 +521,10 @@ class InitGoodDeliverySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InitGoodRefund
-        fields =('dwd_status', 'rider_name', 'rider_mobile', 'status_name')
+        fields = ('dwd_status', 'rider_name', 'rider_mobile', 'status_name')
 
 
 class OrderRetrieveSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.StoreOrder
         fields = '__all__'
@@ -542,7 +541,7 @@ class RefundProofSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         order_refund = validated_data.get('order_refund')
         order = order_refund.store_order
-        image_data = validated_data.pop('proof_images',[])
+        image_data = validated_data.pop('proof_images', [])
         image_ids = [image['image'] for image in image_data]
         refund_proof = models.RefundProof.objects.create(**validated_data)
         models.CommentImage.objects.filter(store_order=order, id__in=image_ids).update(refund_proof=refund_proof)
@@ -553,15 +552,27 @@ class RefundProofSerializer(serializers.ModelSerializer):
         image_ids = [image['image'] for image in image_data]
         models.CommentImage.objects.filter(refund_proof=instance).update(refund_proof=None)
         models.CommentImage.objects.filter(id__in=image_ids).update(refund_proof=instance)
-        instance = super().update(instance,validated_data)
+        instance = super().update(instance, validated_data)
 
         return instance
+
 
 class CarItemsPKSerializer(serializers.Serializer):
     car = serializers.PrimaryKeyRelatedField(queryset=models.ShoppingCarItem.objects.all())
 
+
 class AddToFavorSerializer(serializers.Serializer):
-    car_items=CarItemsPKSerializer(many=True)
+    car_items = CarItemsPKSerializer(many=True)
 
 
+class ShoppingConsultSerializer(serializers.ModelSerializer):
+    sku_data = SkuDetailSerializer(source='sku', read_only=True)
 
+    class Meta:
+        model = models.ShoppingConsult
+        fields = '__all__'
+
+    def create(self, validated_data):
+        instance,created = self.Meta.model.objects.update_or_create(defaults=validated_data,user=validated_data['user'],sku=validated_data['sku'])
+
+        return instance
