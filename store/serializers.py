@@ -92,10 +92,11 @@ class StoreMessageSerializer(serializers.ModelSerializer):
     score_avg = serializers.SerializerMethodField()
     coupons = serializers.SerializerMethodField()
     activities = serializers.SerializerMethodField()
+    had_been_favored=serializers.SerializerMethodField()
 
     class Meta:
         model = models.Stores
-        fields = ('logo', 'name', 'take_off', 'activities', 'score_avg', 'coupons','receive_address')
+        fields = ('logo', 'name', 'take_off', 'activities', 'score_avg', 'coupons','receive_address','had_been_favored')
 
     def get_score_avg(self, obj):
         orders = obj.store_orders.all()
@@ -113,6 +114,13 @@ class StoreMessageSerializer(serializers.ModelSerializer):
                                                         state=0)
 
         return [activity.act_name for activity in valid_activities]
+
+    def get_had_been_favored(self,obj):
+        request= self.context.get('request',None)
+        if request and hasattr(request,'user') and request.user.is_authenticated and models.StoreFavorites.objects.filter(user=request.user,store=obj).exists():
+            return True
+        else:
+            return False
 
 
 class StoreGoodsTypeSerializer(serializers.ModelSerializer):

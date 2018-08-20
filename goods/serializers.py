@@ -10,6 +10,7 @@ from platforms.serializers import DeliverServiceSerializer
 from platforms.models import DeliverServices
 from geopy.distance import VincentyDistance
 from order.models import CommentContent
+from store.models import GoodFavorites
 from order.serializers import CommentContentSerializer
 
 
@@ -186,6 +187,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
     after_sale_services=AfterSaleServicesSerializer(many=True)
     delivers=GoodDeliverSerializer(many=True)
     latest_comment = serializers.SerializerMethodField()
+    had_been_favored=serializers.SerializerMethodField()
 
     def get_class_name(self,obj):
         return "%s>%s" % (obj.third_class.second_class.second_class_name,obj.third_class.third_class_name)
@@ -251,6 +253,13 @@ class GoodDetailSerializer(serializers.ModelSerializer):
         content = CommentContent.objects.filter(sku_order__sku__color__good_detail=obj)
         if content.exists():
             return CommentFirstSerializer(content.latest('comment_time')).data
+
+    def get_had_been_favored(self,obj):
+        request= self.context.get('request',None)
+        if request and hasattr(request,'user') and request.user.is_authenticated and GoodFavorites.objects.filter(user=request.user,good=obj).exists():
+            return True
+        else:
+            return False
 
 
 class GoodSearchSerializer(serializers.ModelSerializer):
