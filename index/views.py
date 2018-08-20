@@ -3,6 +3,7 @@ from rest_framework.views import Response, status
 from rest_framework.decorators import action
 
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.query import QuerySet
 
 from django.db.models import Count
 import datetime
@@ -129,3 +130,4 @@ class GoodTrackViewSets(CreateListViewSet):
             return Response({'code': 1000, 'msg': '删除成功'})
         else:
             return Response({'code': 4150, 'msg': '删除错误'})
+

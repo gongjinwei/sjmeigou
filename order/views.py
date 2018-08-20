@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from django_redis import get_redis_connection
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import FilterSet,BooleanFilter
 from django.db.models.query import EmptyQuerySet
 
 # Create your views here.
@@ -932,9 +933,19 @@ class OrderRefundView(ListRetrieveCreateViewSets):
                 return Response({'code':3005,'msg':'不存在可修改凭据'})
 
 
+class CommentHasImageFilter(FilterSet):
+    has_image = BooleanFilter(lookup_expr='isnull',field_name='comment_images')
+
+    class Meta:
+        model = models.CommentContent
+        fields =['has_image']
+
+
 class UserCommentContentView(ListDetailDeleteViewSet):
     queryset = models.CommentContent.objects.all()
     serializer_class = serializers.CommentContentSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class=CommentHasImageFilter
 
     def get_queryset(self):
         queryset = self.queryset
