@@ -44,6 +44,9 @@ class ConsultTopic(models.Model):
                                               through='ConsultItem')
     create_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering=('-create_time',)
+
 
 class ConsultItem(models.Model):
     shopping_consult = models.ForeignKey(to='ShoppingConsult', on_delete=models.CASCADE)

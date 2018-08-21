@@ -16,6 +16,7 @@ from django.db.models.query import EmptyQuerySet
 from . import serializers, models
 from goods.models import SKU
 from store.models import GoodFavorites
+from store.serializers import HistoryDeleteSerializer
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet, ListRetrieveCreateViewSets, RetrieveOnlyViewSets
@@ -1047,6 +1048,18 @@ class ShoppingConsultViewSets(CreateListDeleteViewSet):
             return queryset.filter(user=self.request.user)
         else:
             return queryset.none()
+
+    @action(methods=['post'], detail=False, serializer_class=HistoryDeleteSerializer)
+    def bulk_delete(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ids = serializer.validated_data['ids']
+        user_ids = list(self.queryset.filter(user=request.user).values_list('id', flat=True))
+        if set(ids).issubset(user_ids):
+            self.queryset.filter(id__in=ids).delete()
+            return Response({'code': 1000, 'msg': '删除成功'})
+        else:
+            return Response({'code': 4150, 'msg': '删除错误'})
 
 
 class ConsultTopicView(ModelViewSet):
