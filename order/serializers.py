@@ -573,6 +573,29 @@ class ShoppingConsultSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        instance,created = self.Meta.model.objects.update_or_create(defaults=validated_data,user=validated_data['user'],sku=validated_data['sku'])
+        instance, created = self.Meta.model.objects.update_or_create(defaults=validated_data,
+                                                                     user=validated_data['user'],
+                                                                     sku=validated_data['sku'])
 
+        return instance
+
+
+class ShoppingConsultPKSerializer(serializers.Serializer):
+    pk = serializers.PrimaryKeyRelatedField(queryset=models.ShoppingConsult.objects.all())
+
+
+class ConsultTopicSerializer(serializers.ModelSerializer):
+    topics = ShoppingConsultPKSerializer(many=True, required=False)
+
+    class Meta:
+        model = models.ConsultTopic
+        exclude=('user',)
+
+    def create(self, validated_data):
+        topics=validated_data.pop('topics',[])
+        instance = self.Meta.model.objects.create(**validated_data)
+
+        for topic in topics:
+            models.ConsultItem.objects.create(consult_topic=instance,shopping_consult=topic['pk'])
+        instance.save()
         return instance

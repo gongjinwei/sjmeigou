@@ -29,11 +29,41 @@ class ShoppingCar(models.Model):
 
 
 class ShoppingConsult(models.Model):
-    user = models.ForeignKey(to=User,on_delete=models.CASCADE,related_name='consults',editable=False)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='consults', editable=False)
     price_of_added = models.DecimalField(decimal_places=2, max_digits=30, editable=False)
     sku = models.ForeignKey(to='goods.SKU', on_delete=models.CASCADE)
     state = models.SmallIntegerField(choices=((0, '正常'), (1, '失效')), default=0, editable=False)
     update_time = models.DateTimeField(auto_now=True)
+
+
+class ConsultTopic(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='consult_topics', editable=False)
+    title = models.CharField(max_length=128)
+    brief = models.CharField(max_length=1024)
+    shopping_consult = models.ManyToManyField(to='ShoppingConsult',
+                                              through='ConsultItem')
+    create_time = models.DateTimeField(auto_now_add=True)
+
+
+class ConsultItem(models.Model):
+    shopping_consult = models.ForeignKey(to='ShoppingConsult', on_delete=models.CASCADE)
+    consult_topic = models.ForeignKey(to='ConsultTopic', on_delete=models.CASCADE)
+
+
+class ConsultTopicComment(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
+    topic = models.ForeignKey(to='ConsultTopic',on_delete=models.CASCADE,related_name='topic_comments')
+    content = models.CharField(max_length=256)
+    update_time = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering=('-update_time',)
+
+
+class ConsultItemToLaud(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
+    consult_item = models.ForeignKey(to='ConsultItem', on_delete=models.CASCADE, related_name='lauds')
+    to_laud = models.SmallIntegerField(choices=((0, '未点赞'), (1, '点赞')))
 
 
 class Coupon(models.Model):
@@ -163,8 +193,8 @@ class UnifyOrder(models.Model):
     address = models.ForeignKey(to='ReceiveAddress', on_delete=models.SET_NULL, null=True)
     update_time = models.DateTimeField(auto_now=True)
     state = models.SmallIntegerField(choices=(
-    (1, '待付款'), (2, '待发货'), (3, '配送中'), (4, '配送完成待评价'), (5, '交易完成'), (6, '退款成功'), (7, '待退款'), (8, '订单已取消'),
-    (9, '已完成用户删除'), (10, '部分支付')), editable=False, default=1)
+        (1, '待付款'), (2, '待发货'), (3, '配送中'), (4, '配送完成待评价'), (5, '交易完成'), (6, '退款成功'), (7, '待退款'), (8, '订单已取消'),
+        (9, '已完成用户删除'), (10, '部分支付')), editable=False, default=1)
 
 
 class StoreOrder(models.Model):
@@ -173,14 +203,14 @@ class StoreOrder(models.Model):
     store_order_no = models.CharField(primary_key=True, editable=False, max_length=18)
     coupon = models.ForeignKey(to='GetCoupon', on_delete=models.DO_NOTHING, null=True)
     activity = models.ForeignKey(to='StoreActivity', on_delete=models.DO_NOTHING, null=True)
-    store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING,related_name='store_orders')
+    store = models.ForeignKey(to='store.Stores', on_delete=models.DO_NOTHING, related_name='store_orders')
     account = models.DecimalField(editable=False, decimal_places=2, max_digits=30)
     account_paid = models.DecimalField(editable=False, decimal_places=2, max_digits=30, default=Decimal(0.00))
     paid_time = models.DateTimeField(editable=False, null=True)
     state = models.SmallIntegerField(choices=(
-    (1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '已完成待评价'), (5, '交易完成'), (6, '退款成功'), (7, '退款中'), (8, '订单已取消'),
-    (9, '已完成用户删除')),
-                                     editable=False, default=1)
+        (1, '待付款'), (2, '待发货'), (3, '待收货'), (4, '已完成待评价'), (5, '交易完成'), (6, '退款成功'), (7, '退款中'), (8, '订单已取消'),
+        (9, '已完成用户删除')),
+        editable=False, default=1)
     deliver_server = models.ForeignKey(to='goods.GoodDeliver', on_delete=models.DO_NOTHING, null=True)
     deliver_payment = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00), editable=False)
     deliver_distance = models.FloatField(help_text='配送距离', null=True, editable=False)
@@ -229,16 +259,18 @@ class InitiatePayment(models.Model):
 
 
 class CommentContent(models.Model):
-    sku_order = models.OneToOneField(to='SkuOrder',on_delete=models.CASCADE)
+    sku_order = models.OneToOneField(to='SkuOrder', on_delete=models.CASCADE)
     is_anonymous = models.BooleanField(default=False)
-    comment = models.CharField(max_length=255,null=True)
+    comment = models.CharField(max_length=255, null=True)
     score = models.SmallIntegerField(choices=((1, '很差'), (2, '一般'), (3, '满意'), (4, '非常满意'), (5, '完美')))
     comment_time = models.DateTimeField(auto_now_add=True)
-    state = models.SmallIntegerField(choices=((1, '买家已评价'), (2, '买家追评'),(3,'卖家已处理'),(4,'不可见')), default=1, editable=False)
+    state = models.SmallIntegerField(choices=((1, '买家已评价'), (2, '买家追评'), (3, '卖家已处理'), (4, '不可见')), default=1,
+                                     editable=False)
 
 
 class CommentReply(models.Model):
-    comment_content = models.OneToOneField(to='CommentContent',on_delete=models.CASCADE,editable=False,related_name='comment_reply')
+    comment_content = models.OneToOneField(to='CommentContent', on_delete=models.CASCADE, editable=False,
+                                           related_name='comment_reply')
     comment = models.CharField(max_length=255, null=True)
     comment_time = models.DateTimeField(auto_now_add=True)
 
@@ -248,23 +280,26 @@ class CommentImage(models.Model):
     store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, editable=False)
     comment_content = models.ForeignKey(to='CommentContent', on_delete=models.CASCADE, null=True, editable=False,
                                         related_name='comment_images')
-    review_content = models.ForeignKey(to='OrderReview',on_delete=models.CASCADE,null=True,editable=False,related_name='review_images')
-    refund = models.ForeignKey(to='OrderRefund',on_delete=models.CASCADE,null=True,editable=False,related_name='refund_images')
-    refund_proof = models.ForeignKey(to='RefundProof',on_delete=models.CASCADE,null=True,editable=False,related_name='proof_images')
+    review_content = models.ForeignKey(to='OrderReview', on_delete=models.CASCADE, null=True, editable=False,
+                                       related_name='review_images')
+    refund = models.ForeignKey(to='OrderRefund', on_delete=models.CASCADE, null=True, editable=False,
+                               related_name='refund_images')
+    refund_proof = models.ForeignKey(to='RefundProof', on_delete=models.CASCADE, null=True, editable=False,
+                                     related_name='proof_images')
     image = models.ImageField(upload_to='sjmeigou/order/comment/%Y%m%d/')
     add_time = models.DateTimeField(auto_now_add=True)
 
 
 class OrderTrade(models.Model):
-    store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, null=True,related_name='order_trades')
+    store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, null=True, related_name='order_trades')
     unify_order = models.ForeignKey(to='UnifyOrder', on_delete=models.CASCADE, null=True)
     recharge = models.ForeignKey(to='platforms.AccountRecharge', on_delete=models.CASCADE, null=True)
-    good_refund = models.ForeignKey(to='delivery.InitDwdOrder',on_delete=models.CASCADE,null=True)
+    good_refund = models.ForeignKey(to='delivery.InitDwdOrder', on_delete=models.CASCADE, null=True)
     trade_no = models.CharField(primary_key=True, max_length=30)
     paid_time = models.DateTimeField(null=True, editable=False)
     paid_money = models.DecimalField(default=Decimal(0.00), max_digits=30, decimal_places=2, editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
-    deal_time = models.DateTimeField(null=True,editable=False)
+    deal_time = models.DateTimeField(null=True, editable=False)
 
     @property
     def trade_number(self):
@@ -280,11 +315,11 @@ class OrderTrade(models.Model):
 class DwdOrder(models.Model):
     store_order = models.OneToOneField(to='StoreOrder', on_delete=models.DO_NOTHING, related_name='dwd_order_info')
     dwd_status = models.SmallIntegerField(choices=(
-    (0, '系统派单中'), (3, '骑手已转单'), (5, '骑手已接单'), (10, '骑手已到店，等待商家发货'), (15, '骑手已离店，配送途中'), (98, '订单出现异常，骑手无法完成'),
-    (99, '订单已取消'), (100, '骑手已妥投')), null=True)
-    accept_time = models.DateTimeField(null=True,editable=False)
-    user_arrive_time = models.DateTimeField(null=True,editable=False)
-    arrive_time = models.DateTimeField(null=True,editable=False)
+        (0, '系统派单中'), (3, '骑手已转单'), (5, '骑手已接单'), (10, '骑手已到店，等待商家发货'), (15, '骑手已离店，配送途中'), (98, '订单出现异常，骑手无法完成'),
+        (99, '订单已取消'), (100, '骑手已妥投')), null=True)
+    accept_time = models.DateTimeField(null=True, editable=False)
+    user_arrive_time = models.DateTimeField(null=True, editable=False)
+    arrive_time = models.DateTimeField(null=True, editable=False)
     rider_name = models.CharField(max_length=50, null=True)
     rider_code = models.CharField(max_length=20, null=True)
     rider_mobile = models.CharField(max_length=12, null=True)
@@ -294,11 +329,12 @@ class DwdOrder(models.Model):
 
 
 class DwdOrderComment(models.Model):
-    dwd_order=models.OneToOneField(to='DwdOrder',on_delete=models.CASCADE,related_name='dwd_order_comment',editable=False)
+    dwd_order = models.OneToOneField(to='DwdOrder', on_delete=models.CASCADE, related_name='dwd_order_comment',
+                                     editable=False)
     is_satisfied = models.BooleanField(default=True)
-    satisfied_reasons=models.ManyToManyField(to='platforms.DeliveryReason')
+    satisfied_reasons = models.ManyToManyField(to='platforms.DeliveryReason')
     comment_time = models.DateTimeField(auto_now_add=True)
-    has_comment=models.BooleanField(default=False,editable=False)
+    has_comment = models.BooleanField(default=False, editable=False)
 
 
 class OrderRefundResult(models.Model):
@@ -322,7 +358,7 @@ class OrderRefundResult(models.Model):
     cash_fee = models.IntegerField(null=True, blank=True)
     cash_fee_type = models.CharField(max_length=16, null=True, blank=True)
     cash_refund_fee = models.IntegerField(null=True)
-    refund_channel = models.CharField(max_length=32,null=True)
+    refund_channel = models.CharField(max_length=32, null=True)
     coupon_type_0 = models.CharField(max_length=8, null=True, blank=True)
     coupon_refund_fee = models.IntegerField(null=True)
     coupon_refund_fee_0 = models.IntegerField(null=True)
@@ -332,38 +368,39 @@ class OrderRefundResult(models.Model):
 
 
 class OrderReview(models.Model):
-    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
-    is_buyer = models.BooleanField(default=True,editable=False)
-    comment_content = models.ForeignKey(to='CommentContent',on_delete=models.CASCADE,editable=False,related_name='reviews')
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
+    is_buyer = models.BooleanField(default=True, editable=False)
+    comment_content = models.ForeignKey(to='CommentContent', on_delete=models.CASCADE, editable=False,
+                                        related_name='reviews')
     content = models.CharField(max_length=255)
-    state = models.SmallIntegerField(choices=((1,'正常'),(2,'不可见')),default=1,editable=False)
-    create_time= models.DateTimeField(auto_now_add=True)
+    state = models.SmallIntegerField(choices=((1, '正常'), (2, '不可见')), default=1, editable=False)
+    create_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering=('create_time',)
+        ordering = ('create_time',)
 
 
 class OrderRefund(models.Model):
-    store_order = models.ForeignKey(to='StoreOrder',on_delete=models.CASCADE,related_name='refunds')
+    store_order = models.ForeignKey(to='StoreOrder', on_delete=models.CASCADE, related_name='refunds')
     refund_type = models.SmallIntegerField(choices=((1, '仅退款'), (2, '退货退款')))
-    good_state = models.SmallIntegerField(choices=((1,'未收到货'),(2,'已收到货')))
-    reason = models.ForeignKey(to='platforms.RefundReason',on_delete=models.CASCADE)
-    refund_money = models.DecimalField(help_text='退款金额（元）',decimal_places=2,max_digits=30)
-    refund_desc = models.CharField(max_length=1024,null=True)
-    state = models.SmallIntegerField(choices=((1,'等待卖家退款'),(2,'退款成功'),(3,'卖家拒绝退款'),(4,'等待买家发货'),(5,'等待商家收货'),(6,'取消退款'),(7,'等待卖家同意退货')),editable=False)
-    result = models.SmallIntegerField(choices=((1,'进行中'),(2,'关闭'),(3,'存在单据')),editable=False,default=1)
-    create_time =models.DateTimeField(auto_now_add=True)
+    good_state = models.SmallIntegerField(choices=((1, '未收到货'), (2, '已收到货')))
+    reason = models.ForeignKey(to='platforms.RefundReason', on_delete=models.CASCADE)
+    refund_money = models.DecimalField(help_text='退款金额（元）', decimal_places=2, max_digits=30)
+    refund_desc = models.CharField(max_length=1024, null=True)
+    state = models.SmallIntegerField(
+        choices=((1, '等待卖家退款'), (2, '退款成功'), (3, '卖家拒绝退款'), (4, '等待买家发货'), (5, '等待商家收货'), (6, '取消退款'), (7, '等待卖家同意退货')),
+        editable=False)
+    result = models.SmallIntegerField(choices=((1, '进行中'), (2, '关闭'), (3, '存在单据')), editable=False, default=1)
+    create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
 
 
 class RefundProof(models.Model):
-    order_refund = models.ForeignKey(to='OrderRefund',on_delete=models.CASCADE,editable=False,related_name='refund_proof')
+    order_refund = models.ForeignKey(to='OrderRefund', on_delete=models.CASCADE, editable=False,
+                                     related_name='refund_proof')
     delivery_company = models.CharField(max_length=100)
     delivery_no = models.CharField(max_length=50)
     contract_phone = models.CharField(max_length=12)
-    refund_desc = models.CharField(max_length=128,null=True)
-    state = models.SmallIntegerField(choices=((1,'退货进行中'),(2,'退货成功')),editable=False,default=1)
+    refund_desc = models.CharField(max_length=128, null=True)
+    state = models.SmallIntegerField(choices=((1, '退货进行中'), (2, '退货成功')), editable=False, default=1)
     create_time = models.DateTimeField(auto_now_add=True)
-
-
-

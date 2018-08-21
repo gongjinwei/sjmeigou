@@ -1047,3 +1047,18 @@ class ShoppingConsultViewSets(CreateListDeleteViewSet):
             return queryset.filter(user=self.request.user)
         else:
             return queryset.none()
+
+
+class ConsultTopicView(ModelViewSet):
+    queryset = models.ConsultTopic.objects.all()
+    serializer_class = serializers.ConsultTopicSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        queryset=self.queryset
+        if hasattr(self.request,'user') and self.request.user.is_authenticated:
+            return queryset.filter(user=self.request.user)
+        else:
+            return queryset.none()
