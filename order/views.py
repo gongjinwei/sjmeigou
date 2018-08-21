@@ -1075,3 +1075,16 @@ class ConsultTopicView(ModelViewSet):
             return queryset.filter(user=self.request.user)
         else:
             return queryset.none()
+
+    @action(methods=['post'], detail=True,serializer_class=serializers.ConsultToLaudSerializer)
+    def to_laud(self,request,pk=None):
+        obj = self.get_object()
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        item = serializer.validated_data['cousult_item']
+        if item.consult_topic == obj:
+            serializer.save(user=self.request.user)
+            return Response({'code':1000,'msg':'OK'})
+        else:
+            return Response({'code':4155,'msg':'不在允许范围'})

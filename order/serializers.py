@@ -599,3 +599,17 @@ class ConsultTopicSerializer(serializers.ModelSerializer):
             models.ConsultItem.objects.create(consult_topic=instance,shopping_consult=topic['pk'])
         instance.save()
         return instance
+
+
+class ConsultToLaudSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ConsultItemToLaud
+        fields = '__all__'
+
+    def create(self, validated_data):
+        instance,created=self.Meta.model.objects.get_or_create(defaults=validated_data,**validated_data)
+        if not created:
+            instance.to_laud = 1-instance.to_laud
+            instance.save()
+        return instance
