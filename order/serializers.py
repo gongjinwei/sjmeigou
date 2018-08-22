@@ -595,6 +595,7 @@ class ShoppingConsultPicSerializer(serializers.ModelSerializer):
 class ConsultTopicSerializer(serializers.ModelSerializer):
     topics = ShoppingConsultPKSerializer(many=True, required=False)
     shopping_consult = ShoppingConsultPicSerializer(many=True,read_only=True)
+    participants = serializers.SerializerMethodField()
 
     class Meta:
         model = models.ConsultTopic
@@ -608,6 +609,14 @@ class ConsultTopicSerializer(serializers.ModelSerializer):
             models.ConsultItem.objects.create(consult_topic=instance,shopping_consult=topic['pk'])
         instance.save()
         return instance
+
+    def get_participants(self,obj):
+        # 点赞人
+        user_set=set([item.user for item in models.ConsultItemToLaud.objects.filter(to_laud=1,consult_item__consult_topic=obj)])
+        # 评价人
+        for comment in models.ConsultTopicComment.objects.filter(topic=obj):
+            user_set.add(comment.user)
+        return len(user_set)
 
 
 class ConsultToLaudSerializer(serializers.ModelSerializer):
