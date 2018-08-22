@@ -5,10 +5,12 @@ from django.db.models import F, Q
 
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import get_object_or_404
 from rest_framework.decorators import action
 from django_redis import get_redis_connection
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet, BooleanFilter
+from django.db.models import Sum
 from django.db.models.query import EmptyQuerySet
 
 # Create your views here.
@@ -1089,12 +1091,63 @@ class ConsultTopicView(ModelViewSet):
         else:
             return Response({'code':4155,'msg':'不在允许范围'})
 
-    @action(methods=['post'], detail=True, serializer_class=serializers.ConsultTopicCommentSerializer)
-    def add_comment(self,request,pk=None):
-        obj = self.get_object()
+    @action(methods=['get','post'], detail=True, serializer_class=serializers.ConsultTopicCommentSerializer)
+    def comment(self,request,pk=None):
+        if request.method=='POST':
+            if not hasattr(request,'user') or not request.user.is_authenticated:
+                return Response({'code':4161,'msg':'必须先登录才能评论'})
+            obj = self.customer_get_object()
 
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-        serializer.save(user=request.user,topic=obj)
-        return Response({'code':1000,'msg':'OK'})
+            serializer.save(user=request.user,topic=obj)
+            return Response({'code':1000,'msg':'OK'})
+
+        elif request.method =='GET':
+            obj=self.customer_get_object()
+            queryset=models.ConsultTopicComment.objects.filter(topic=obj)
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+
+    @action(methods=['get'], detail=True)
+    def get_laud(self,request,pk=None):
+        obj=self.customer_get_object()
+        shopping_consults=obj.shopping_consult.all()
+        ret={}
+        ret['lauds']=[]
+        for shopping_consult in shopping_consults:
+            tmp_dict={}
+            consult_item=models.ConsultItem.objects.get(shopping_consult=shopping_consult,consult_topic=obj)
+            tmp_dict.update({
+                'consult':shopping_consult.id,
+                'pic':shopping_consult.sku.color.color_pic,
+                'good_id':shopping_consult.sku.color.good_detail.id
+            })
+            if models.ConsultItemToLaud.objects.filter(consult_item=consult_item).exists():
+                tmp_dict.update(models.ConsultItemToLaud.objects.filter(consult_item=consult_item).aggregate(laud_num=Sum('to_laud')))
+            else:
+                tmp_dict.update({'laud_num':0})
+            ret['lauds'].append(tmp_dict)
+        ret.update({'title':obj.title,'brief':obj.brief})
+        return Response(ret)
+
+    def customer_get_object(self):
+        queryset = self.queryset
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        assert lookup_url_kwarg in self.kwargs, (
+                'Expected view %s to be called with a URL keyword argument '
+                'named "%s". Fix your URL conf, or set the `.lookup_field` '
+                'attribute on the view correctly.' %
+                (self.__class__.__name__, lookup_url_kwarg)
+        )
+
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        obj = get_object_or_404(queryset, **filter_kwargs)
+        return obj

@@ -45,28 +45,32 @@ class ConsultTopic(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering=('-create_time',)
+        ordering = ('-create_time',)
 
 
 class ConsultItem(models.Model):
     shopping_consult = models.ForeignKey(to='ShoppingConsult', on_delete=models.CASCADE)
-    consult_topic = models.ForeignKey(to='ConsultTopic', on_delete=models.CASCADE,related_name='consult_items')
+    consult_topic = models.ForeignKey(to='ConsultTopic', on_delete=models.CASCADE, related_name='consult_items')
+
+    class Meta:
+        unique_together = ('shopping_consult', 'consult_topic')
 
 
 class ConsultTopicComment(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
-    topic = models.ForeignKey(to='ConsultTopic',on_delete=models.CASCADE,related_name='topic_comments',editable=False)
+    topic = models.ForeignKey(to='ConsultTopic', on_delete=models.CASCADE, related_name='topic_comments',
+                              editable=False)
     content = models.CharField(max_length=256)
     update_time = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering=('-update_time',)
+        ordering = ('-update_time',)
 
 
 class ConsultItemToLaud(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
     consult_item = models.ForeignKey(to='ConsultItem', on_delete=models.CASCADE, related_name='lauds')
-    to_laud = models.SmallIntegerField(choices=((0, '未点赞'), (1, '点赞')),editable=False,default=1)
+    to_laud = models.SmallIntegerField(choices=((0, '未点赞'), (1, '点赞')), editable=False, default=1)
 
 
 class Coupon(models.Model):
