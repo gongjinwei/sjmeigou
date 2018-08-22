@@ -625,9 +625,18 @@ class ConsultToLaudSerializer(serializers.ModelSerializer):
 
 
 class ConsultTopicCommentSerializer(serializers.ModelSerializer):
+    is_myself = serializers.SerializerMethodField()
+
     class Meta:
         model = models.ConsultTopicComment
         exclude = ('user',)
+
+    def get_is_myself(self,obj):
+        request= self.context['request']
+        if hasattr(request,'user') and request.user.is_authenticated:
+            return request.user ==obj.user
+        else:
+            return False
 
 
 
