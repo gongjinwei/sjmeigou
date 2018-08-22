@@ -1087,7 +1087,12 @@ class ConsultTopicView(ModelViewSet):
         item = serializer.validated_data['consult_item']
         if item.consult_topic == obj:
             serializer.save(user=self.request.user)
-            return Response({'code':1000,'msg':'OK'})
+            ret={'code':1000,'msg':'OK'}
+            if models.ConsultItemToLaud.objects.filter(consult_item=item).exists():
+                ret.update(models.ConsultItemToLaud.objects.filter(consult_item=item).aggregate(laud_num=Sum('to_laud')))
+            else:
+                ret.update({'laud_num':0})
+            return Response(ret)
         else:
             return Response({'code':4155,'msg':'不在允许范围'})
 
