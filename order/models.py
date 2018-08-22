@@ -55,7 +55,7 @@ class ConsultItem(models.Model):
 
 class ConsultTopicComment(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
-    topic = models.ForeignKey(to='ConsultTopic',on_delete=models.CASCADE,related_name='topic_comments')
+    topic = models.ForeignKey(to='ConsultTopic',on_delete=models.CASCADE,related_name='topic_comments',editable=False)
     content = models.CharField(max_length=256)
     update_time = models.DateTimeField(auto_now=True)
 
@@ -66,7 +66,7 @@ class ConsultTopicComment(models.Model):
 class ConsultItemToLaud(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, editable=False)
     consult_item = models.ForeignKey(to='ConsultItem', on_delete=models.CASCADE, related_name='lauds')
-    to_laud = models.SmallIntegerField(choices=((0, '未点赞'), (1, '点赞')),editable=False,default=0)
+    to_laud = models.SmallIntegerField(choices=((0, '未点赞'), (1, '点赞')),editable=False,default=1)
 
 
 class Coupon(models.Model):

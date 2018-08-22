@@ -584,8 +584,17 @@ class ShoppingConsultPKSerializer(serializers.Serializer):
     pk = serializers.PrimaryKeyRelatedField(queryset=models.ShoppingConsult.objects.all())
 
 
+class ShoppingConsultPicSerializer(serializers.ModelSerializer):
+    pic = serializers.ReadOnlyField(source='sku.color.color_pic')
+
+    class Meta:
+        model = models.ShoppingConsult
+        fields = ('pic',)
+
+
 class ConsultTopicSerializer(serializers.ModelSerializer):
     topics = ShoppingConsultPKSerializer(many=True, required=False)
+    shopping_consult = ShoppingConsultPicSerializer(many=True,read_only=True)
 
     class Meta:
         model = models.ConsultTopic
@@ -613,3 +622,11 @@ class ConsultToLaudSerializer(serializers.ModelSerializer):
             instance.to_laud = 1-instance.to_laud
             instance.save()
         return instance
+
+
+class ConsultTopicCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ConsultTopicComment
+        exclude = ('user',)
+
+

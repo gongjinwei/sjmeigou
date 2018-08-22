@@ -1082,9 +1082,19 @@ class ConsultTopicView(ModelViewSet):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        item = serializer.validated_data['cousult_item']
+        item = serializer.validated_data['consult_item']
         if item.consult_topic == obj:
             serializer.save(user=self.request.user)
             return Response({'code':1000,'msg':'OK'})
         else:
             return Response({'code':4155,'msg':'不在允许范围'})
+
+    @action(methods=['post'], detail=True, serializer_class=serializers.ConsultTopicCommentSerializer)
+    def add_comment(self,request,pk=None):
+        obj = self.get_object()
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save(user=request.user,topic=obj)
+        return Response({'code':1000,'msg':'OK'})
