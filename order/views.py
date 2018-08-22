@@ -1116,7 +1116,7 @@ class ConsultTopicView(ModelViewSet):
             return Response(serializer.data)
 
     @action(methods=['get'], detail=True)
-    def get_laud(self,request,pk=None):
+    def get_data(self,request,pk=None):
         obj=self.customer_get_object()
         shopping_consults=obj.shopping_consult.all()
         ret={}
