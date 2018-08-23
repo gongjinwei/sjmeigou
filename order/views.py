@@ -1129,10 +1129,15 @@ class ConsultTopicView(ModelViewSet):
         for shopping_consult in shopping_consults:
             tmp_dict={}
             consult_item=models.ConsultItem.objects.get(shopping_consult=shopping_consult,consult_topic=obj)
+            if hasattr(request,'user') and request.user.is_authenticated:
+                to_laud=models.ConsultItemToLaud.objects.get(user=request.user,consult_item=consult_item).to_laud
+            else:
+                to_laud =0
             tmp_dict.update({
                 'consult':shopping_consult.id,
                 'pic':shopping_consult.sku.color.color_pic,
-                'good_id':shopping_consult.sku.color.good_detail.id
+                'good_id':shopping_consult.sku.color.good_detail.id,
+                'to_laud':to_laud
             })
             if models.ConsultItemToLaud.objects.filter(consult_item=consult_item).exists():
                 tmp_dict.update(models.ConsultItemToLaud.objects.filter(consult_item=consult_item).aggregate(laud_num=Sum('to_laud')))
