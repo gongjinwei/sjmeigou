@@ -15,3 +15,4 @@ class BasicInfo(models.Model):
     transparent_pic = models.OneToOneField(on_delete=models.CASCADE,to='ActivityImage',related_name='trans_bg')
     profit = models.CharField(max_length=9)
     is_imported = models.BooleanField(default=False)
+    purchase_limit=models.SmallIntegerField(default=0)

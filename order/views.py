@@ -1134,7 +1134,7 @@ class ConsultTopicView(ModelViewSet):
             else:
                 to_laud =0
             tmp_dict.update({
-                'consult':shopping_consult.id,
+                'consult_item':consult_item.id,
                 'pic':shopping_consult.sku.color.color_pic,
                 'good_id':shopping_consult.sku.color.good_detail.id,
                 'to_laud':to_laud
