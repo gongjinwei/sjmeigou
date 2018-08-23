@@ -635,6 +635,8 @@ class ConsultToLaudSerializer(serializers.ModelSerializer):
 
 class ConsultTopicCommentSerializer(serializers.ModelSerializer):
     is_myself = serializers.SerializerMethodField()
+    avatar_url = serializers.ReadOnlyField(source='user.userinfo.avatarUrl')
+    nick_name = serializers.ReadOnlyField(source='user.userinfo.nickName')
 
     class Meta:
         model = models.ConsultTopicComment
