@@ -11,7 +11,7 @@ class ActivityImage(models.Model):
 
 class BasicInfo(models.Model):
     title = models.CharField(max_length=14)
-    white_bg_pic= models.OneToOneField(on_delete=models.CASCADE,to='ActivityImage')
-    transparent_pic = models.OneToOneField(on_delete=models.CASCADE,to='ActivityImage')
+    white_bg_pic= models.OneToOneField(on_delete=models.CASCADE,to='ActivityImage',related_name='white_bg')
+    transparent_pic = models.OneToOneField(on_delete=models.CASCADE,to='ActivityImage',related_name='trans_bg')
     profit = models.CharField(max_length=9)
     is_imported = models.BooleanField(default=False)
