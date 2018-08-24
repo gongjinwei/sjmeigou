@@ -434,8 +434,8 @@ class BargainPriceViewSets(ModelViewSet):
         obj = customer_get_object(self)
         activity = obj.activity
         # 每人限砍一次
-        if models.UserBargain.objects.filter(user=request.user, activity=activity).exists():
-            return Response({'code': 4171, 'msg': '您已经砍过了'})
+        # if models.UserBargain.objects.filter(user=request.user, activity=activity).exists():
+        #     return Response({'code': 4171, 'msg': '您已经砍过了'})
         now = datetime.datetime.now()
         if obj.from_time>=now:
             return Response({'code':4173,'msg':'活动还未开始'})
