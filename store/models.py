@@ -107,6 +107,7 @@ class BargainPrice(models.Model):
 class UserBargain(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.CASCADE)
     activity = models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='user_bargains')
+    price_now = models.FloatField()
     create_time = models.DateTimeField(auto_now_add=True)
 
 

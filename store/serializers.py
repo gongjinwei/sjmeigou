@@ -259,4 +259,10 @@ class BargainPriceSerializer(serializers.ModelSerializer):
         return instance
 
 
+class UserBargainSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserBargain
+        fields='__all__'
+
+
 
