@@ -4,6 +4,7 @@ import requests
 from django.conf import settings
 from django.core.cache import cache
 from weixin.pay import WeixinPayError
+from rest_framework.generics import get_object_or_404
 
 gd_key = getattr(settings, 'GDKEY')
 
@@ -130,3 +131,19 @@ def prepare_dwd_order(store_order, user, op=None):
         })
     dwdorder.__dict__.update(temp_dict)
     return dwdorder
+
+
+def customer_get_object(self):
+    queryset = self.queryset
+    lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+    assert lookup_url_kwarg in self.kwargs, (
+            'Expected view %s to be called with a URL keyword argument '
+            'named "%s". Fix your URL conf, or set the `.lookup_field` '
+            'attribute on the view correctly.' %
+            (self.__class__.__name__, lookup_url_kwarg)
+    )
+
+    filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+    obj = get_object_or_404(queryset, **filter_kwargs)
+    return obj

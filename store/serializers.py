@@ -1,8 +1,8 @@
 # -*- coding:UTF-8 -*-
-import datetime
+import datetime,random
 from itertools import groupby
-
 from rest_framework import serializers
+
 
 from django.db.models import Avg,Count
 
@@ -11,6 +11,7 @@ from geopy.distance import VincentyDistance
 from . import models
 from order.models import CommentContent, Coupon, StoreActivity,SkuOrder
 from goods.models import GoodDetail
+from tools.contrib import customer_get_object
 
 
 class StoresSerializer(serializers.ModelSerializer):
@@ -242,9 +243,20 @@ class BargainActivitySerializer(serializers.ModelSerializer):
         model = models.BargainActivity
         fields = '__all__'
 
+
 class BargainPriceSerializer(serializers.ModelSerializer):
     activity = BargainActivitySerializer()
 
     class Meta:
         model = models.BargainPrice
         fields = '__all__'
+
+    def create(self, validated_data):
+        activity_data = validated_data.pop('activity')
+        activity = models.BargainActivity.objects.create(**activity_data)
+        validated_data.update({'activity':activity})
+        instance = super().create(validated_data)
+        return instance
+
+
+

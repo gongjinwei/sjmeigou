@@ -5,7 +5,7 @@ from django.db.models import F, Q
 
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import get_object_or_404
+
 from rest_framework.decorators import action
 from django_redis import get_redis_connection
 from django_filters.rest_framework import DjangoFilterBackend
@@ -22,7 +22,7 @@ from store.serializers import HistoryDeleteSerializer
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
     ListDetailDeleteViewSet, ListRetrieveCreateViewSets, RetrieveOnlyViewSets
-from tools.contrib import get_deliver_pay, store_order_refund, prepare_dwd_order
+from tools.contrib import get_deliver_pay, store_order_refund, prepare_dwd_order,customer_get_object
 from wxpay.views import weixinpay, dwd
 from platforms.models import AccountRecharge, Account
 from delivery.models import InitDwdOrder, InitGoodRefund
@@ -1101,7 +1101,7 @@ class ConsultTopicView(ModelViewSet):
         if request.method=='POST':
             if not hasattr(request,'user') or not request.user.is_authenticated:
                 return Response({'code':4161,'msg':'必须先登录才能评论'})
-            obj = self.customer_get_object()
+            obj = customer_get_object(self)
 
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -1110,7 +1110,7 @@ class ConsultTopicView(ModelViewSet):
             return Response({'code':1000,'msg':'OK'})
 
         elif request.method =='GET':
-            obj=self.customer_get_object()
+            obj = customer_get_object(self)
             queryset=models.ConsultTopicComment.objects.filter(topic=obj)
             page = self.paginate_queryset(queryset)
             if page is not None:
@@ -1122,7 +1122,7 @@ class ConsultTopicView(ModelViewSet):
 
     @action(methods=['get'], detail=True)
     def get_data(self,request,pk=None):
-        obj=self.customer_get_object()
+        obj = customer_get_object(self)
         shopping_consults=obj.shopping_consult.all()
         ret={}
         ret['lauds']=[]
@@ -1147,17 +1147,3 @@ class ConsultTopicView(ModelViewSet):
         ret.update({'title':obj.title,'brief':obj.brief})
         return Response(ret)
 
-    def customer_get_object(self):
-        queryset = self.queryset
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-
-        assert lookup_url_kwarg in self.kwargs, (
-                'Expected view %s to be called with a URL keyword argument '
-                'named "%s". Fix your URL conf, or set the `.lookup_field` '
-                'attribute on the view correctly.' %
-                (self.__class__.__name__, lookup_url_kwarg)
-        )
-
-        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
-        obj = get_object_or_404(queryset, **filter_kwargs)
-        return obj

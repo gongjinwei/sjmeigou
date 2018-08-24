@@ -91,7 +91,7 @@ class BargainActivity(models.Model):
     from_time = models.DateTimeField(help_text='起始时间')
     to_time = models.DateTimeField(help_text='终止时间')
     store = models.ForeignKey(to='Stores',on_delete=models.CASCADE,editable=False)
-    state = models.SmallIntegerField(choices=((1,'正常'),(2,'终止')),editable=False)
+    state = models.SmallIntegerField(choices=((1,'正常'),(2,'终止')),editable=False,default=1)
 
 
 class BargainPrice(models.Model):
@@ -106,10 +106,12 @@ class BargainPrice(models.Model):
 
 
 class UserBargain(models.Model):
-    user = models.OneToOneField(to=User,on_delete=models.CASCADE)
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE)
     activity = models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='user_bargains')
     cut_price = models.FloatField(editable=False)
     join_time = models.DateTimeField(auto_now_add=True)
+
+
 
 
 
