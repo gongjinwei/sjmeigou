@@ -85,7 +85,7 @@ class GoodFavorites(models.Model):
 
 
 class BargainActivity(models.Model):
-    good = models.ForeignKey(to='goods.GoodDetail',on_delete=models.CASCADE)
+    sku = models.ForeignKey(to='goods.SKU',on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     poster = models.ForeignKey(to='platforms.BargainPoster',on_delete=models.CASCADE)
     from_time = models.DateTimeField(help_text='起始时间')

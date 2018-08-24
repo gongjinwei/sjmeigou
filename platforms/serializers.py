@@ -26,7 +26,7 @@ class DeliverSerializer(serializers.ModelSerializer):
 
 
 class DeliverServiceSerializer(serializers.ModelSerializer):
-    delivers=DeliverSerializer(many=True,read_only=True)
+    delivers = DeliverSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.DeliverServices
@@ -34,14 +34,12 @@ class DeliverServiceSerializer(serializers.ModelSerializer):
 
 
 class GenerateCodeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.CodeWarehouse
         fields = '__all__'
 
 
 class AccountRechargeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.AccountRecharge
         fields = '__all__'
@@ -50,7 +48,7 @@ class AccountRechargeSerializer(serializers.ModelSerializer):
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Account
-        fields = ('id','account_type','bank_balance')
+        fields = ('id', 'account_type', 'bank_balance')
 
 
 class KeepAccountSerializer(serializers.ModelSerializer):
@@ -60,15 +58,15 @@ class KeepAccountSerializer(serializers.ModelSerializer):
 
 
 class DeliverReasonSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.DeliveryReason
         fields = '__all__'
 
+
 class ProtocolSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Protocol
-        fields='__all__'
+        fields = '__all__'
 
 
 class RefundReasonSerializer(serializers.ModelSerializer):
@@ -76,7 +74,8 @@ class RefundReasonSerializer(serializers.ModelSerializer):
         model = models.RefundReason
         fields = '__all__'
 
+
 class BargainPosterSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BargainPoster
-        fields ='__all__'
+        fields = '__all__'
