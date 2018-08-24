@@ -415,3 +415,7 @@ class GoodFavoritesViewSets(CreateListViewSet):
             return Response({'code': 1000, 'msg': '删除成功'})
         else:
             return Response({'code': 4150, 'msg': '删除错误'})
+
+class BargainPriceViewSets(ModelViewSet):
+    queryset = models.BargainPrice.objects.all()
+    serializer_class = serializers.BargainPriceSerializer

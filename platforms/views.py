@@ -140,3 +140,7 @@ class RefundReasonViewSets(ModelViewSet):
     filter_fields = ('reason_type',)
     ordering_fields = ('id',)
 
+
+class BargainPosterViewSets(ModelViewSet):
+    queryset = models.BargainPoster.objects.all()
+    serializer_class = serializers.BargainPosterSerializer

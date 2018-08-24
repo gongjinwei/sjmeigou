@@ -122,3 +122,8 @@ class RefundReason(models.Model):
 
     class Meta:
         unique_together=('reason_type','reason_name')
+
+
+class BargainPoster(models.Model):
+    image = models.ImageField(upload_to='sjmeigou/store/poster/%Y%m%d')
+    create_time = models.DateTimeField(auto_now_add=True)

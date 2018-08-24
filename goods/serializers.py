@@ -188,6 +188,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
     delivers=GoodDeliverSerializer(many=True)
     latest_comment = serializers.SerializerMethodField()
     had_been_favored=serializers.SerializerMethodField()
+    sku_num = serializers.SerializerMethodField()
 
     def get_class_name(self,obj):
         return "%s>%s" % (obj.third_class.second_class.second_class_name,obj.third_class.third_class_name)
@@ -260,6 +261,10 @@ class GoodDetailSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+
+    def get_sku_num(self,obj):
+        return len(models.SKU.objects.filter(color__good_detail=obj))
+
 
 
 class GoodSearchSerializer(serializers.ModelSerializer):

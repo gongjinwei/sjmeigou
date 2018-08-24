@@ -84,6 +84,34 @@ class GoodFavorites(models.Model):
         ordering=('-update_time',)
 
 
+class BargainActivity(models.Model):
+    good = models.ForeignKey(to='goods.GoodDetail',on_delete=models.CASCADE)
+    title = models.CharField(max_length=50)
+    poster = models.ForeignKey(to='platforms.BargainPoster',on_delete=models.CASCADE)
+    from_time = models.DateTimeField(help_text='起始时间')
+    to_time = models.DateTimeField(help_text='终止时间')
+    store = models.ForeignKey(to='Stores',on_delete=models.CASCADE,editable=False)
+    state = models.SmallIntegerField(choices=((1,'正常'),(2,'终止')),editable=False)
+
+
+class BargainPrice(models.Model):
+    activity=models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='bargain_prices')
+    activity_stock = models.IntegerField()
+    limit_per_user=models.SmallIntegerField(default=0)
+    origin_price = models.FloatField(editable=False)
+    price_now = models.FloatField(editable=False)
+    min_price = models.FloatField()
+    cut_price_from = models.FloatField()
+    cut_price_to = models.FloatField()
+
+
+class UserBargain(models.Model):
+    user = models.OneToOneField(to=User,on_delete=models.CASCADE)
+    activity = models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='user_bargains')
+    cut_price = models.FloatField(editable=False)
+    join_time = models.DateTimeField(auto_now_add=True)
+
+
 
 
 

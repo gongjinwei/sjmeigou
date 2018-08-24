@@ -234,3 +234,17 @@ class GoodFavoritesSerializer(serializers.ModelSerializer):
 
 class HistoryDeleteSerializer(serializers.Serializer):
     ids = serializers.ListField()
+
+
+class BargainActivitySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.BargainActivity
+        fields = '__all__'
+
+class BargainPriceSerializer(serializers.ModelSerializer):
+    activity = BargainActivitySerializer()
+
+    class Meta:
+        model = models.BargainPrice
+        fields = '__all__'
