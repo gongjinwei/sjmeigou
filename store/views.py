@@ -435,7 +435,7 @@ class UserBargainViewSets(ModelViewSet):
     serializer_class = serializers.UserBargainSerializer
 
     def perform_create(self, serializer):
-        price_now = serializer.validated_data['activity'].origin_price
+        price_now = serializer.validated_data['activity'].bargainprice.origin_price
         serializer.save(user=self.request.user,price_now=price_now)
 
     @action(methods=['post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer)
