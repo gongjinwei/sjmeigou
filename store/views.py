@@ -426,7 +426,7 @@ class BargainPriceViewSets(ModelViewSet):
     def perform_create(self, serializer):
         serializer.validated_data['activity'].update({'store':self.request.user.stores})
         origin_price = serializer.validated_data['activity']['sku'].price
-        serializer.validated_data.update({'origin_price':origin_price,'price_now':origin_price})
+        serializer.validated_data.update({'origin_price':origin_price})
         serializer.save()
 
     @action(methods=['get', 'post'], detail=True, permission_classes=[IsAuthenticatedOrReadOnly])

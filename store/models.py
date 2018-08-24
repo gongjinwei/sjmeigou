@@ -99,7 +99,6 @@ class BargainPrice(models.Model):
     activity_stock = models.IntegerField()
     limit_per_user=models.SmallIntegerField(default=0)
     origin_price = models.FloatField(editable=False)
-    price_now = models.FloatField(editable=False)
     min_price = models.FloatField()
     cut_price_from = models.FloatField()
     cut_price_to = models.FloatField()
@@ -108,8 +107,7 @@ class BargainPrice(models.Model):
 class UserBargain(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.CASCADE)
     activity = models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='user_bargains')
-    cut_price = models.FloatField(editable=False)
-    join_time = models.DateTimeField(auto_now_add=True)
+    create_time = models.DateTimeField(auto_now_add=True)
 
 
 
