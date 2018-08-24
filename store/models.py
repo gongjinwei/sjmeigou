@@ -97,7 +97,6 @@ class BargainActivity(models.Model):
 class BargainPrice(models.Model):
     activity=models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='bargain_prices')
     activity_stock = models.IntegerField()
-    limit_per_user=models.SmallIntegerField(default=0)
     origin_price = models.FloatField(editable=False)
     min_price = models.FloatField()
     cut_price_from = models.FloatField()
