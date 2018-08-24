@@ -95,7 +95,7 @@ class BargainActivity(models.Model):
 
 
 class BargainPrice(models.Model):
-    activity=models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='bargain_prices')
+    activity=models.OneToOneField(to='BargainActivity',on_delete=models.CASCADE,related_name='bargain_prices')
     activity_stock = models.IntegerField()
     origin_price = models.FloatField(editable=False)
     min_price = models.FloatField()
@@ -107,7 +107,15 @@ class UserBargain(models.Model):
     user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
     activity = models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='user_bargains')
     price_now = models.FloatField(editable=False)
+    had_paid = models.BooleanField(default=False,editable=False)
     create_time = models.DateTimeField(auto_now_add=True)
+
+
+class HelpCutPrice(models.Model):
+    userId = models.ForeignKey(to='register.UserInfo',on_delete=models.CASCADE)
+    cut_price = models.FloatField(editable=False)
+    user_bargain = models.ForeignKey(to='UserBargain',on_delete=models.CASCADE)
+    join_time = models.DateTimeField(auto_now_add=True)
 
 
 

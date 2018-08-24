@@ -429,21 +429,29 @@ class BargainPriceViewSets(ModelViewSet):
         serializer.validated_data.update({'origin_price':origin_price})
         serializer.save()
 
-    @action(methods=['get', 'post'], detail=True, permission_classes=[IsAuthenticatedOrReadOnly])
+
+class UserBargainViewSets(ModelViewSet):
+    queryset = models.UserBargain.objects.all()
+    serializer_class = serializers.UserBargainSerializer
+
+    def perform_create(self, serializer):
+        price_now = serializer.validated_data['activity'].origin_price
+        serializer.save(user=self.request.user,price_now=price_now)
+
+    @action(methods=['post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer)
     def cut_price(self, request, pk=None):
-        obj = customer_get_object(self)
+        obj = self.get_object()
         activity = obj.activity
         # 每人限砍一次
         # if models.UserBargain.objects.filter(user=request.user, activity=activity).exists():
         #     return Response({'code': 4171, 'msg': '您已经砍过了'})
         now = datetime.datetime.now()
-        if obj.from_time>=now:
+        if activity.from_time>=now:
             return Response({'code':4173,'msg':'活动还未开始'})
-        if obj.to_time<=now:
+        if activity.to_time<=now:
             return Response({'code':4174,'msg':'活动已经结束'})
 
-        if obj.price_now==obj.min_price:
-            return Response({'code':4172,'msg':'价格已经最低了'})
+
         cut_price = round(random.uniform(obj.cut_price_from, obj.cut_price_to),1)
         price_now = round(obj.price_now - cut_price,1)
         if price_now<obj.min_price:
@@ -453,12 +461,3 @@ class BargainPriceViewSets(ModelViewSet):
         obj.price_now=price_now
         obj.save()
         return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})
-
-
-class UserBargainViewSets(ModelViewSet):
-    queryset = models.UserBargain.objects.all()
-    serializer_class = serializers.UserBargainSerializer
-
-    def perform_create(self, serializer):
-        price_now = serializer.validated_data['activity'].origin_price
-        serializer.save(user=self.request.user,price_now=price_now)
