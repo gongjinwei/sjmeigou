@@ -446,7 +446,7 @@ class UserBargainViewSets(ModelViewSet):
         obj = self.get_object()
         activity = obj.activity
         # 每人限砍一次
-        if models.HelpCutPrice.objects.filter(userId=userId, activity=activity).exists():
+        if models.HelpCutPrice.objects.filter(userId=userId, user_bargain=obj).exists():
             return Response({'code': 4171, 'msg': '您已经砍过了'})
         now = datetime.datetime.now()
         if activity.from_time>=now:
@@ -460,7 +460,7 @@ class UserBargainViewSets(ModelViewSet):
         if price_now<bargain_price.min_price:
             price_now=bargain_price.min_price
             cut_price=obj.price_now-bargain_price.min_price
-        models.HelpCutPrice.objects.create(user_bargain=obj,cut_price=cut_price)
+        models.HelpCutPrice.objects.create(user_bargain=obj,cut_price=cut_price,userId=userId)
         obj.price_now=price_now
         obj.save()
         return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})

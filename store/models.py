@@ -114,7 +114,7 @@ class UserBargain(models.Model):
 class HelpCutPrice(models.Model):
     userId = models.ForeignKey(to='register.UserInfo',on_delete=models.CASCADE)
     cut_price = models.FloatField(editable=False)
-    user_bargain = models.ForeignKey(to='UserBargain',on_delete=models.CASCADE)
+    user_bargain = models.ForeignKey(to='UserBargain',on_delete=models.CASCADE,editable=False)
     join_time = models.DateTimeField(auto_now_add=True)
 
 
