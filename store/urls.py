@@ -18,5 +18,6 @@ router.register('storeMessage',views.StoreMessageView,base_name='storeMessage')
 router.register('storeFavorites',views.StoreFavoritesViewSets,base_name='storeFavorites')
 router.register('goodFavorites',views.GoodFavoritesViewSets,base_name='goodFavorites')
 router.register('bargainPrice',views.BargainPriceViewSets,base_name='bargainPrice')
+router.register('userBargain',views.UserBargainViewSets,base_name='userBargain')
 
 urlpatterns=router.urls

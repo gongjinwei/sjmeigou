@@ -453,3 +453,12 @@ class BargainPriceViewSets(ModelViewSet):
         obj.price_now=price_now
         obj.save()
         return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})
+
+
+class UserBargainViewSets(ModelViewSet):
+    queryset = models.UserBargain.objects.all()
+    serializer_class = serializers.UserBargainSerializer
+
+    def perform_create(self, serializer):
+        price_now = serializer.validated_data['activity'].origin_price
+        serializer.save(user=self.request.user,price_now=price_now)
