@@ -435,29 +435,32 @@ class UserBargainViewSets(ModelViewSet):
     serializer_class = serializers.UserBargainSerializer
 
     def perform_create(self, serializer):
-        price_now = serializer.validated_data['activity'].bargainprice.origin_price
+        price_now = serializer.validated_data['activity'].bargain_prices.origin_price
         serializer.save(user=self.request.user,price_now=price_now)
 
-    @action(methods=['post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer)
+    @action(methods=['post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer,permission_classes=[AllowAny])
     def cut_price(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        userId=serializer.validated_data['userId']
         obj = self.get_object()
         activity = obj.activity
         # 每人限砍一次
-        # if models.UserBargain.objects.filter(user=request.user, activity=activity).exists():
-        #     return Response({'code': 4171, 'msg': '您已经砍过了'})
+        if models.HelpCutPrice.objects.filter(userId=userId, activity=activity).exists():
+            return Response({'code': 4171, 'msg': '您已经砍过了'})
         now = datetime.datetime.now()
         if activity.from_time>=now:
             return Response({'code':4173,'msg':'活动还未开始'})
         if activity.to_time<=now:
             return Response({'code':4174,'msg':'活动已经结束'})
 
-
-        cut_price = round(random.uniform(obj.cut_price_from, obj.cut_price_to),1)
+        bargain_price=activity.bargain_prices
+        cut_price = round(random.uniform(bargain_price.cut_price_from, bargain_price.cut_price_to),1)
         price_now = round(obj.price_now - cut_price,1)
-        if price_now<obj.min_price:
-            price_now=obj.min_price
-            cut_price=obj.price_now-obj.min_price
-        models.UserBargain.objects.create(user=self.request.user,activity=activity,cut_price=cut_price)
+        if price_now<bargain_price.min_price:
+            price_now=bargain_price.min_price
+            cut_price=obj.price_now-bargain_price.min_price
+        models.HelpCutPrice.objects.create(user_bargain=obj,cut_price=cut_price)
         obj.price_now=price_now
         obj.save()
         return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})

@@ -265,7 +265,7 @@ class UserBargainSerializer(serializers.ModelSerializer):
         fields='__all__'
 
 
-class HelpCutPriceSerializer(serializers.Serializer):
+class HelpCutPriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.HelpCutPrice
         fields = '__all__'
