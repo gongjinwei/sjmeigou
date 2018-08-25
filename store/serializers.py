@@ -270,8 +270,9 @@ class UserBargainSerializer(serializers.ModelSerializer):
     cut_num = serializers.SerializerMethodField()
     cut_price_all= serializers.SerializerMethodField()
     poster_url = serializers.ReadOnlyField(source='activity.poster.image.url')
-    user_avatar_url = serializers.ReadOnlyField(source='user.userinfo.avatarUrl')
-    user_nick_name = serializers.ReadOnlyField(source='user.userinfo.nickName')
+    sharer_avatar_url = serializers.ReadOnlyField(source='user.userinfo.avatarUrl')
+    sharer_nick_name = serializers.ReadOnlyField(source='user.userinfo.nickName')
+    is_sharer = serializers.SerializerMethodField()
 
     class Meta:
         model = models.UserBargain
@@ -287,6 +288,13 @@ class UserBargainSerializer(serializers.ModelSerializer):
     def get_cut_price_all(self,obj):
         queryset=obj.help_cuts.all().aggregate(cut_sum=Sum('cut_price'))
         return queryset['cut_sum']
+
+    def get_is_sharer(self,obj):
+        request=self.context.get('request',None)
+        if request and hasattr(request,'user') and request.user.is_authenticated:
+            return obj.user == request.user
+        else:
+            return False
 
 
 class BargainBalanceSerializer(serializers.Serializer):
