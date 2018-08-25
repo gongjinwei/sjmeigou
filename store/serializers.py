@@ -238,30 +238,17 @@ class HistoryDeleteSerializer(serializers.Serializer):
 
 
 class BargainActivitySerializer(serializers.ModelSerializer):
+    color_pic = serializers.ReadOnlyField(source='sku.color.color_pic')
+    good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
 
     class Meta:
         model = models.BargainActivity
         fields = '__all__'
 
 
-class BargainPriceSerializer(serializers.ModelSerializer):
-    activity = BargainActivitySerializer()
-    color_pic = serializers.ReadOnlyField(source='activity.sku.color.color_pic')
-    good_id = serializers.ReadOnlyField(source='activity.sku.color.good_detail.id')
-
-    class Meta:
-        model = models.BargainPrice
-        fields = '__all__'
-
-    def create(self, validated_data):
-        activity_data = validated_data.pop('activity')
-        activity = models.BargainActivity.objects.create(**activity_data)
-        validated_data.update({'activity':activity})
-        instance = super().create(validated_data)
-        return instance
-
-
 class UserBargainSerializer(serializers.ModelSerializer):
+    activity = BargainActivitySerializer(read_only=True)
+
     class Meta:
         model = models.UserBargain
         fields='__all__'

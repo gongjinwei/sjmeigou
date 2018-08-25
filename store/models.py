@@ -92,10 +92,6 @@ class BargainActivity(models.Model):
     to_time = models.DateTimeField(help_text='终止时间')
     store = models.ForeignKey(to='Stores',on_delete=models.CASCADE,editable=False)
     state = models.SmallIntegerField(choices=((1,'正常'),(2,'终止')),editable=False,default=1)
-
-
-class BargainPrice(models.Model):
-    activity=models.OneToOneField(to='BargainActivity',on_delete=models.CASCADE,related_name='bargain_prices')
     activity_stock = models.IntegerField()
     origin_price = models.FloatField(editable=False)
     min_price = models.FloatField()

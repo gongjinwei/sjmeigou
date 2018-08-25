@@ -418,14 +418,14 @@ class GoodFavoritesViewSets(CreateListViewSet):
             return Response({'code': 4150, 'msg': '删除错误'})
 
 
-class BargainPriceViewSets(ModelViewSet):
-    queryset = models.BargainPrice.objects.all()
-    serializer_class = serializers.BargainPriceSerializer
+class BargainActivityViewSets(ModelViewSet):
+    queryset = models.BargainActivity.objects.all()
+    serializer_class = serializers.BargainActivitySerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
-        serializer.validated_data['activity'].update({'store':self.request.user.stores})
-        origin_price = serializer.validated_data['activity']['sku'].price
+        serializer.validated_data.update({'store':self.request.user.stores})
+        origin_price = serializer.validated_data['sku'].price
         serializer.validated_data.update({'origin_price':origin_price})
         serializer.save()
 
@@ -435,7 +435,7 @@ class UserBargainViewSets(ModelViewSet):
     serializer_class = serializers.UserBargainSerializer
 
     def perform_create(self, serializer):
-        price_now = serializer.validated_data['activity'].bargain_prices.origin_price
+        price_now = serializer.validated_data['activity'].origin_price
         serializer.save(user=self.request.user,price_now=price_now)
 
     @action(methods=['post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer,permission_classes=[AllowAny])
