@@ -246,6 +246,8 @@ class BargainActivitySerializer(serializers.ModelSerializer):
 
 class BargainPriceSerializer(serializers.ModelSerializer):
     activity = BargainActivitySerializer()
+    color_pic = serializers.ReadOnlyField(source='activity.sku.color.color_pic')
+    good_id = serializers.ReadOnlyField(source='activity.sku.color.good_detail.id')
 
     class Meta:
         model = models.BargainPrice
