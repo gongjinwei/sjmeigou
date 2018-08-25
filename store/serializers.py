@@ -270,6 +270,8 @@ class UserBargainSerializer(serializers.ModelSerializer):
     cut_num = serializers.SerializerMethodField()
     cut_price_all= serializers.SerializerMethodField()
     poster_url = serializers.ReadOnlyField(source='activity.poster.image.url')
+    user_avatar_url = serializers.ReadOnlyField(source='user.userinfo.avatarUrl')
+    user_nick_name = serializers.ReadOnlyField(source='user.userinfo.nickName')
 
     class Meta:
         model = models.UserBargain

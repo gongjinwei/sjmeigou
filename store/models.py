@@ -115,7 +115,7 @@ class HelpCutPrice(models.Model):
     join_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering=('join_time',)
+        ordering=('-join_time',)
 
 
 
