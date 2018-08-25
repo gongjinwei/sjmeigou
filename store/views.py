@@ -495,9 +495,9 @@ class UserBargainViewSets(ModelViewSet):
         if request.method=='POST':
             activity = obj.activity
 
-            cut_price,price_now=self.save_random_cut(obj,activity,userId)
+            code,msg,cut_price,price_now=self.save_random_cut(obj,activity,userId)
 
-            return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})
+            return Response({'code':code, 'msg': msg, 'cut_price': cut_price, 'price_now': price_now})
         elif request.method =='GET':
             data = serializers.UserBargainSerializer(obj).data
             data['had_cut']=False
@@ -550,12 +550,12 @@ class UserBargainViewSets(ModelViewSet):
         if not created:
             # 每人限砍一次
             if models.HelpCutPrice.objects.filter(userId=userId, user_bargain=obj).exists():
-                return Response({'code': 4171, 'msg': '您已经砍过了'})
+                return 4171,'您已经砍过了',None,None
             now = datetime.datetime.now()
             if activity.from_time >= now:
-                return Response({'code': 4173, 'msg': '活动还未开始'})
+                return 4173, '活动还未开始',None,None
             if activity.to_time <= now:
-                return Response({'code': 4174, 'msg': '活动已经结束'})
+                return 4174, '活动已经结束',None,None
         cut_price = round(random.uniform(activity.cut_price_from, activity.cut_price_to), 1)
         price_now = round(obj.price_now - cut_price, 1)
         if price_now < activity.min_price:
@@ -564,7 +564,7 @@ class UserBargainViewSets(ModelViewSet):
         models.HelpCutPrice.objects.create(user_bargain=obj, cut_price=cut_price, userId=userId,instant_price=price_now)
         obj.price_now = price_now
         obj.save()
-        return cut_price,price_now
+        return 1000,'OK',cut_price,price_now
 
 
 class BargainBalanceView(CreateOnlyViewSet):
