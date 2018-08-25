@@ -430,6 +430,42 @@ class BargainActivityViewSets(ModelViewSet):
         serializer.save()
 
 
+def check_bargain(user_bargain,receive_address,store,user_price):
+    # 验证1：活动是否开始或终止，库存是否足够
+    now = datetime.datetime.now()
+    if user_bargain.activity.from_time > now:
+        return 4251,'活动尚未开始',None
+    if user_bargain.activity.to_time < now:
+        return 4252, '活动已结束',None
+
+    if user_bargain.activity.activity_stock <= 0:
+        return 4253, '已经抢光了',None
+
+    # 验证2：提交时的价格是否相符
+    instant_min_price = models.HelpCutPrice.objects.filter(user_bargain=user_bargain).aggregate(min_price=Min('instant_price'))['min_price']
+    if user_price != instant_min_price:
+        return 4254, '下单价格不符',None
+
+    # 验证3：计算配送费用
+
+    if receive_address.exists():
+        destination = '%6f,%6f' % (receive_address[0].longitude, receive_address[0].latitude)
+    else:
+        destination = ''
+
+    origin = '%6f,%6f' % (store.longitude, store.latitude)
+
+    delivery_pay, store_to_pay, deliver_distance = get_deliver_pay(origin,
+                                                                   destination) if origin and destination else (
+        0, 0, None)
+
+    store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store, account_type=5)
+
+    has_enough_delivery = store_delivery_charge.bank_balance >= decimal.Decimal(20.00)
+
+    return 1000,'OK',(delivery_pay,deliver_distance,has_enough_delivery)
+
+
 class UserBargainViewSets(ModelViewSet):
     queryset = models.UserBargain.objects.all()
     serializer_class = serializers.UserBargainSerializer
@@ -482,6 +518,34 @@ class UserBargainViewSets(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(methods=['post'], detail=True, serializer_class=serializers.BargainBalanceSerializer)
+    def bargain_balance(self,request,pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_bargain = serializer.validated_data['user_bargain']
+        user_price = serializer.validated_data['price']
+        receive_address = ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
+        store = user_bargain.activity.store
+        sku = user_bargain.activity.sku
+        code, msg, data = check_bargain(user_bargain, receive_address, store, user_price)
+        if code == 1000:
+            delivery_pay, deliver_distance, has_enough_delivery = data
+
+            sd = SkuDetailSerializer(sku).data
+            data = {
+                'id': store.id,
+                'name': store.name,
+                'logo': store.logo,
+                'take_off': store.take_off,
+                "deliver_pay": delivery_pay,
+                'skus': sd,
+                'has_enough_delivery': has_enough_delivery,
+                'deliver_distance': deliver_distance
+            }
+
+        return Response({'code': code, 'msg': msg, data: data})
+
     def save_random_cut(self,obj,activity,userId,created=False):
         if not created:
             # 每人限砍一次
@@ -501,42 +565,6 @@ class UserBargainViewSets(ModelViewSet):
         obj.price_now = price_now
         obj.save()
         return cut_price,price_now
-
-
-def check_bargain(user_bargain,receive_address,store,user_price):
-    # 验证1：活动是否开始或终止，库存是否足够
-    now = datetime.datetime.now()
-    if user_bargain.activity.from_time > now:
-        return 4251,'活动尚未开始',None
-    if user_bargain.activity.to_time < now:
-        return 4252, '活动已结束',None
-
-    if user_bargain.activity.activity_stock <= 0:
-        return 4253, '已经抢光了',None
-
-    # 验证2：提交时的价格是否相符
-    instant_min_price = models.HelpCutPrice.objects.filter(user_bargain=user_bargain).aggregate(min_price=Min('instant_price'))['min_price']
-    if user_price != instant_min_price:
-        return 4254, '下单价格不符',None
-
-    # 验证3：计算配送费用
-
-    if receive_address.exists():
-        destination = '%6f,%6f' % (receive_address[0].longitude, receive_address[0].latitude)
-    else:
-        destination = ''
-
-    origin = '%6f,%6f' % (store.longitude, store.latitude)
-
-    delivery_pay, store_to_pay, deliver_distance = get_deliver_pay(origin,
-                                                                   destination) if origin and destination else (
-        0, 0, None)
-
-    store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store, account_type=5)
-
-    has_enough_delivery = store_delivery_charge.bank_balance >= decimal.Decimal(20.00)
-
-    return 1000,'OK',(delivery_pay,deliver_distance,has_enough_delivery)
 
 
 class BargainBalanceView(CreateOnlyViewSet):

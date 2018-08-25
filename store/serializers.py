@@ -243,6 +243,7 @@ class BargainActivitySerializer(serializers.ModelSerializer):
     cut_price_from = serializers.FloatField(write_only=True)
     cut_price_to = serializers.FloatField(write_only=True)
     my_bargain = serializers.SerializerMethodField()
+    poster_url = serializers.ReadOnlyField(source='poster.image.url')
 
     class Meta:
         model = models.BargainActivity
@@ -269,10 +270,10 @@ class UserBargainSerializer(serializers.ModelSerializer):
     help_cuts = serializers.SerializerMethodField()
     cut_num = serializers.SerializerMethodField()
     cut_price_all= serializers.SerializerMethodField()
-    poster_url = serializers.ReadOnlyField(source='activity.poster.image.url')
     sharer_avatar_url = serializers.ReadOnlyField(source='user.userinfo.avatarUrl')
     sharer_nick_name = serializers.ReadOnlyField(source='user.userinfo.nickName')
     is_sharer = serializers.SerializerMethodField()
+    activity_data = serializers.SerializerMethodField()
 
     class Meta:
         model = models.UserBargain
@@ -295,6 +296,9 @@ class UserBargainSerializer(serializers.ModelSerializer):
             return obj.user == request.user
         else:
             return False
+
+    def get_activity_data(self,obj):
+        return BargainActivitySerializer(obj.activity).data
 
 
 class BargainBalanceSerializer(serializers.Serializer):
