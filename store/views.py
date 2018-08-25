@@ -499,7 +499,7 @@ class UserBargainViewSets(ModelViewSet):
 
             return Response({'code':code, 'msg': msg, 'cut_price': cut_price, 'price_now': price_now})
         elif request.method =='GET':
-            data = serializers.UserBargainSerializer(obj).data
+            data = serializers.UserBargainSerializer(obj,context={'request':request}).data
             data['had_cut']=False
             if models.HelpCutPrice.objects.filter(userId=userId,user_bargain=obj).exists():
 
@@ -566,34 +566,6 @@ class UserBargainViewSets(ModelViewSet):
         obj.save()
         return 1000,'OK',cut_price,price_now
 
-
-class BargainBalanceView(CreateOnlyViewSet):
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user_bargain = serializer.validated_data['user_bargain']
-        user_price = serializer.validated_data['price']
-        receive_address = ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
-        store = user_bargain.activity.store
-        sku = user_bargain.activity.sku
-        code,msg,data=check_bargain(user_bargain,receive_address,store,user_price)
-        if code==1000:
-            delivery_pay, deliver_distance, has_enough_delivery=data
-
-            sd = SkuDetailSerializer(sku).data
-            data={
-                'id': store.id,
-                'name': store.name,
-                'logo': store.logo,
-                'take_off': store.take_off,
-                "deliver_pay": delivery_pay,
-                'skus':sd,
-                'has_enough_delivery': has_enough_delivery,
-                'deliver_distance': deliver_distance
-                }
-
-        return Response({'code':code,'msg':msg,data:data})
 
 
 
