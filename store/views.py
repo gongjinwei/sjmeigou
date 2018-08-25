@@ -544,7 +544,7 @@ class UserBargainViewSets(ModelViewSet):
                 'deliver_distance': deliver_distance
             }
 
-        return Response({'code': code, 'msg': msg, data: data})
+        return Response({'code': code, 'msg': msg, 'data': data})
 
     def save_random_cut(self,obj,activity,userId,created=False):
         if not created:
