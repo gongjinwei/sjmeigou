@@ -244,6 +244,7 @@ class BargainActivitySerializer(serializers.ModelSerializer):
     cut_price_to = serializers.FloatField(write_only=True)
     my_bargain = serializers.SerializerMethodField()
     poster_url = serializers.ReadOnlyField(source='poster.image.url')
+    participator_nums = serializers.SerializerMethodField()
 
     class Meta:
         model = models.BargainActivity
@@ -254,6 +255,9 @@ class BargainActivitySerializer(serializers.ModelSerializer):
         if request and hasattr(request,'user') and request.user.is_authenticated:
             if models.UserBargain.objects.filter(user=request.user,activity=obj).exists():
                 return models.UserBargain.objects.get(user=request.user,activity=obj).id
+
+    def get_participator_nums(self,obj):
+        return models.HelpCutPrice.objects.filter(user_bargain__activity=obj).aggregate(joiners=Count('userId'))['joiners']
 
 
 class HelpCutPriceSerializer(serializers.ModelSerializer):
