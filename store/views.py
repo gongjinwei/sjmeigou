@@ -419,7 +419,7 @@ class GoodFavoritesViewSets(CreateListViewSet):
 
 
 class BargainActivityViewSets(ModelViewSet):
-    queryset = models.BargainActivity.objects.all()
+    queryset = models.BargainActivity.objects.filter()
     serializer_class = serializers.BargainActivitySerializer
     permission_classes = (MerchantOrReadOnlyPermission,)
 
@@ -436,7 +436,8 @@ class UserBargainViewSets(ModelViewSet):
 
     def perform_create(self, serializer):
         price_now = serializer.validated_data['activity'].origin_price
-        serializer.save(user=self.request.user,price_now=price_now)
+        instance=serializer.save(user=self.request.user,price_now=price_now)
+        self.save_random_cut(instance,instance.activity,self.request.user.userinfo)
 
     @action(methods=['post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer,permission_classes=[AllowAny])
     def cut_price(self, request, pk=None):
@@ -445,21 +446,26 @@ class UserBargainViewSets(ModelViewSet):
         userId=serializer.validated_data['userId']
         obj = self.get_object()
         activity = obj.activity
+
+        cut_price,price_now=self.save_random_cut(obj,activity,userId)
+
+        return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})
+
+    def save_random_cut(self,obj,activity,userId):
         # 每人限砍一次
         if models.HelpCutPrice.objects.filter(userId=userId, user_bargain=obj).exists():
             return Response({'code': 4171, 'msg': '您已经砍过了'})
         now = datetime.datetime.now()
-        if activity.from_time>=now:
-            return Response({'code':4173,'msg':'活动还未开始'})
-        if activity.to_time<=now:
-            return Response({'code':4174,'msg':'活动已经结束'})
-
-        cut_price = round(random.uniform(activity.cut_price_from, activity.cut_price_to),1)
-        price_now = round(obj.price_now - cut_price,1)
-        if price_now<activity.min_price:
-            price_now=activity.min_price
-            cut_price=obj.price_now-activity.min_price
-        models.HelpCutPrice.objects.create(user_bargain=obj,cut_price=cut_price,userId=userId)
-        obj.price_now=price_now
+        if activity.from_time >= now:
+            return Response({'code': 4173, 'msg': '活动还未开始'})
+        if activity.to_time <= now:
+            return Response({'code': 4174, 'msg': '活动已经结束'})
+        cut_price = round(random.uniform(activity.cut_price_from, activity.cut_price_to), 1)
+        price_now = round(obj.price_now - cut_price, 1)
+        if price_now < activity.min_price:
+            price_now = activity.min_price
+            cut_price = obj.price_now - activity.min_price
+        models.HelpCutPrice.objects.create(user_bargain=obj, cut_price=cut_price, userId=userId)
+        obj.price_now = price_now
         obj.save()
-        return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})
+        return cut_price,price_now
