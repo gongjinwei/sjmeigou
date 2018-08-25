@@ -252,13 +252,13 @@ class HelpCutPriceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.HelpCutPrice
-        fields = '__all__'
+        exclude=('userId',)
 
 
 class UserBargainSerializer(serializers.ModelSerializer):
     activity_data = serializers.SerializerMethodField()
     activity = serializers.PrimaryKeyRelatedField(queryset=models.BargainActivity.objects.filter(from_time__lte=datetime.datetime.now(),to_time__gte=datetime.datetime.now(),state=1,activity_stock__gt=0))
-
+    help_cuts = serializers.SerializerMethodField()
 
     class Meta:
         model = models.UserBargain
@@ -266,6 +266,12 @@ class UserBargainSerializer(serializers.ModelSerializer):
 
     def get_activity_data(self,obj):
         return BargainActivitySerializer(obj.activity).data
+
+    def get_help_cuts(self,obj):
+        queryset= obj.help_cuts.all()[:10]
+        return HelpCutPriceSerializer(queryset,many=True).data
+
+
 
 
 

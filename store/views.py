@@ -1,4 +1,4 @@
-import random,datetime
+import random,datetime,requests, uuid
 
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
@@ -11,15 +11,11 @@ from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet
 
+from guardian.shortcuts import assign_perm
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet,CreateListViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.contrib import look_up_adocode,customer_get_object
-
-from guardian.shortcuts import assign_perm
-
-
-import requests, uuid
+from tools.contrib import look_up_adocode
 
 
 # Create your views here.
@@ -28,6 +24,7 @@ from . import serializers, models
 from index.models import Application
 from goods.models import GoodDetail,SearchHistory
 from platforms.models import CodeWarehouse,Account,DeliverAdcode
+from register.models import UserInfo
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
@@ -434,13 +431,23 @@ class UserBargainViewSets(ModelViewSet):
     queryset = models.UserBargain.objects.all()
     serializer_class = serializers.UserBargainSerializer
 
+    def get_queryset(self):
+        queryset=self.queryset
+        userId = self.request.query_params.get('userId','')
+        if hasattr(self.request,'user') and self.request.user.is_authenticated:
+            return queryset
+        if UserInfo.objects.filter(pk=userId).exists():
+            return queryset
+        else:
+            return queryset.none()
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         activity = serializer.validated_data['activity']
         user = self.request.user
         price_now = activity.origin_price
-        if self.queryset.filter(user=user, activity=activity, has_paid=False).exists():
+        if self.queryset.filter(user=user, activity=activity, had_paid=False).exists():
             return Response({'code': 4181, 'msg': '您已经创建过砍价了'})
         instance = serializer.save(user=user, price_now=price_now)
         self.save_random_cut(instance, activity, user.userinfo)
