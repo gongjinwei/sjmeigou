@@ -4,7 +4,7 @@ from itertools import groupby
 from rest_framework import serializers
 
 
-from django.db.models import Avg,Count
+from django.db.models import Avg,Count,Sum
 
 from geopy.distance import VincentyDistance
 
@@ -267,6 +267,8 @@ class HelpCutPriceSerializer(serializers.ModelSerializer):
 class UserBargainSerializer(serializers.ModelSerializer):
     activity = serializers.PrimaryKeyRelatedField(queryset=models.BargainActivity.objects.filter(from_time__lte=datetime.datetime.now(),to_time__gte=datetime.datetime.now(),state=1,activity_stock__gt=0))
     help_cuts = serializers.SerializerMethodField()
+    cut_num = serializers.SerializerMethodField()
+    cut_price_all= serializers.SerializerMethodField()
 
     class Meta:
         model = models.UserBargain
@@ -275,6 +277,13 @@ class UserBargainSerializer(serializers.ModelSerializer):
     def get_help_cuts(self,obj):
         queryset= obj.help_cuts.all()[:10]
         return HelpCutPriceSerializer(queryset,many=True).data
+
+    def get_cut_num(self,obj):
+        return len(obj.help_cuts.all())
+
+    def get_cut_price_all(self,obj):
+        queryset=obj.help_cuts.all().aggregate(cut_sum=Sum('cut_price'))
+        return queryset['cut_sum']
 
 
 
