@@ -301,7 +301,7 @@ class UserBargainSerializer(serializers.ModelSerializer):
             return False
 
     def get_activity_data(self,obj):
-        return BargainActivitySerializer(obj.activity).data
+        return BargainActivitySerializer(obj.activity,context=self.context).data
 
 
 class BargainBalanceSerializer(serializers.Serializer):
