@@ -292,8 +292,9 @@ class UserBargainSerializer(serializers.ModelSerializer):
 
     def get_is_sharer(self,obj):
         request=self.context.get('request',None)
-        if request and hasattr(request,'user') and request.user.is_authenticated:
-            return obj.user == request.user
+        user_id = request.query_params.get('userId',None) if request else None
+        if user_id:
+            return obj.user.userinfo.id == user_id
         else:
             return False
 
