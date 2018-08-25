@@ -550,12 +550,12 @@ class UserBargainViewSets(ModelViewSet):
         if not created:
             # 每人限砍一次
             if models.HelpCutPrice.objects.filter(userId=userId, user_bargain=obj).exists():
-                return 4171,'您已经砍过了',None,None
+                return 4171,'您已经砍过了',0,obj.price_now
             now = datetime.datetime.now()
             if activity.from_time >= now:
-                return 4173, '活动还未开始',None,None
+                return 4173, '活动还未开始',0,obj.price_now
             if activity.to_time <= now:
-                return 4174, '活动已经结束',None,None
+                return 4174, '活动已经结束',0,obj.price_now
         cut_price = round(random.uniform(activity.cut_price_from, activity.cut_price_to), 1)
         price_now = round(obj.price_now - cut_price, 1)
         if price_now < activity.min_price:
