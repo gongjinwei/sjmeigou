@@ -434,10 +434,17 @@ class UserBargainViewSets(ModelViewSet):
     queryset = models.UserBargain.objects.all()
     serializer_class = serializers.UserBargainSerializer
 
-    def perform_create(self, serializer):
-        price_now = serializer.validated_data['activity'].origin_price
-        instance=serializer.save(user=self.request.user,price_now=price_now)
-        self.save_random_cut(instance,instance.activity,self.request.user.userinfo)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        activity = serializer.validated_data['activity']
+        user = self.request.user
+        price_now = activity.origin_price
+        if self.queryset.filter(user=user, activity=activity, has_paid=False).exists():
+            return Response({'code': 4181, 'msg': '您已经创建过砍价了'})
+        instance = serializer.save(user=user, price_now=price_now)
+        self.save_random_cut(instance, activity, user.userinfo)
+        return Response({'code':1000,'msg':'创建成功'})
 
     @action(methods=['post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer,permission_classes=[AllowAny])
     def cut_price(self, request, pk=None):
@@ -465,7 +472,7 @@ class UserBargainViewSets(ModelViewSet):
         if price_now < activity.min_price:
             price_now = activity.min_price
             cut_price = obj.price_now - activity.min_price
-        models.HelpCutPrice.objects.create(user_bargain=obj, cut_price=cut_price, userId=userId)
+        models.HelpCutPrice.objects.create(user_bargain=obj, cut_price=cut_price, userId=userId,instant_price=price_now)
         obj.price_now = price_now
         obj.save()
         return cut_price,price_now

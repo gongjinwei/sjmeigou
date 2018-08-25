@@ -246,9 +246,19 @@ class BargainActivitySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class HelpCutPriceSerializer(serializers.ModelSerializer):
+    avatarUrl = serializers.ReadOnlyField(source='userId.avatarUrl')
+    nickName = serializers.ReadOnlyField(source='userId.nickName')
+
+    class Meta:
+        model = models.HelpCutPrice
+        fields = '__all__'
+
+
 class UserBargainSerializer(serializers.ModelSerializer):
     activity_data = serializers.SerializerMethodField()
     activity = serializers.PrimaryKeyRelatedField(queryset=models.BargainActivity.objects.filter(from_time__lte=datetime.datetime.now(),to_time__gte=datetime.datetime.now(),state=1,activity_stock__gt=0))
+
 
     class Meta:
         model = models.UserBargain
@@ -258,13 +268,7 @@ class UserBargainSerializer(serializers.ModelSerializer):
         return BargainActivitySerializer(obj.activity).data
 
 
-class HelpCutPriceSerializer(serializers.ModelSerializer):
-    avatarUrl = serializers.ReadOnlyField(source='userId.avatarUrl')
-    nickName = serializers.ReadOnlyField(source='userId.nickName')
 
-    class Meta:
-        model = models.HelpCutPrice
-        fields = '__all__'
 
 
 
