@@ -147,3 +147,6 @@ def customer_get_object(self):
     filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
     obj = get_object_or_404(queryset, **filter_kwargs)
     return obj
+
+
+

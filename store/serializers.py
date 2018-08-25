@@ -269,6 +269,7 @@ class UserBargainSerializer(serializers.ModelSerializer):
     help_cuts = serializers.SerializerMethodField()
     cut_num = serializers.SerializerMethodField()
     cut_price_all= serializers.SerializerMethodField()
+    poster_url = serializers.ReadOnlyField(source='activity.poster.image.url')
 
     class Meta:
         model = models.UserBargain
@@ -286,7 +287,9 @@ class UserBargainSerializer(serializers.ModelSerializer):
         return queryset['cut_sum']
 
 
-
+class BargainBalanceSerializer(serializers.Serializer):
+    price = serializers.FloatField(help_text='当前价格,用于验证')
+    user_bargain= serializers.PrimaryKeyRelatedField(queryset=models.UserBargain.objects.all())
 
 
 
