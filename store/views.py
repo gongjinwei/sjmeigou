@@ -15,7 +15,7 @@ from guardian.shortcuts import assign_perm
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet,CreateListViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.contrib import look_up_adocode
+from tools.contrib import look_up_adocode,customer_get_object
 
 
 # Create your views here.
@@ -431,49 +431,64 @@ class UserBargainViewSets(ModelViewSet):
     queryset = models.UserBargain.objects.all()
     serializer_class = serializers.UserBargainSerializer
 
-    def get_queryset(self):
-        queryset=self.queryset
-        userId = self.request.query_params.get('userId','')
-        if hasattr(self.request,'user') and self.request.user.is_authenticated:
-            return queryset
-        if UserInfo.objects.filter(pk=userId).exists():
-            return queryset
-        else:
-            return queryset.none()
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         activity = serializer.validated_data['activity']
         user = self.request.user
         price_now = activity.origin_price
-        if self.queryset.filter(user=user, activity=activity, had_paid=False).exists():
-            return Response({'code': 4181, 'msg': '您已经创建过砍价了'})
+        if self.queryset.filter(user=user, activity=activity).exists():
+            return Response({'code': 4181, 'msg': '您已经创建过了'})
         instance = serializer.save(user=user, price_now=price_now)
-        self.save_random_cut(instance, activity, user.userinfo)
+        self.save_random_cut(instance, activity, user.userinfo,created=True)
         return Response({'code':1000,'msg':'创建成功'})
 
-    @action(methods=['post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer,permission_classes=[AllowAny])
+    @action(methods=['get','post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer,permission_classes=[AllowAny])
     def cut_price(self, request, pk=None):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        userId=serializer.validated_data['userId']
         obj = self.get_object()
-        activity = obj.activity
+        user_id = request.query_params.get('userId', '')
+        if user_id and UserInfo.objects.filter(pk=user_id).exists():
+            userId = UserInfo.objects.get(pk=user_id)
+        elif hasattr(request, 'user') and request.user.is_authenticated:
+            userId = request.user.userinfo
+        else:
+            return Response({'code': 4182, 'msg': '请携带ID访问'})
+        if request.method=='POST':
+            activity = obj.activity
 
-        cut_price,price_now=self.save_random_cut(obj,activity,userId)
+            cut_price,price_now=self.save_random_cut(obj,activity,userId)
 
-        return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})
+            return Response({'code': 1000, 'msg': '砍价成功', 'cut_price': cut_price, 'price_now': price_now})
+        elif request.method =='GET':
+            data = serializers.UserBargainSerializer(obj).data
+            data['had_cut']=False
+            if models.HelpCutPrice.objects.filter(userId=userId,user_bargain=obj).exists():
 
-    def save_random_cut(self,obj,activity,userId):
-        # 每人限砍一次
-        if models.HelpCutPrice.objects.filter(userId=userId, user_bargain=obj).exists():
-            return Response({'code': 4171, 'msg': '您已经砍过了'})
-        now = datetime.datetime.now()
-        if activity.from_time >= now:
-            return Response({'code': 4173, 'msg': '活动还未开始'})
-        if activity.to_time <= now:
-            return Response({'code': 4174, 'msg': '活动已经结束'})
+                data.update({'had_cut':True})
+            return Response({'code':1000,'data':data})
+
+    @action(methods=['get'], detail=True, serializer_class=serializers.HelpCutPriceSerializer)
+    def get_help_cuts(self,request,pk=None):
+        obj = self.get_object()
+        queryset = models.HelpCutPrice.objects.filter(user_bargain=obj)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def save_random_cut(self,obj,activity,userId,created=False):
+        if not created:
+            # 每人限砍一次
+            if models.HelpCutPrice.objects.filter(userId=userId, user_bargain=obj).exists():
+                return Response({'code': 4171, 'msg': '您已经砍过了'})
+            now = datetime.datetime.now()
+            if activity.from_time >= now:
+                return Response({'code': 4173, 'msg': '活动还未开始'})
+            if activity.to_time <= now:
+                return Response({'code': 4174, 'msg': '活动已经结束'})
         cut_price = round(random.uniform(activity.cut_price_from, activity.cut_price_to), 1)
         price_now = round(obj.price_now - cut_price, 1)
         if price_now < activity.min_price:
@@ -483,3 +498,5 @@ class UserBargainViewSets(ModelViewSet):
         obj.price_now = price_now
         obj.save()
         return cut_price,price_now
+
+

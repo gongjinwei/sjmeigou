@@ -240,10 +240,19 @@ class HistoryDeleteSerializer(serializers.Serializer):
 class BargainActivitySerializer(serializers.ModelSerializer):
     color_pic = serializers.ReadOnlyField(source='sku.color.color_pic')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
+    cut_price_from = serializers.FloatField(write_only=True)
+    cut_price_to = serializers.FloatField(write_only=True)
+    my_bargain = serializers.SerializerMethodField()
 
     class Meta:
         model = models.BargainActivity
         fields = '__all__'
+
+    def get_my_bargain(self,obj):
+        request = self.context.get('request',None)
+        if request and hasattr(request,'user') and request.user.is_authenticated:
+            if models.UserBargain.objects.filter(user=request.user,activity=obj).exists():
+                return models.UserBargain.objects.get(user=request.user,activity=obj).id
 
 
 class HelpCutPriceSerializer(serializers.ModelSerializer):
@@ -256,16 +265,12 @@ class HelpCutPriceSerializer(serializers.ModelSerializer):
 
 
 class UserBargainSerializer(serializers.ModelSerializer):
-    activity_data = serializers.SerializerMethodField()
     activity = serializers.PrimaryKeyRelatedField(queryset=models.BargainActivity.objects.filter(from_time__lte=datetime.datetime.now(),to_time__gte=datetime.datetime.now(),state=1,activity_stock__gt=0))
     help_cuts = serializers.SerializerMethodField()
 
     class Meta:
         model = models.UserBargain
         fields='__all__'
-
-    def get_activity_data(self,obj):
-        return BargainActivitySerializer(obj.activity).data
 
     def get_help_cuts(self,obj):
         queryset= obj.help_cuts.all()[:10]
