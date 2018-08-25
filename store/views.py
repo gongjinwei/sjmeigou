@@ -454,12 +454,11 @@ class UserBargainViewSets(ModelViewSet):
         if activity.to_time<=now:
             return Response({'code':4174,'msg':'活动已经结束'})
 
-        bargain_price=activity.bargain_prices
-        cut_price = round(random.uniform(bargain_price.cut_price_from, bargain_price.cut_price_to),1)
+        cut_price = round(random.uniform(activity.cut_price_from, activity.cut_price_to),1)
         price_now = round(obj.price_now - cut_price,1)
-        if price_now<bargain_price.min_price:
-            price_now=bargain_price.min_price
-            cut_price=obj.price_now-bargain_price.min_price
+        if price_now<activity.min_price:
+            price_now=activity.min_price
+            cut_price=obj.price_now-activity.min_price
         models.HelpCutPrice.objects.create(user_bargain=obj,cut_price=cut_price,userId=userId)
         obj.price_now=price_now
         obj.save()

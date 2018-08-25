@@ -247,11 +247,14 @@ class BargainActivitySerializer(serializers.ModelSerializer):
 
 
 class UserBargainSerializer(serializers.ModelSerializer):
-    activity = BargainActivitySerializer(read_only=True)
+    activity_data = serializers.SerializerMethodField()
 
     class Meta:
         model = models.UserBargain
         fields='__all__'
+
+    def get_activity_data(self,obj):
+        return BargainActivitySerializer(obj.activity).data
 
 
 class HelpCutPriceSerializer(serializers.ModelSerializer):
