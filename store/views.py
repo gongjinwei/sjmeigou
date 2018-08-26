@@ -430,9 +430,8 @@ class BargainActivityViewSets(ModelViewSet):
         serializer.save()
 
 
-def check_bargain(user_bargain,receive_address,store,user_price):
+def check_bargain(user_bargain,receive_address,store,user_price,now):
     # 验证1：活动是否开始或终止，库存是否足够
-    now = datetime.datetime.now()
     if user_bargain.activity.from_time > now:
         return 4251,'活动尚未开始',None
     if user_bargain.activity.to_time < now:
@@ -528,7 +527,8 @@ class UserBargainViewSets(ModelViewSet):
         receive_address = ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
         store = user_bargain.activity.store
         sku = user_bargain.activity.sku
-        code, msg, data = check_bargain(user_bargain, receive_address, store, user_price)
+        now = datetime.datetime.now()
+        code, msg, data = check_bargain(user_bargain, receive_address, store, user_price,now)
         if code == 1000:
             delivery_pay, deliver_distance, has_enough_delivery = data
 
@@ -541,7 +541,8 @@ class UserBargainViewSets(ModelViewSet):
                 "deliver_pay": delivery_pay,
                 'skus': sd,
                 'has_enough_delivery': has_enough_delivery,
-                'deliver_distance': deliver_distance
+                'deliver_distance': deliver_distance,
+                'balance_time':now
             }
 
         return Response({'code': code, 'msg': msg, 'data': data})
