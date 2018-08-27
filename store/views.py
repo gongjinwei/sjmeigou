@@ -550,6 +550,8 @@ class UserBargainViewSets(ModelViewSet):
                 'logo': store.logo,
                 'take_off': store.take_off,
                 "deliver_pay": delivery_pay,
+                'price_now':user_price,
+                'origin_price':sku.price,
                 'skus': sd,
                 'has_enough_delivery': has_enough_delivery,
                 'deliver_distance': deliver_distance,
