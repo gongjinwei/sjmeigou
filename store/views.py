@@ -442,7 +442,7 @@ def check_bargain(user_bargain,receive_address,store,user_price,bargain_time,is_
         return 4253, '已经抢光了',None
 
     # 验证2：提交时的价格是否相符
-    instant_min_price = models.HelpCutPrice.objects.filter(user_bargain=user_bargain,join_time__gte=bargain_time).aggregate(min_price=Min('instant_price'))['min_price']
+    instant_min_price = models.HelpCutPrice.objects.filter(user_bargain=user_bargain,join_time__lte=bargain_time).aggregate(min_price=Min('instant_price'))['min_price']
     if not is_order and float(user_price) != instant_min_price:
         return 4254, '下单价格不符',None
 
