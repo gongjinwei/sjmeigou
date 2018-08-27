@@ -624,49 +624,5 @@ class UserBargainViewSets(ModelViewSet):
             return Response({'code': code, 'msg': msg})
 
 
-class BargainOrderView(ModelViewSet):
-    queryset = models.BargainOrder.objects.all()
-    serializer_class = serializers.BargainOrderSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        data = serializer.validated_data
-        order_data =data.get('store_order')
-        user_bargain=data['user_bargain']
-
-        if user_bargain.user != request.user:
-            return Response({'code':4191,'msg':'非发起者不能下单'})
-        price = data['price']
-        store = user_bargain.activity.store
-        receive_addr = order_data.get('user_address')
-        code,msg,deliver_data=check_bargain(user_bargain,receive_addr,price,data['balance_time'],is_order=True)
-
-        if code ==1000:
-            delivery_pay, deliver_distance, has_enough_delivery = deliver_data
-            if has_enough_delivery:
-                order_data.update({
-                    'account':price,
-                    'store_order_no':get_order_no(store.id),
-                    'deliver_payment':delivery_pay,
-                    'deliver_distance':deliver_distance,
-                    'user':request.user
-                })
-                store_order=serializer.save()
-                # 记录交易
-                order_trade = OrderTrade()
-                order_trade.trade_no=order_trade.trade_number
-                order_trade.store_order = store_order
-                order_trade.save()
-                # 发起付款
-                data=prepare_payment(request.user,'砍价订单',price,store_order.store_order_no,order_type='store_order')
-
-                return Response({'code':1000,'msg':'下单成功，即将发起付款','data':data})
-            else:
-                return Response({'code':code,'msg':'商家费用不足'})
-        else:
-            return Response({'code':code,'msg':msg})
-
 
 
