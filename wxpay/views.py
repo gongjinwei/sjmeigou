@@ -13,6 +13,7 @@ from weixin.pay import WeixinPay
 from . import serializers, models
 from register.views import CustomerXMLRender, CustomerXMLParser
 from order.models import JoinActivity, OrderTrade, DwdOrder
+from store.models import UserBargain
 from platforms.models import Account, KeepAccounts
 from platforms.serializers import KeepAccountSerializer
 from tools.contrib import prepare_dwd_order
@@ -189,7 +190,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                 keep_serializer.save()
 
         # 处理店铺单独付款订单-平台连锁单
-        if hasattr(order, 'unify_order'):
+        elif hasattr(order, 'unify_order'):
             # 下物流单
             self.order_deliver_server(order, plat_account)
 
@@ -199,6 +200,15 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             if relate_order.account <= relate_order.account_paid:
                 relate_order.state = 2
             relate_order.save()
+
+        # 处理砍价单
+        elif hasattr(order,'bargain_orders'):
+            self.order_deliver_server(order,plat_account)
+            relate_bargain=UserBargain.objects.filter(bargain_orders__store_order=order)
+            if relate_bargain.exists():
+                bargain = relate_bargain[0]
+                bargain.had_paid=True
+                bargain.save()
 
         order.save()
 

@@ -583,6 +583,8 @@ class UserBargainViewSets(ModelViewSet):
     @action(methods=['post'], detail=True, serializer_class=serializers.BargainOrderSerializer)
     def order(self,request,pk=None):
         user_bargain=self.get_object()
+        if user_bargain.had_paid == True:
+            return Response({'code':4192,'msg':'这个订单已支付'})
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

@@ -119,10 +119,10 @@ class HelpCutPrice(models.Model):
 
 
 class BargainOrder(models.Model):
-    user_bargain = models.ForeignKey(to='UserBargain',on_delete=models.CASCADE,editable=False)
+    user_bargain = models.ForeignKey(to='UserBargain',on_delete=models.CASCADE,editable=False,related_name='bargain_orders')
     balance_time = models.DateTimeField()
     price = models.DecimalField(max_digits=30,decimal_places=2)
-    store_order = models.ForeignKey(to='order.StoreOrder',on_delete=models.CASCADE)
+    store_order = models.ForeignKey(to='order.StoreOrder',on_delete=models.CASCADE,related_name='bargain_orders')
 
 
 
