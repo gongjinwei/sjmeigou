@@ -609,14 +609,14 @@ class UserBargainViewSets(ModelViewSet):
                     'user': request.user,
                     'store':store
                 })
-                store_order = serializer.save()
+                bargain_order = serializer.save()
                 # 记录交易
                 order_trade = OrderTrade()
                 order_trade.trade_no = order_trade.trade_number
-                order_trade.store_order = store_order
+                order_trade.store_order = bargain_order.store_order
                 order_trade.save()
                 # 发起付款
-                data = prepare_payment(request.user, '砍价订单', price, store_order.store_order_no,
+                data = prepare_payment(request.user, '砍价订单', price, bargain_order.store_order.store_order_no,
                                        order_type='store_order')
 
                 return Response({'code': 1000, 'msg': '下单成功，即将发起付款', 'data': data})
