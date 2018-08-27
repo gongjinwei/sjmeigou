@@ -457,9 +457,6 @@ class UnifyOrderView(CreateOnlyViewSet):
                             store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store,
                                                                                            account_type=5)
 
-                            if store_delivery_charge.bank_balance < Decimal(20.00):
-                                return Response({'code': 4109, 'msg': '商户物流费用不足', 'success': 'FAIL'})
-
                             address = serializer.validated_data.get('address', None)
                             if not address:
                                 return Response({'code': 4108, 'msg': '必须选择地址', 'success': 'FAIL'})
@@ -467,8 +464,12 @@ class UnifyOrderView(CreateOnlyViewSet):
                                 destination = '%6f,%6f' % (address.longitude, address.latitude)
                                 origin = '%6f,%6f' % (store.longitude, store.latitude)
 
-                                store_deliver_payment, store_to_pay, deliver_distance = get_deliver_pay(origin,
-                                                                                                        destination)
+                            store_deliver_payment, store_to_pay, deliver_distance = get_deliver_pay(origin,
+                                                                                                    destination)
+
+                            if store_delivery_charge.bank_balance < Decimal(20.00) or store_to_pay>store_delivery_charge.bank_balance:
+                                return Response({'code': 4109, 'msg': '商户物流费用不足', 'success': 'FAIL'})
+
                 if activity and get_coupon_data:
                     return Response({'code': 4106, 'msg': '只能使用一种优惠', 'success': 'FAIL'})
                 now = datetime.datetime.now()

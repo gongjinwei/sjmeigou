@@ -11,7 +11,7 @@ from geopy.distance import VincentyDistance
 from . import models
 from order.models import CommentContent, Coupon, StoreActivity,SkuOrder
 from goods.models import GoodDetail
-from tools.contrib import customer_get_object
+from order.serializers import StoreOrderSerializer
 
 
 class StoresSerializer(serializers.ModelSerializer):
@@ -313,6 +313,15 @@ class BargainBalanceSerializer(serializers.Serializer):
     user_bargain= serializers.PrimaryKeyRelatedField(queryset=models.UserBargain.objects.all())
 
 
+class BargainOrderSerializer(serializers.ModelSerializer):
+    store_order = StoreOrderSerializer()
 
+    class Meta:
+        model = models.BargainOrder
+        fields = '__all__'
 
-
+    def create(self, validated_data):
+        store_order_data = validated_data.pop('store_order')
+        store_order=StoreOrderSerializer().create(store_order_data)
+        validated_data['store_order']=store_order
+        return super().create(validated_data)

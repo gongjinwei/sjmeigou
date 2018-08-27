@@ -568,5 +568,10 @@ class UserBargainViewSets(ModelViewSet):
         return 1000,'OK',cut_price,price_now
 
 
+class BargainOrderView(ModelViewSet):
+    queryset = models.BargainOrder.objects.all()
+    serializer_class = serializers.BargainOrderSerializer
+
+
 
 
