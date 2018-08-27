@@ -627,6 +627,14 @@ class UserBargainViewSets(ModelViewSet):
         else:
             return Response({'code': code, 'msg': msg})
 
+    def get_queryset(self):
+        queryset = self.queryset
+        store_id = self.request.query_params.get('store','')
+        if not store_id and hasattr(self.request,'user') and self.request.user.is_authenticated:
+            return queryset.filter(user=self.request.user)
 
-
-
+        elif store_id and models.Stores.objects.filter(pk=store_id).exists():
+            store = models.Stores.objects.get(pk=store_id)
+            return queryset.filter(activity__store=store)
+        else:
+            return queryset.none()
