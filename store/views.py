@@ -16,7 +16,7 @@ from guardian.shortcuts import assign_perm
 
 from tools.viewset import CreateOnlyViewSet, ListDeleteViewSet, RetrieveUpdateViewSets,RetrieveOnlyViewSets,ListOnlyViewSet,CreateListViewSet
 from tools.permissions import MerchantOrReadOnlyPermission
-from tools.contrib import look_up_adocode,get_deliver_pay
+from tools.contrib import look_up_adocode,get_deliver_pay,customer_get_object
 
 
 # Create your views here.
@@ -489,7 +489,7 @@ class UserBargainViewSets(ModelViewSet):
 
     @action(methods=['get','post'], detail=True,serializer_class=serializers.HelpCutPriceSerializer,permission_classes=[AllowAny])
     def cut_price(self, request, pk=None):
-        obj = self.get_object()
+        obj = customer_get_object(self)
         user_id = request.query_params.get('userId', '')
         if user_id and UserInfo.objects.filter(pk=user_id).exists():
             userId = UserInfo.objects.get(pk=user_id)
@@ -513,7 +513,7 @@ class UserBargainViewSets(ModelViewSet):
 
     @action(methods=['get'], detail=True, serializer_class=serializers.HelpCutPriceSerializer)
     def get_help_cuts(self,request,pk=None):
-        obj = self.get_object()
+        obj = customer_get_object(self)
         queryset = models.HelpCutPrice.objects.filter(user_bargain=obj)
         page = self.paginate_queryset(queryset)
         if page is not None:
