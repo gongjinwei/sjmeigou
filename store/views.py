@@ -430,7 +430,7 @@ class BargainActivityViewSets(ModelViewSet):
         serializer.save()
 
 
-def check_bargain(user_bargain,receive_address,store,user_price,bargain_time):
+def check_bargain(user_bargain,receive_address,store,user_price,bargain_time,is_order=False):
     now = datetime.datetime.now()
     # 验证1：活动是否开始或终止，库存是否足够
     if user_bargain.activity.from_time > now:
@@ -443,13 +443,13 @@ def check_bargain(user_bargain,receive_address,store,user_price,bargain_time):
 
     # 验证2：提交时的价格是否相符
     instant_min_price = models.HelpCutPrice.objects.filter(user_bargain=user_bargain,join_time__gte=bargain_time).aggregate(min_price=Min('instant_price'))['min_price']
-    if user_price != instant_min_price:
+    if not is_order and float(user_price) != instant_min_price:
         return 4254, '下单价格不符',None
 
     # 验证3：计算配送费用
 
-    if receive_address.exists():
-        destination = '%6f,%6f' % (receive_address[0].longitude, receive_address[0].latitude)
+    if receive_address:
+        destination = '%6f,%6f' % (receive_address.longitude, receive_address.latitude)
     else:
         destination = ''
 
@@ -459,9 +459,12 @@ def check_bargain(user_bargain,receive_address,store,user_price,bargain_time):
                                                                    destination) if origin and destination else (
         0, 0, None)
 
+    if is_order and instant_min_price+delivery_pay !=float(user_price):
+        return 4254, '下单价格不符', None
+
     store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store, account_type=5)
 
-    has_enough_delivery = store_delivery_charge.bank_balance >= decimal.Decimal(20.00) and store_delivery_charge.bank_balance>store_to_pay
+    has_enough_delivery = store_delivery_charge.bank_balance >= decimal.Decimal(20.00) and store_delivery_charge.bank_balance>decimal.Decimal(store_to_pay)
 
     return 1000,'OK',(delivery_pay,deliver_distance,has_enough_delivery)
 
@@ -526,6 +529,10 @@ class UserBargainViewSets(ModelViewSet):
         user_bargain = serializer.validated_data['user_bargain']
         user_price = serializer.validated_data['price']
         receive_address = ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
+        if receive_address.exists():
+            receive_address = ReceiveAddress.objects.get(user=self.request.user,is_default=True)
+        else:
+            receive_address= None
         store = user_bargain.activity.store
         sku = user_bargain.activity.sku
         now = datetime.datetime.now()
@@ -572,6 +579,17 @@ class UserBargainViewSets(ModelViewSet):
 class BargainOrderView(ModelViewSet):
     queryset = models.BargainOrder.objects.all()
     serializer_class = serializers.BargainOrderSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        order_data =data.get('store_order')
+        user_bargain=data['user_bargain']
+        receive_addr = order_data.get('user_address')
+        # check_bargain(user_bargain,)
+
 
 
 
