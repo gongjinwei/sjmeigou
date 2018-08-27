@@ -26,8 +26,9 @@ from index.models import Application
 from goods.models import GoodDetail,SearchHistory
 from platforms.models import CodeWarehouse,Account,DeliverAdcode
 from register.models import UserInfo
-from order.models import ReceiveAddress
+from order.models import ReceiveAddress,OrderTrade
 from order.serializers import SkuDetailSerializer,ReceiveAddressSerializer
+from order.views import get_order_no,prepare_payment
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
@@ -430,7 +431,8 @@ class BargainActivityViewSets(ModelViewSet):
         serializer.save()
 
 
-def check_bargain(user_bargain,receive_address,store,user_price,bargain_time,is_order=False):
+def check_bargain(user_bargain,receive_address,user_price,bargain_time,is_order=False):
+    store = user_bargain.activity.store
     now = datetime.datetime.now()
     # 验证1：活动是否开始或终止，库存是否足够
     if user_bargain.activity.from_time > now:
@@ -537,7 +539,7 @@ class UserBargainViewSets(ModelViewSet):
         store = user_bargain.activity.store
         sku = user_bargain.activity.sku
         now = datetime.datetime.now()
-        code, msg, data = check_bargain(user_bargain, receive_address, store, user_price,now)
+        code, msg, data = check_bargain(user_bargain, receive_address,user_price,now)
         if code == 1000:
             delivery_pay, deliver_distance, has_enough_delivery = data
 
@@ -589,10 +591,38 @@ class BargainOrderView(ModelViewSet):
         data = serializer.validated_data
         order_data =data.get('store_order')
         user_bargain=data['user_bargain']
+
+        if user_bargain.user != request.user:
+            return Response({'code':4191,'msg':'非发起者不能下单'})
+        price = data['price']
+        store = user_bargain.activity.store
         receive_addr = order_data.get('user_address')
-        # check_bargain(user_bargain,)
+        code,msg,deliver_data=check_bargain(user_bargain,receive_addr,price,data['balance_time'],is_order=True)
 
+        if code ==1000:
+            delivery_pay, deliver_distance, has_enough_delivery = deliver_data
+            if has_enough_delivery:
+                order_data.update({
+                    'account':price,
+                    'store_order_no':get_order_no(store.id),
+                    'deliver_payment':delivery_pay,
+                    'deliver_distance':deliver_distance,
+                    'user':request.user
+                })
+                store_order=serializer.save()
+                # 记录交易
+                order_trade = OrderTrade()
+                order_trade.trade_no=order_trade.trade_number
+                order_trade.store_order = store_order
+                order_trade.save()
+                # 发起付款
+                data=prepare_payment(request.user,'砍价订单',price,store_order.store_order_no,order_type='store_order')
 
+                return Response({'code':1000,'msg':'下单成功，即将发起付款','data':data})
+            else:
+                return Response({'code':code,'msg':'商家费用不足'})
+        else:
+            return Response({'code':code,'msg':msg})
 
 
 
