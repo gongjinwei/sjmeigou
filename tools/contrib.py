@@ -85,7 +85,7 @@ def look_up_towncode(location):
 def prepare_dwd_order(store_order, user, op=None):
     from delivery.models import InitDwdOrder
     dwdorder = InitDwdOrder()
-    receive_address = store_order.unify_order.address
+    receive_address = store_order.unify_order.address if store_order.unify_order else store_order.user_address
     store = store_order.store
     temp_dict = {
         'order_original_id': dwdorder.trade_number,
