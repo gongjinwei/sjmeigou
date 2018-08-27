@@ -430,6 +430,20 @@ class BargainActivityViewSets(ModelViewSet):
         serializer.validated_data.update({'origin_price':origin_price})
         serializer.save()
 
+    def get_queryset(self):
+        queryset = self.queryset
+        store_id = self.request.query_params.get('store','')
+
+        if store_id:
+            try:
+                store_id = int(store_id)
+            except ValueError:
+                return queryset.none()
+            if models.Stores.objects.filter(pk=store_id).exists():
+                store = models.Stores.objects.get(pk=store_id)
+                return queryset.filter(store=store)
+        return queryset.none()
+
 
 def check_bargain(user_bargain,receive_address,user_price,bargain_time,is_order=False):
     store = user_bargain.activity.store
