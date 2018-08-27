@@ -27,7 +27,7 @@ from goods.models import GoodDetail,SearchHistory
 from platforms.models import CodeWarehouse,Account,DeliverAdcode
 from register.models import UserInfo
 from order.models import ReceiveAddress
-from order.serializers import SkuDetailSerializer
+from order.serializers import SkuDetailSerializer,ReceiveAddressSerializer
 
 appid = getattr(settings, 'APPID')
 secret = getattr(settings, 'APPSECRET')
@@ -550,7 +550,8 @@ class UserBargainViewSets(ModelViewSet):
                 'skus': sd,
                 'has_enough_delivery': has_enough_delivery,
                 'deliver_distance': deliver_distance,
-                'balance_time':now
+                'balance_time':now,
+                'receive_address':ReceiveAddressSerializer(receive_address).data if receive_address else None
             }
 
         return Response({'code': code, 'msg': msg, 'data': data})
