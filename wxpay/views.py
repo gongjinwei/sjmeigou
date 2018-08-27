@@ -190,7 +190,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                 keep_serializer.save()
 
         # 处理店铺单独付款订单-平台连锁单
-        if hasattr(order, 'unify_order'):
+        if getattr(order, 'unify_order',None):
             # 下物流单
             self.order_deliver_server(order, plat_account)
 
@@ -202,7 +202,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             relate_order.save()
 
         # 处理砍价单
-        elif hasattr(order,'bargain_orders'):
+        elif order.bargain_orders.exists():
             self.order_deliver_server(order,plat_account)
             relate_bargain=UserBargain.objects.filter(bargain_orders__store_order=order)
             if relate_bargain.exists():
