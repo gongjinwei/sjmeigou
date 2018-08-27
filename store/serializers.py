@@ -310,7 +310,6 @@ class UserBargainSerializer(serializers.ModelSerializer):
 
 class BargainBalanceSerializer(serializers.Serializer):
     price = serializers.FloatField(help_text='当前价格,用于验证')
-    user_bargain= serializers.PrimaryKeyRelatedField(queryset=models.UserBargain.objects.all())
 
 
 class BargainOrderSerializer(serializers.ModelSerializer):

@@ -523,10 +523,10 @@ class UserBargainViewSets(ModelViewSet):
 
     @action(methods=['post'], detail=True, serializer_class=serializers.BargainBalanceSerializer)
     def bargain_balance(self,request,pk=None):
+        user_bargain = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user_bargain = serializer.validated_data['user_bargain']
         user_price = serializer.validated_data['price']
         receive_address = ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
         if receive_address.exists():
