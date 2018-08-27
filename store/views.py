@@ -526,7 +526,8 @@ class UserBargainViewSets(ModelViewSet):
         user_bargain = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        if user_bargain.user !=request.user:
+            return Response({'msg':'非发起者不能结算','code':4255,'data':None})
         user_price = serializer.validated_data['price']
         receive_address = ReceiveAddress.objects.filter(user=self.request.user, is_default=True)
         if receive_address.exists():
