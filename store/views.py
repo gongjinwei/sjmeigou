@@ -430,7 +430,8 @@ class BargainActivityViewSets(ModelViewSet):
         serializer.save()
 
 
-def check_bargain(user_bargain,receive_address,store,user_price,now):
+def check_bargain(user_bargain,receive_address,store,user_price,bargain_time):
+    now = datetime.datetime.now()
     # 验证1：活动是否开始或终止，库存是否足够
     if user_bargain.activity.from_time > now:
         return 4251,'活动尚未开始',None
@@ -441,7 +442,7 @@ def check_bargain(user_bargain,receive_address,store,user_price,now):
         return 4253, '已经抢光了',None
 
     # 验证2：提交时的价格是否相符
-    instant_min_price = models.HelpCutPrice.objects.filter(user_bargain=user_bargain).aggregate(min_price=Min('instant_price'))['min_price']
+    instant_min_price = models.HelpCutPrice.objects.filter(user_bargain=user_bargain,join_time__gte=bargain_time).aggregate(min_price=Min('instant_price'))['min_price']
     if user_price != instant_min_price:
         return 4254, '下单价格不符',None
 
@@ -460,7 +461,7 @@ def check_bargain(user_bargain,receive_address,store,user_price,now):
 
     store_delivery_charge, created = Account.objects.get_or_create(user=None, store=store, account_type=5)
 
-    has_enough_delivery = store_delivery_charge.bank_balance >= decimal.Decimal(20.00)
+    has_enough_delivery = store_delivery_charge.bank_balance >= decimal.Decimal(20.00) and store_delivery_charge.bank_balance>store_to_pay
 
     return 1000,'OK',(delivery_pay,deliver_distance,has_enough_delivery)
 
