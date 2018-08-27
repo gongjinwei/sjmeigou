@@ -190,7 +190,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                 keep_serializer.save()
 
         # 处理店铺单独付款订单-平台连锁单
-        elif hasattr(order, 'unify_order'):
+        if hasattr(order, 'unify_order'):
             # 下物流单
             self.order_deliver_server(order, plat_account)
 
