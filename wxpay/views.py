@@ -208,6 +208,8 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             if relate_bargain.exists():
                 bargain = relate_bargain[0]
                 bargain.had_paid=True
+                bargain.activity.activity_stock-=1
+                bargain.activity.save()
                 bargain.save()
 
         order.save()

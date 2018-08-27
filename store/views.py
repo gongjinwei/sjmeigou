@@ -441,7 +441,8 @@ class BargainActivityViewSets(ModelViewSet):
                 return queryset.none()
             if models.Stores.objects.filter(pk=store_id).exists():
                 store = models.Stores.objects.get(pk=store_id)
-                return queryset.filter(store=store)
+                now =datetime.datetime.now()
+                return queryset.filter(store=store,from_time__lte=now,to_time__gte=now,activity_stock__gt=0)
         return queryset.none()
 
 
