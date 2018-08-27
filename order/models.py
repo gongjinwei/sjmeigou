@@ -206,7 +206,7 @@ class UnifyOrder(models.Model):
 
 class StoreOrder(models.Model):
     unify_order = models.ForeignKey(to='UnifyOrder', on_delete=models.CASCADE, related_name='store_orders',
-                                    editable=False)
+                                    editable=False,null=True)
     store_order_no = models.CharField(primary_key=True, editable=False, max_length=18)
     coupon = models.ForeignKey(to='GetCoupon', on_delete=models.DO_NOTHING, null=True)
     activity = models.ForeignKey(to='StoreActivity', on_delete=models.DO_NOTHING, null=True)

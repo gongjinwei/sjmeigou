@@ -600,6 +600,7 @@ class UserBargainViewSets(ModelViewSet):
         if code == 1000:
             delivery_pay, deliver_distance, has_enough_delivery = deliver_data
             if has_enough_delivery:
+
                 order_data.update({
                     'account': price,
                     'store_order_no': get_order_no(store.id),
