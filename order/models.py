@@ -223,7 +223,7 @@ class StoreOrder(models.Model):
     deliver_distance = models.FloatField(help_text='配送距离', null=True, editable=False)
     store_to_pay = models.DecimalField(max_digits=30, decimal_places=2, default=Decimal(0.00), editable=False)
     user_message = models.CharField(max_length=255, default='', blank=True)
-    user_address = models.OneToOneField(to='ReceiveAddress',on_delete=models.SET_NULL,null=True)
+    user_address = models.ForeignKey(to='ReceiveAddress',on_delete=models.SET_NULL,null=True)
     update_time = models.DateTimeField(auto_now=True)
     create_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, editable=False)
