@@ -44,7 +44,8 @@ class StoreInfoSerializer(serializers.ModelSerializer):
         return obj.info.store_images.values('store_image')
 
     def get_has_bargain(self,obj):
-        return obj.bargain_activities.exists()
+        now =datetime.datetime.now()
+        return obj.bargain_activities.filter(from_time__lte=now,to_time__gte=now,activity_stock__gt=0).exists()
 
     class Meta:
         model = models.Stores
