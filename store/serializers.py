@@ -38,19 +38,14 @@ class StoreQRCodeSerializer(serializers.ModelSerializer):
 
 class StoreInfoSerializer(serializers.ModelSerializer):
     store_images = serializers.SerializerMethodField()
-    has_bargain = serializers.SerializerMethodField()
 
     def get_store_images(self, obj):
         return obj.info.store_images.values('store_image')
 
-    def get_has_bargain(self,obj):
-        now =datetime.datetime.now()
-        return obj.bargain_activities.filter(from_time__lte=now,to_time__gte=now,activity_stock__gt=0).exists()
-
     class Meta:
         model = models.Stores
         fields = ('id', 'business_hour_from', 'business_hour_to', 'logo', 'active_state', 'create_time', 'name',
-                  'receive_address', 'longitude', 'latitude', 'store_phone', 'store_images', 'take_off','profile','has_bargain')
+                  'receive_address', 'longitude', 'latitude', 'store_phone', 'store_images', 'take_off','profile')
 
 
 class EnterpriseQualificationSerializer(serializers.ModelSerializer):
@@ -99,15 +94,20 @@ class StoreMessageSerializer(serializers.ModelSerializer):
     coupons = serializers.SerializerMethodField()
     activities = serializers.SerializerMethodField()
     had_been_favored=serializers.SerializerMethodField()
+    has_bargain = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Stores
-        fields = ('logo', 'name', 'take_off', 'activities', 'score_avg', 'coupons','receive_address','had_been_favored')
+        fields = ('logo', 'name', 'take_off', 'activities', 'score_avg', 'coupons','receive_address','had_been_favored','has_bargain')
 
     def get_score_avg(self, obj):
         orders = obj.store_orders.all()
         comments = CommentContent.objects.filter(sku_order__store_order__in=orders)
         return comments.aggregate(Avg('score')).get('score__avg', 0.0)
+
+    def get_has_bargain(self,obj):
+        now =datetime.datetime.now()
+        return obj.bargain_activities.filter(from_time__lte=now,to_time__gte=now,activity_stock__gt=0).exists()
 
     def get_coupons(self, obj):
         today = datetime.date.today()
