@@ -433,7 +433,7 @@ class BargainActivityViewSets(ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
         store_id = self.request.query_params.get('store','')
-
+        op = self.request.query_params.get('op','')
         if store_id:
             try:
                 store_id = int(store_id)
@@ -442,7 +442,10 @@ class BargainActivityViewSets(ModelViewSet):
             if models.Stores.objects.filter(pk=store_id).exists():
                 store = models.Stores.objects.get(pk=store_id)
                 now =datetime.datetime.now()
-                return queryset.filter(store=store,from_time__lte=now,to_time__gte=now,activity_stock__gt=0)
+                if op != 'backend':
+                    return queryset.filter(store=store,from_time__lte=now,to_time__gte=now,activity_stock__gt=0)
+                else:
+                    return queryset.filter(store=store)
         return queryset.none()
 
 
