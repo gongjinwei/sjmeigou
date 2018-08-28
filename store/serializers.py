@@ -38,9 +38,13 @@ class StoreQRCodeSerializer(serializers.ModelSerializer):
 
 class StoreInfoSerializer(serializers.ModelSerializer):
     store_images = serializers.SerializerMethodField()
+    has_bargain = serializers.SerializerMethodField()
 
     def get_store_images(self, obj):
         return obj.info.store_images.values('store_image')
+
+    def get_has_bargain(self,obj):
+        return obj.bargain_activities.exists()
 
     class Meta:
         model = models.Stores

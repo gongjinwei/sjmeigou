@@ -90,7 +90,7 @@ class BargainActivity(models.Model):
     poster = models.ForeignKey(to='platforms.BargainPoster',on_delete=models.CASCADE)
     from_time = models.DateTimeField(help_text='起始时间')
     to_time = models.DateTimeField(help_text='终止时间')
-    store = models.ForeignKey(to='Stores',on_delete=models.CASCADE,editable=False)
+    store = models.ForeignKey(to='Stores',on_delete=models.CASCADE,editable=False,related_name='bargain_activities')
     state = models.SmallIntegerField(choices=((1,'正常'),(2,'终止')),editable=False,default=1)
     activity_stock = models.IntegerField()
     origin_price = models.FloatField(editable=False)
