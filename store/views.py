@@ -656,6 +656,6 @@ class UserBargainViewSets(ModelViewSet):
     def delivery(self,request):
         data=['120.060956,29.328234','120.060534,29.32797','120.060291,29.327797','120.059819,29.32747',
               '120.059245,29.327222','120.058737,29.327029']
-        seconds = int(datetime.datetime.now().timestamp())
+        seconds = int(datetime.datetime.now().timestamp()/5)
         lng, lat = data[seconds % 6].split(',')
         return Response({'lng':lng,'lat':lat})
