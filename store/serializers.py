@@ -329,3 +329,5 @@ class BargainOrderSerializer(serializers.ModelSerializer):
         store_order=StoreOrderSerializer().create(store_order_data)
         validated_data['store_order']=store_order
         return super().create(validated_data)
+
+

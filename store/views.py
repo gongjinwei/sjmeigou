@@ -651,3 +651,10 @@ class UserBargainViewSets(ModelViewSet):
             return queryset.filter(user=self.request.user)
         else:
             return queryset.none()
+
+    @action(methods=['get'],detail=False)
+    def delivery(self,request):
+        data=['120.060956,29.328234','120.060534,29.32797','120.060291,29.327797','120.059819,29.32747',
+              '120.059245,29.327222','120.058737,29.327029']
+        seconds = int(datetime.datetime.now().timestamp())
+        return Response(data[seconds % 6])
