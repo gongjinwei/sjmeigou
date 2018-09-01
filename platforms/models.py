@@ -89,6 +89,7 @@ class BankCard(models.Model):
     class Meta:
         ordering=('-updated_time',)
 
+
 class BankNo(models.Model):
     bank_name = models.CharField(max_length=50)
     bank_no = models.CharField(max_length=4,primary_key=True)
