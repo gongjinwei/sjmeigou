@@ -82,9 +82,17 @@ class BankCard(models.Model):
     receiver_account_num = models.CharField(max_length=30)
     receiver_bank_name = models.CharField(max_length=128)
     receiver_name = models.CharField(max_length=50)
-    receiver_bank_no = models.IntegerField()
+    receiver_bank_no = models.ForeignKey(to='BankNo',on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
+
+
+class BankNo(models.Model):
+    bank_name = models.CharField(max_length=50)
+    bank_no = models.CharField(max_length=4,primary_key=True)
+
+    def __str__(self):
+        return self.bank_name
 
 
 class ToLingqiang(models.Model):
