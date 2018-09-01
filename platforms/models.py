@@ -87,6 +87,15 @@ class BankCard(models.Model):
     updated_time = models.DateTimeField(auto_now=True)
 
 
+class ToLingqiang(models.Model):
+    partner_trade_no = models.CharField(max_length=40,editable=False)
+    to_user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+    amount = models.IntegerField(help_text='单位（分）')
+    desc = models.CharField(default='转至微信零钱',editable=False,max_length=50)
+    payment_no = models.CharField(max_length=40,editable=False)
+    payment_time = models.CharField(max_length=50,editable=False)
+
+
 class AccountRecharge(models.Model):
     recharge_money = models.DecimalField(help_text='充值金额(元）',max_digits=30,decimal_places=2)
     recharge_type = models.SmallIntegerField(help_text='充值类型',choices=((1,'商家物流充值'),(2,'平台物流充值')))

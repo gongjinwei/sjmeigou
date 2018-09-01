@@ -85,3 +85,9 @@ class BankCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BankCard
         fields ='__all__'
+
+
+class TolingqiangSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ToLingqiang
+        fields = '__all__'

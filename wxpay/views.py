@@ -1,4 +1,4 @@
-import time, copy
+import time, copy,random
 from django.conf import settings
 from rest_framework.views import Response
 from rest_framework.permissions import AllowAny
@@ -9,6 +9,7 @@ from django.db.models import F
 from tools import viewset, dianwoda
 
 from weixin.pay import WeixinPay
+from weixin.base import Map
 
 from . import serializers, models
 from register.views import CustomerXMLRender, CustomerXMLParser
@@ -240,3 +241,30 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
 
             init_dwd_order.dwd_store_order=dwd_store_order
             init_dwd_order.save()
+
+
+class MyWeixinPay(WeixinPay):
+    def _lingqiang(self,url,data):
+        data.setdefault("mch_appid", self.app_id)
+        data.setdefault("mchid", self.mch_id)
+        data.setdefault("nonce_str", self.nonce_str)
+        data.setdefault("check_name","NO_CHECK")
+        data.setdefault("partner_trade_no",self.trade_no)
+        data.setdefault("sign", self.sign(data))
+
+        resp = self.sess.post(url, data=self.to_xml(data), cert=(self.cert, self.key))
+        content = resp.content.decode("utf-8")
+        if "return_code" in content:
+            data = Map(self.to_dict(content))
+            return data
+        return content
+
+    @property
+    def trade_no(self):
+        return '%s%s%s' % ('LQ', datetime.strftime(datetime.now(), '%y%m%d'),random.randint(10,99))
+
+    def to_lingqiang(self,**data):
+        url = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers"
+        return self._lingqiang(url,data)
+
+myweixinpay = MyWeixinPay(app_id, mch_id, mch_key, notify_url,mch_key_file,mch_cert_file)

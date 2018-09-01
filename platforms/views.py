@@ -14,6 +14,7 @@ from . import serializers, models
 from tools.viewset import CreateOnlyViewSet
 from order.views import prepare_payment
 from store.models import Stores
+from wxpay.views import myweixinpay
 
 
 class CheckApplicationViewSets(ModelViewSet):
@@ -126,7 +127,7 @@ class AccountViewSets(ModelViewSet):
     def bank_card(self,request):
         if hasattr(request,'user') and request.user.is_authenticated:
             if request.method == 'GET':
-                queryset = models.BankCard.objects.filter()
+                queryset = models.BankCard.objects.filter(user=request.user)
                 page = self.paginate_queryset(queryset)
                 if page is not None:
                     serializer = self.get_serializer(page, many=True)
@@ -138,10 +139,31 @@ class AccountViewSets(ModelViewSet):
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
 
-                serializer.save()
+                serializer.save(user=request.user)
                 return Response(serializer.data)
         else:
             return Response('请先登录')
+
+    @action(methods=['post'],detail=True,serializer_class=serializers.TolingqiangSerializer)
+    def to_lingqian(self,request,pk=None):
+        obj = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        amount = serializer.validated_data['amount']
+        if obj.account_type==5:
+            return Response('物流账户不可提现')
+        elif obj.account_type ==3 and amount>0 and amount<=obj.bank_balance:
+            data ={
+                'openid':request.user.userinfo.openId,
+                'amount':amount,
+                'desc':'转至微信零钱',
+                'spbill_create_ip':request.META['HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.META else request.META['REMOTE_ADDR']
+            }
+            r=myweixinpay.to_lingqiang(**data)
+            return Response(r)
+        else:
+            return Response('金额不能非正值，提现金额不能大于余额')
+
 
 
 class DeliveryReasonView(ModelViewSet):
