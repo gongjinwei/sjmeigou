@@ -145,31 +145,36 @@ class AccountViewSets(ModelViewSet):
         else:
             return Response('请先登录')
 
-    @action(methods=['post'],detail=True,serializer_class=serializers.TolingqiangSerializer)
+    @action(methods=['get','post'],detail=True,serializer_class=serializers.TolingqiangSerializer)
     def to_lingqian(self,request,pk=None):
         obj = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        amount = serializer.validated_data['amount']
-        if obj.account_type==5:
-            return Response({"result_code": "FAIL","err_code_des":'物流账户不可提现'})
-        elif obj.account_type ==3 and amount>=100 and amount<=int(obj.bank_balance*100):
-            data ={
-                'openid':request.user.userinfo.openId,
-                'amount':amount,
-                'desc':'转至微信零钱',
-                'spbill_create_ip':request.META['HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.META else request.META['REMOTE_ADDR']
-            }
-            r=myweixinpay.to_lingqiang(**data)
-            result_code = r.get('result_code','FAIL')
-            return_code = r.get('return_code','FAIL')
-            if result_code =='SUCCESS' and return_code=='SUCCESS':
-                serializer.save(partner_trade_no=r['partner_trade_no'],to_user=request.user,payment_no=r['payment_no'],payment_time=r['payment_time'])
-                obj.bank_balance -=decimal.Decimal(amount/100)
-                obj.save()
-            return Response(r)
-        else:
-            return Response({"result_code": "FAIL","err_code_des":'金额不能少于1元，提现金额不能大于余额'})
+        if request.method =='GET':
+            queryset = models.BankNo.objects.all()
+            bank_no_serializer = serializers.BankNoSerializer(queryset,many=True)
+            return Response(bank_no_serializer.data)
+        elif request.method == 'POST':
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            amount = serializer.validated_data['amount']
+            if obj.account_type==5:
+                return Response({"result_code": "FAIL","err_code_des":'物流账户不可提现'})
+            elif obj.account_type ==3 and amount>=100 and amount<=int(obj.bank_balance*100):
+                data ={
+                    'openid':request.user.userinfo.openId,
+                    'amount':amount,
+                    'desc':'转至微信零钱',
+                    'spbill_create_ip':request.META['HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.META else request.META['REMOTE_ADDR']
+                }
+                r=myweixinpay.to_lingqiang(**data)
+                result_code = r.get('result_code','FAIL')
+                return_code = r.get('return_code','FAIL')
+                if result_code =='SUCCESS' and return_code=='SUCCESS':
+                    serializer.save(partner_trade_no=r['partner_trade_no'],to_user=request.user,payment_no=r['payment_no'],payment_time=r['payment_time'])
+                    obj.bank_balance -=decimal.Decimal(amount/100)
+                    obj.save()
+                return Response(r)
+            else:
+                return Response({"result_code": "FAIL","err_code_des":'金额不能少于1元，提现金额不能大于余额'})
 
 
 class DeliveryReasonView(ModelViewSet):
@@ -196,8 +201,3 @@ class RefundReasonViewSets(ModelViewSet):
 class BargainPosterViewSets(ModelViewSet):
     queryset = models.BargainPoster.objects.all()
     serializer_class = serializers.BargainPosterSerializer
-
-
-class BankNoView(ListOnlyViewSet):
-    queryset = models.BankNo.objects.all()
-    serializer_class = serializers.BankNoSerializer
