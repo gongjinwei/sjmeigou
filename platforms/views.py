@@ -171,34 +171,38 @@ class AccountViewSets(ModelViewSet):
         else:
             return Response({"result_code": "FAIL","err_code_des":'金额不能少于1元，提现金额不能大于余额'})
 
-    @action(methods=['post'], detail=True, serializer_class=serializers.ToBankSerializer)
+    @action(methods=['get','post'], detail=True, serializer_class=serializers.ToBankSerializer)
     def to_bank(self, request, pk=None):
         obj = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        amount = serializer.validated_data['amount']
-        bank_card = serializer.validated_data['bank_card']
-        if obj.account_type == 5:
-            return Response({"result_code": "FAIL", "err_code_des": '物流账户不可提现'})
-        elif obj.account_type == 3 and amount >= 100 and amount <= int(obj.bank_balance * 100):
-            data = {
-                'amount': amount,
-                'desc': '转至银行卡',
-                'enc_bank_no':bank_card.receiver_bank_no.pk,
-                'enc_true_name':bank_card.receiver_name,
-                'bank_code':bank_card.receiver_bank_no.pk
-            }
-            r = myweixinpay.to_bank(**data)
-            result_code = r.get('result_code', 'FAIL')
-            return_code = r.get('return_code', 'FAIL')
-            if result_code == 'SUCCESS' and return_code == 'SUCCESS':
-                serializer.save(partner_trade_no=r['partner_trade_no'], to_user=request.user,
-                                cmms_amt=r['cmms_amt'])
-                obj.bank_balance -= decimal.Decimal(amount / 100)
-                obj.save()
-            return Response(r)
-        else:
-            return Response({"result_code": "FAIL", "err_code_des": '金额不能少于1元，提现金额不能大于余额'})
+        if request.method =='GET':
+            return Response('OK')
+        elif request.method =='POST':
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            amount = serializer.validated_data['amount']
+            bank_card = serializer.validated_data['bank_card']
+            if obj.account_type == 5:
+                return Response({"result_code": "FAIL", "err_code_des": '物流账户不可提现'})
+
+            elif obj.account_type == 3 and amount >= 100 and amount <= int(obj.bank_balance * 100):
+                data = {
+                    'amount': amount,
+                    'desc': '转至银行卡',
+                    'enc_bank_no':bank_card.receiver_bank_no.pk,
+                    'enc_true_name':bank_card.receiver_name,
+                    'bank_code':bank_card.receiver_bank_no.pk
+                }
+                r = myweixinpay.to_bank(**data)
+                result_code = r.get('result_code', 'FAIL')
+                return_code = r.get('return_code', 'FAIL')
+                if result_code == 'SUCCESS' and return_code == 'SUCCESS':
+                    serializer.save(partner_trade_no=r['partner_trade_no'], to_user=request.user,
+                                    cmms_amt=r['cmms_amt'])
+                    obj.bank_balance -= decimal.Decimal(amount / 100)
+                    obj.save()
+                return Response(r)
+            else:
+                return Response({"result_code": "FAIL", "err_code_des": '金额不能少于1元，提现金额不能大于余额'})
 
 
 class DeliveryReasonView(ModelViewSet):

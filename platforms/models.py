@@ -87,7 +87,6 @@ class BankCard(models.Model):
     updated_time = models.DateTimeField(auto_now=True)
 
 
-
 class BankNo(models.Model):
     bank_name = models.CharField(max_length=50)
     bank_no = models.CharField(max_length=4,primary_key=True)

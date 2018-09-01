@@ -82,6 +82,8 @@ class BargainPosterSerializer(serializers.ModelSerializer):
 
 
 class BankCardSerializer(serializers.ModelSerializer):
+    bank_name = serializers.ReadOnlyField(source='receiver_bank_no.bank_name')
+
     class Meta:
         model = models.BankCard
         fields ='__all__'
