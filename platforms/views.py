@@ -12,7 +12,7 @@ from rest_framework.decorators import action
 # Create your views here.
 
 from . import serializers, models
-from tools.viewset import CreateOnlyViewSet
+from tools.viewset import ListOnlyViewSet
 from order.views import prepare_payment
 from store.models import Stores
 from wxpay.views import myweixinpay
@@ -196,3 +196,8 @@ class RefundReasonViewSets(ModelViewSet):
 class BargainPosterViewSets(ModelViewSet):
     queryset = models.BargainPoster.objects.all()
     serializer_class = serializers.BargainPosterSerializer
+
+
+class BankNoView(ListOnlyViewSet):
+    queryset = models.BankNo.objects.all()
+    serializer_class = serializers.BankNoSerializer

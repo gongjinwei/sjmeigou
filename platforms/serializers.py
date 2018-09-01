@@ -91,3 +91,9 @@ class TolingqiangSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ToLingqiang
         fields = '__all__'
+
+
+class BankNoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.BankNo
+        fields ='__all__'
