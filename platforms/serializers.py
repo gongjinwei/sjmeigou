@@ -97,3 +97,9 @@ class BankNoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BankNo
         fields ='__all__'
+
+
+class ToBankSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ToBank
+        fields ='__all__'

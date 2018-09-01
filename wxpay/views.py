@@ -249,7 +249,7 @@ class MyWeixinPay(WeixinPay):
         data.setdefault("mchid", self.mch_id)
         data.setdefault("nonce_str", self.nonce_str)
         data.setdefault("check_name","NO_CHECK")
-        data.setdefault("partner_trade_no",self.trade_no)
+        data.setdefault("partner_trade_no",self.trade_no())
         data.setdefault("sign", self.sign(data))
 
         resp = self.sess.post(url, data=self.to_xml(data), cert=(self.cert, self.key))
@@ -259,12 +259,28 @@ class MyWeixinPay(WeixinPay):
             return data
         return content
 
-    @property
-    def trade_no(self):
-        return '%s%s%s' % ('LQ', datetime.strftime(datetime.now(), '%y%m%d'),random.randint(10,99))
+    def _bank(self,url,data):
+        data.setdefault('mch_id',self.mch_id)
+        data.setdefault("partner_trade_no", self.trade_no(trade_type='BK'))
+        data.setdefault("nonce_str", self.nonce_str)
+        data.setdefault("sign", self.sign(data))
+
+        resp = self.sess.post(url, data=self.to_xml(data), cert=(self.cert, self.key))
+        content = resp.content.decode("utf-8")
+        if "return_code" in content:
+            data = Map(self.to_dict(content))
+            return data
+        return content
+
+    def trade_no(self,trade_type='LQ'):
+        return '%s%s%s' % (trade_type, datetime.strftime(datetime.now(), '%y%m%d'),random.randint(10,99))
 
     def to_lingqiang(self,**data):
         url = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers"
         return self._lingqiang(url,data)
+
+    def to_bank(self,**data):
+        url ='https://api.mch.weixin.qq.com/mmpaysptrans/pay_bank'
+        return self._bank(url,data)
 
 myweixinpay = MyWeixinPay(app_id, mch_id, mch_key, notify_url,mch_key_file,mch_cert_file)
