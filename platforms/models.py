@@ -78,7 +78,7 @@ class Account(models.Model):
 
 
 class BankCard(models.Model):
-    account = models.ForeignKey(to='Account',on_delete=models.CASCADE,editable=False)
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
     receiver_account_num = models.CharField(max_length=30)
     receiver_bank_name = models.CharField(max_length=128)
     receiver_name = models.CharField(max_length=50)

@@ -122,24 +122,26 @@ class AccountViewSets(ModelViewSet):
         else:
             return queryset.none()
 
-    @action(methods=['get','post'],detail=True,serializer_class=serializers.BankCardSerializer)
-    def bank_card(self,request,pk=None):
-        obj = self.get_object()
-        if request.method == 'GET':
-            queryset = models.BankCard.objects.filter(account=obj)
-            page = self.paginate_queryset(queryset)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                return self.get_paginated_response(serializer.data)
+    @action(methods=['get','post'],detail=False,serializer_class=serializers.BankCardSerializer)
+    def bank_card(self,request):
+        if hasattr(request,'user') and request.user.is_authenticated:
+            if request.method == 'GET':
+                queryset = models.BankCard.objects.filter()
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    return self.get_paginated_response(serializer.data)
 
-            serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
-        elif request.method == 'POSt':
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
+            elif request.method == 'POSt':
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
 
-            serializer.save(account=obj)
-            return Response(serializer.data)
+                serializer.save()
+                return Response(serializer.data)
+        else:
+            return Response('请先登录')
 
 
 class DeliveryReasonView(ModelViewSet):
