@@ -1,3 +1,4 @@
+import decimal
 from rest_framework.views import Response, status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
@@ -151,8 +152,8 @@ class AccountViewSets(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         amount = serializer.validated_data['amount']
         if obj.account_type==5:
-            return Response('物流账户不可提现')
-        elif obj.account_type ==3 and amount>=0 and amount<=int(obj.bank_balance*100):
+            return Response({"result_code": "FAIL","err_code_des":'物流账户不可提现'})
+        elif obj.account_type ==3 and amount>=100 and amount<=int(obj.bank_balance*100):
             data ={
                 'openid':request.user.userinfo.openId,
                 'amount':amount,
@@ -160,10 +161,15 @@ class AccountViewSets(ModelViewSet):
                 'spbill_create_ip':request.META['HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.META else request.META['REMOTE_ADDR']
             }
             r=myweixinpay.to_lingqiang(**data)
+            result_code = r.get('result_code','FAIL')
+            return_code = r.get('return_code','FAIL')
+            if result_code =='SUCCESS' and return_code=='SUCCESS':
+                serializer.save(partner_trade_no=r['partner_trade_no'],to_user=request.user,payment_no=r['payment_no'],payment_time=r['payment_time'])
+                obj.bank_balance -=decimal.Decimal(amount/100)
+                obj.save()
             return Response(r)
         else:
-            return Response('金额不能少于1元，提现金额不能大于余额')
-
+            return Response({"result_code": "FAIL","err_code_des":'金额不能少于1元，提现金额不能大于余额'})
 
 
 class DeliveryReasonView(ModelViewSet):
