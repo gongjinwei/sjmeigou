@@ -152,7 +152,7 @@ class AccountViewSets(ModelViewSet):
         amount = serializer.validated_data['amount']
         if obj.account_type==5:
             return Response('物流账户不可提现')
-        elif obj.account_type ==3 and amount>=100 and amount<=int(obj.bank_balance*100):
+        elif obj.account_type ==3 and amount>=0 and amount<=int(obj.bank_balance*100):
             data ={
                 'openid':request.user.userinfo.openId,
                 'amount':amount,
