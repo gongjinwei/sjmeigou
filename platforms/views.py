@@ -152,7 +152,7 @@ class AccountViewSets(ModelViewSet):
         amount = serializer.validated_data['amount']
         if obj.account_type==5:
             return Response('物流账户不可提现')
-        elif obj.account_type ==3 and amount>0 and amount<=obj.bank_balance:
+        elif obj.account_type ==3 and amount>=100 and amount<=int(obj.bank_balance*100):
             data ={
                 'openid':request.user.userinfo.openId,
                 'amount':amount,
@@ -162,7 +162,7 @@ class AccountViewSets(ModelViewSet):
             r=myweixinpay.to_lingqiang(**data)
             return Response(r)
         else:
-            return Response('金额不能非正值，提现金额不能大于余额')
+            return Response('金额不能少于1元，提现金额不能大于余额')
 
 
 
