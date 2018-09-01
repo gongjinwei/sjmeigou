@@ -86,6 +86,8 @@ class BankCard(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering=('-updated_time',)
 
 class BankNo(models.Model):
     bank_name = models.CharField(max_length=50)

@@ -175,7 +175,13 @@ class AccountViewSets(ModelViewSet):
     def to_bank(self, request, pk=None):
         obj = self.get_object()
         if request.method =='GET':
-            return Response('OK')
+            if models.BankCard.objects.filter(user=self.request.user).exists():
+                instance =models.BankCard.objects.filter(user=self.request.user).latest('updated_time')
+                ret={
+                    'bank_no':instance.receiver_bank_no.bank_name,
+                    'last_four_num':instance.receiver_account_num[-4:]
+                }
+                return Response(ret)
         elif request.method =='POST':
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
