@@ -178,6 +178,7 @@ class AccountViewSets(ModelViewSet):
             if models.BankCard.objects.filter(user=self.request.user).exists():
                 instance =models.BankCard.objects.filter(user=self.request.user).latest('updated_time')
                 ret={
+                    'bank_card_id':instance.id,
                     'bank_no':instance.receiver_bank_no.bank_name,
                     'last_four_num':instance.receiver_account_num[-4:]
                 }

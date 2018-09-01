@@ -83,10 +83,15 @@ class BargainPosterSerializer(serializers.ModelSerializer):
 
 class BankCardSerializer(serializers.ModelSerializer):
     bank_name = serializers.ReadOnlyField(source='receiver_bank_no.bank_name')
+    receiver_account_num = serializers.CharField(max_length=30,write_only=True)
+    last_four_num = serializers.SerializerMethodField()
 
     class Meta:
         model = models.BankCard
         fields ='__all__'
+
+    def get_last_four_num(self,obj):
+        return obj.receiver_account_num[-4:]
 
 
 class TolingqiangSerializer(serializers.ModelSerializer):
