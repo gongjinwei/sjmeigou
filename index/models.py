@@ -48,10 +48,6 @@ class Application(models.Model):
     longitude = models.FloatField()
     latitude = models.FloatField()
     adcode = models.CharField(max_length=6,default='330700')
-    receiver_account_num = models.CharField(max_length=30)
-    receiver_bank_name = models.CharField(max_length=128)
-    receiver_name = models.CharField(max_length=50)
-    receiver_bank_no = models.IntegerField()
     form_id = models.CharField(max_length=50, blank=True, null=True)
     application_status = models.SmallIntegerField(choices=((1, '审核中'), (2, '打款验证中'), (3, '审核通过'),(4,'审核不通过'),(5,'待激活'),(6,'正常')), editable=False,
                                                   default=1)

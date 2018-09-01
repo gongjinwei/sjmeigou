@@ -79,3 +79,9 @@ class BargainPosterSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BargainPoster
         fields = '__all__'
+
+
+class BankCardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.BankCard
+        fields ='__all__'

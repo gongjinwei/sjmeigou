@@ -77,6 +77,16 @@ class Account(models.Model):
         unique_together=('user','store','account_type')
 
 
+class BankCard(models.Model):
+    account = models.ForeignKey(to='Account',on_delete=models.CASCADE,editable=False)
+    receiver_account_num = models.CharField(max_length=30)
+    receiver_bank_name = models.CharField(max_length=128)
+    receiver_name = models.CharField(max_length=50)
+    receiver_bank_no = models.IntegerField()
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
+
+
 class AccountRecharge(models.Model):
     recharge_money = models.DecimalField(help_text='充值金额(元）',max_digits=30,decimal_places=2)
     recharge_type = models.SmallIntegerField(help_text='充值类型',choices=((1,'商家物流充值'),(2,'平台物流充值')))
