@@ -10,7 +10,7 @@ from platforms.serializers import DeliverServiceSerializer
 from platforms.models import DeliverServices
 from geopy.distance import VincentyDistance
 from order.models import CommentContent
-from store.models import GoodFavorites
+from store.models import GoodFavorites,SharingReduceActivity,BargainActivity
 from order.serializers import CommentContentSerializer
 
 
@@ -189,6 +189,8 @@ class GoodDetailSerializer(serializers.ModelSerializer):
     latest_comment = serializers.SerializerMethodField()
     had_been_favored=serializers.SerializerMethodField()
     sku_num = serializers.SerializerMethodField()
+    good_share_activity=serializers.SerializerMethodField()
+    good_bargain_activity = serializers.SerializerMethodField()
 
     def get_class_name(self,obj):
         return "%s>%s" % (obj.third_class.second_class.second_class_name,obj.third_class.third_class_name)
@@ -265,6 +267,16 @@ class GoodDetailSerializer(serializers.ModelSerializer):
     def get_sku_num(self,obj):
         return len(models.SKU.objects.filter(color__good_detail=obj))
 
+    def get_good_share_activity(self,obj):
+        activity = SharingReduceActivity.objects.filter(store=obj.store, is_ended=False)
+        if activity.exists():
+            return {'id':activity[0].id,'reduce_money':activity[0].reduce_money}
+
+    def get_good_bargain_activity(self,obj):
+        now=datetime.datetime.now()
+        activity = BargainActivity.objects.filter(sku__color__good_detail=obj,from_time__lte=now,to_time__gte=now,state=0)
+        if activity.exists():
+            return activity.values('sku_id')
 
 
 class GoodSearchSerializer(serializers.ModelSerializer):
