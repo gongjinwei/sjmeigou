@@ -669,3 +669,10 @@ class SharingReduceViewSets(CreateListViewSet):
     def perform_create(self, serializer):
         serializer.save(store=self.request.user.stores)
 
+    def get_queryset(self):
+        queryset = self.queryset
+        if hasattr(self.request,'user') and hasattr(self.request.user,'stores'):
+            return queryset.filter(store=self.request.user.stores)
+        else:
+            return queryset.none()
+
