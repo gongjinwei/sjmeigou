@@ -1059,7 +1059,7 @@ class ShoppingConsultViewSets(CreateListDeleteViewSet):
         ids = serializer.validated_data['ids']
         user_ids = list(self.queryset.filter(user=request.user).values_list('id', flat=True))
         if set(ids).issubset(user_ids):
-            self.queryset.filter(id__in=ids).delete()
+            self.queryset.filter(id__in=ids).update(state=1)
             return Response({'code': 1000, 'msg': '删除成功'})
         else:
             return Response({'code': 4150, 'msg': '删除错误'})
