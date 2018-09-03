@@ -667,7 +667,11 @@ class SharingReduceViewSets(ModelViewSet):
     permission_classes = (MerchantOrReadOnlyPermission,)
 
     def perform_create(self, serializer):
-        serializer.save(store=self.request.user.stores)
+        store = self.request.user.stores
+        if self.queryset.filter(store=store,to_date__isnull=True).exists():
+            return Response({'code':4251,'msg':'存在未结束分享'})
+        else:
+            serializer.save(store=store,to_date=datetime.date.today()+datetime.timedelta(days=1))
 
     def perform_update(self, serializer):
         is_ended = serializer.validated_data.get('is_ended',False)
