@@ -127,10 +127,7 @@ class BargainOrder(models.Model):
 
 class SharingReduceActivity(models.Model):
     store =models.ForeignKey(to='Stores',on_delete=models.CASCADE,editable=False,related_name='sharing_activities')
-    start_date = models.DateField(auto_now_add=True)
-    to_date = models.DateField(editable=False,null=True)
     is_ended = models.BooleanField(default=False)
-    visible = models.SmallIntegerField(choices=((1,'可见'),(2,'不可见')),default=1,editable=False)
     reduce_money = models.DecimalField(max_digits=5,decimal_places=2)
 
 

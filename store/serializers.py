@@ -336,3 +336,6 @@ class SharingReduceSerializer(serializers.ModelSerializer):
         model = models.SharingReduceActivity
         fields = '__all__'
 
+    def create(self, validated_data):
+        instance,created=self.Meta.model.objects.get_or_create(defaults=validated_data,store=validated_data['store'])
+        return instance
