@@ -125,6 +125,11 @@ class BargainOrder(models.Model):
     store_order = models.ForeignKey(to='order.StoreOrder',on_delete=models.CASCADE,related_name='bargain_orders')
 
 
+class SharingReduceActivity(models.Model):
+    store =models.ForeignKey(to='Stores',on_delete=models.CASCADE,editable=False,related_name='sharing_activities')
+    start_date = models.DateField()
+    to_date = models.DateField()
+    reduce_money = models.DecimalField(max_digits=5,decimal_places=2)
 
 
 

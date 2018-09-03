@@ -412,3 +412,4 @@ class RefundProof(models.Model):
     refund_desc = models.CharField(max_length=128, null=True)
     state = models.SmallIntegerField(choices=((1, '退货进行中'), (2, '退货成功')), editable=False, default=1)
     create_time = models.DateTimeField(auto_now_add=True)
+
