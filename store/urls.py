@@ -19,5 +19,6 @@ router.register('storeFavorites',views.StoreFavoritesViewSets,base_name='storeFa
 router.register('goodFavorites',views.GoodFavoritesViewSets,base_name='goodFavorites')
 router.register('bargainActivity',views.BargainActivityViewSets,base_name='bargainActivity')
 router.register('userBargain',views.UserBargainViewSets,base_name='userBargain')
+router.register('sharingReduce',views.SharingReduceViewSets,base_name='sharingReduce')
 
 urlpatterns=router.urls

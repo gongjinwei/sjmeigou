@@ -331,3 +331,8 @@ class BargainOrderSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class SharingReduceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.SharingReduceActivity
+        fields = '__all__'
+

@@ -659,3 +659,20 @@ class UserBargainViewSets(ModelViewSet):
         seconds = int(datetime.datetime.now().timestamp()/5)
         lng, lat = data[seconds % 6].split(',')
         return Response({'lng':lng,'lat':lat})
+
+
+class SharingReduceViewSets(ModelViewSet):
+    queryset = models.SharingReduceActivity.objects.filter(visible=1)
+    serializer_class = serializers.SharingReduceSerializer
+    permission_classes = (MerchantOrReadOnlyPermission,)
+
+    def perform_create(self, serializer):
+        serializer.save(store=self.request.user.stores)
+
+    def perform_update(self, serializer):
+        is_ended = serializer.validated_data.get('is_ended',False)
+        if is_ended:
+            serializer.save(visible=2,to_date=datetime.date.today())
+        else:
+            serializer.save()
+
