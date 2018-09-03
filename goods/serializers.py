@@ -274,7 +274,7 @@ class GoodDetailSerializer(serializers.ModelSerializer):
 
     def get_good_bargain_activity(self,obj):
         now=datetime.datetime.now()
-        activity = BargainActivity.objects.filter(sku__color__good_detail=obj,from_time__lte=now,to_time__gte=now,state=0)
+        activity = BargainActivity.objects.filter(sku__color__good_detail=obj,from_time__lte=now,to_time__gte=now,state=1)
         if activity.exists():
             return activity.values('sku_id')
 
