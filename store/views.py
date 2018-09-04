@@ -676,3 +676,7 @@ class SharingReduceViewSets(CreateListViewSet):
         else:
             return queryset.none()
 
+    @action(methods=['post'],detail=True,serializer_class=serializers.JoinSharingReduceSerializer,permission_classes=(AllowAny,))
+    def join(self,request,pk=None):
+        obj = self.get_object()
+        return Response('ok')

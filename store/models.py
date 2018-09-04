@@ -131,4 +131,9 @@ class SharingReduceActivity(models.Model):
     reduce_money = models.DecimalField(max_digits=5,decimal_places=1)
 
 
+class JoinSharingReduce(models.Model):
+    user = models.ForeignKey(to=User,on_delete=models.CASCADE,editable=False)
+    sharing_activity = models.ForeignKey(to='store.SharingReduceActivity',on_delete=models.CASCADE,editable=False)
+    sharing_times = models.IntegerField(default=1,editable=False)
+    has_paid = models.BooleanField(default=False,editable=False)
 
