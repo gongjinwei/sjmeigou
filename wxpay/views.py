@@ -120,13 +120,11 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                                 "voucher": 1,
                                 "money": int(cash_fee * 100),
                                 "remark": '%s充值收入' % recharge.account.get_account_type_display(),
-                                "intercourse_business2": recharge.id,
-                                'account': recharge.account.id,
+                                "intercourse_business2": recharge,
+                                'account': recharge.account,
                                 'keep_account_no': KeepAccounts.account_no()
                             }
-                            keep_serializer = KeepAccountSerializer(data=keep_data)
-                            keep_serializer.is_valid(raise_exception=True)
-                            keep_serializer.save()
+                            KeepAccounts.objects.create(**keep_data)
                             recharge.account.save()
                             recharge.save()
 
@@ -166,10 +164,18 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
         order.paid_time = paid_time
         if order.account <= cash_fee:
             order.state = 2
+            keep_data = {
+                "vocher": 3,
+                "money": int(cash_fee * 100),
+                "account": plat_account,
+                'keep_account_no': KeepAccounts.account_no()
 
+            }
             # 处理合并支付成功
             if hasattr(order, 'store_orders'):
-
+                keep_data.update({
+                    "remark": "平台代收店铺收入"
+                })
                 order.store_orders.update(account_paid=F('account'), state=2, paid_time=paid_time)
                 # 下物流单
                 for store_o in order.store_orders.all():
@@ -179,16 +185,10 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
                 plat_account.bank_balance += cash_fee
                 plat_account.save()
                 # 记一笔平台收入
-                keep_data = {
-                    "voucher": 1,
-                    "money": int(cash_fee * 100),
-                    "remark": '平台其他收入',
-                    'account': plat_account.id,
-                    'keep_account_no': KeepAccounts.account_no()
-                }
-                keep_serializer = KeepAccountSerializer(data=keep_data)
-                keep_serializer.is_valid(raise_exception=True)
-                keep_serializer.save()
+                keep_data.update({
+                    "remark": '平台其他收入'
+                })
+            KeepAccounts.objects.create(**keep_data)
 
         # 处理店铺单独付款订单-平台连锁单
         if getattr(order, 'unify_order',None):
@@ -224,6 +224,7 @@ class NotifyOrderView(viewset.CreateOnlyViewSet):
             store_account.bank_balance -= store_order.store_to_pay
             store_account.save()
             plat_account.save()
+
             # 发起物流单
             self.send_store_deliver(store_order)
 

@@ -46,7 +46,7 @@ class StoreActivityType(models.Model):
 class KeepAccounts(models.Model):
     keep_account_no = models.CharField(max_length=30,primary_key=True)
     account_time = models.DateTimeField(auto_now_add=True)
-    voucher = models.SmallIntegerField(choices=((1,'收'),(2,'付'),(3,'转'),(4,'记')))
+    voucher = models.SmallIntegerField(choices=((1,'收'),(2,'付'),(3,'代收'),(4,'代付')))
     currency = models.CharField(max_length=20,default='CNY')
     money = models.PositiveIntegerField(help_text='发生金额（分）')
     remark = models.CharField(max_length=255)
