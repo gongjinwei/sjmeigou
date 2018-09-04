@@ -268,7 +268,7 @@ class BargainActivitySerializer(serializers.ModelSerializer):
     def get_participator_nums(self,obj):
         return models.HelpCutPrice.objects.filter(user_bargain__activity=obj).aggregate(joiners=Count('userId'))['joiners']
 
-    def get_paid_nums(self,obj):
+    def get_paid_info(self,obj):
         paid_activities=models.UserBargain.objects.filter(activity=obj,had_paid=True)
         paid_num=paid_activities.aggregate(joiners=Count('userId'))['joiners']
         max_paid = paid_activities.aggregate(max_p=Max('paid_money'))['max_p']
