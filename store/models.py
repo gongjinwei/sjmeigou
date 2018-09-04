@@ -104,6 +104,7 @@ class UserBargain(models.Model):
     activity = models.ForeignKey(to='BargainActivity',on_delete=models.CASCADE,related_name='user_bargains')
     price_now = models.FloatField(editable=False)
     had_paid = models.BooleanField(default=False,editable=False)
+    paid_money = models.DecimalField(null=True,editable=False,max_digits=30,decimal_places=2)
     create_time = models.DateTimeField(auto_now_add=True)
 
 

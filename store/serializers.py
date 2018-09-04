@@ -4,7 +4,7 @@ from itertools import groupby
 from rest_framework import serializers
 
 
-from django.db.models import Avg,Count,Sum
+from django.db.models import Avg,Count,Sum,Max,Min
 
 from geopy.distance import VincentyDistance
 
@@ -252,6 +252,8 @@ class BargainActivitySerializer(serializers.ModelSerializer):
     my_bargain = serializers.SerializerMethodField()
     poster_url = serializers.ReadOnlyField(source='poster.image.url')
     participator_nums = serializers.SerializerMethodField()
+    paid_info = serializers.SerializerMethodField()
+
 
     class Meta:
         model = models.BargainActivity
@@ -265,6 +267,16 @@ class BargainActivitySerializer(serializers.ModelSerializer):
 
     def get_participator_nums(self,obj):
         return models.HelpCutPrice.objects.filter(user_bargain__activity=obj).aggregate(joiners=Count('userId'))['joiners']
+
+    def get_paid_nums(self,obj):
+        paid_activities=models.UserBargain.objects.filter(activity=obj,had_paid=True)
+        paid_num=paid_activities.aggregate(joiners=Count('userId'))['joiners']
+        max_paid = paid_activities.aggregate(max_p=Max('paid_money'))['max_p']
+        min_paid = paid_activities.aggregate(min_p=Min('paid_money'))['min_p']
+        avg_paid = paid_activities.aggregate(ave_p=Avg('paid_money'))['avg_p']
+
+        return {'paid_nums':paid_num,'max_paid':max_paid,'min_paid':min_paid,'avg_paid':avg_paid}
+
 
 
 class HelpCutPriceSerializer(serializers.ModelSerializer):
