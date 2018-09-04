@@ -245,6 +245,8 @@ class HistoryDeleteSerializer(serializers.Serializer):
 class BargainActivitySerializer(serializers.ModelSerializer):
     color_pic = serializers.ReadOnlyField(source='sku.color.color_pic')
     good_id = serializers.ReadOnlyField(source='sku.color.good_detail.id')
+    color_name = serializers.ReadOnlyField(source='sku.color.color_name')
+    size_name = serializers.ReadOnlyField(source='sku.size.size_name')
     cut_price_from = serializers.FloatField(write_only=True)
     cut_price_to = serializers.FloatField(write_only=True)
     my_bargain = serializers.SerializerMethodField()
