@@ -279,6 +279,8 @@ class UserBargainSerializer(serializers.ModelSerializer):
     help_cuts = serializers.SerializerMethodField()
     cut_num = serializers.SerializerMethodField()
     cut_price_all= serializers.SerializerMethodField()
+    size_name = serializers.ReadOnlyField(source='activity.sku.size.size_name')
+    color_name=serializers.ReadOnlyField(source='activity.sku.color.color_name')
     sharer_avatar_url = serializers.ReadOnlyField(source='user.userinfo.avatarUrl')
     sharer_nick_name = serializers.ReadOnlyField(source='user.userinfo.nickName')
     is_sharer = serializers.SerializerMethodField()
