@@ -457,7 +457,7 @@ class UnifyOrderView(CreateOnlyViewSet):
 
                 # 计算分享减
                 if join_sharing:
-                    sharing_discount=float(join_sharing.sharing_activity.reduce_money)
+                    sharing_discount=join_sharing.sharing_activity.reduce_money
                     join_sharing.has_paid=True
                     join_sharing.save()
 
