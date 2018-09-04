@@ -17,7 +17,7 @@ from django.db.models.query import EmptyQuerySet
 
 from . import serializers, models
 from goods.models import SKU
-from store.models import GoodFavorites
+from store.models import GoodFavorites,JoinSharingReduce
 from store.serializers import HistoryDeleteSerializer
 from tools.permissions import MerchantOrReadOnlyPermission, MerchantPermission
 from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyViewSet, CreateOnlyViewSet, \
@@ -233,6 +233,11 @@ class BalanceView(CreateOnlyViewSet):
         ret = []
         for st in stores:
             store = st['store']
+            sr=None
+            # 取分享减活动
+            if JoinSharingReduce.objects.filter(sharing_activity__store=store,sharing_activity__is_ended=False,user=request.user).exists():
+                join_reduce=JoinSharingReduce.objects.filter(sharing_activity__store=store,sharing_activity__is_ended=False,user=request.user)[0]
+                sr={'id':join_reduce.id,'reduce_money':join_reduce.sharing_activity.reduce_money}
 
             # 判断是否为该店铺下的sku，如果不属于指定店铺直接报错
             sku_data = st['skus']
@@ -312,7 +317,8 @@ class BalanceView(CreateOnlyViewSet):
                 'skus': sd,
                 "deliver_pay": delivery_pay,
                 'has_enough_delivery': has_enough_delivery,
-                'deliver_distance': deliver_distance
+                'deliver_distance': deliver_distance,
+                'join_sharing':sr
             }})
 
         # 取出收货地址
@@ -440,12 +446,20 @@ class UnifyOrderView(CreateOnlyViewSet):
                 # 验证活动
                 activity_discount = 0
                 coupon_discount = 0
+                sharing_discount=0
                 activity = data_st.get('activity', None)
                 get_coupon_data = data_st.get('coupon', None)
                 deliver_server = data_st.get('deliver_server', None)
+                join_sharing = data_st.get('join_sharing',None)
                 store_deliver_payment = Decimal(0.00)
                 store_to_pay = Decimal(0.00)
                 deliver_distance = None
+
+                # 计算分享减
+                if join_sharing:
+                    sharing_discount=float(join_sharing.sharing_activity.reduce_money)
+                    join_sharing.has_paid=True
+                    join_sharing.save()
 
                 # 计算物流费用
                 if deliver_server:
@@ -498,13 +512,13 @@ class UnifyOrderView(CreateOnlyViewSet):
                     x, coupon_discount = coupon.algorithm(store_money)
 
                 store_order_no = get_order_no(store.id)
-                store_order_money = store_money - activity_discount - coupon_discount
+                store_order_money = store_money - activity_discount - coupon_discount-sharing_discount
                 order_num += store_num
                 order_money += store_order_money
                 data_st.update(
                     {'store_order_no': store_order_no, 'account': store_order_money, 'user': self.request.user,
                      'store_to_pay': store_to_pay, 'deliver_payment': store_deliver_payment,
-                     'deliver_distance': deliver_distance})
+                     'deliver_distance': deliver_distance,'join_sharing':join_sharing})
 
                 # 移除购物车
                 shopping_car = models.ShoppingCar.objects.filter(user=self.request.user, store=store)
