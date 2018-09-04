@@ -270,7 +270,7 @@ class BargainActivitySerializer(serializers.ModelSerializer):
 
     def get_paid_info(self,obj):
         paid_activities=models.UserBargain.objects.filter(activity=obj,had_paid=True)
-        paid_num=paid_activities.aggregate(joiners=Count('userId'))['joiners']
+        paid_num=paid_activities.aggregate(joiners=Count('user'))['joiners']
         max_paid = paid_activities.aggregate(max_p=Max('paid_money'))['max_p']
         min_paid = paid_activities.aggregate(min_p=Min('paid_money'))['min_p']
         avg_paid = paid_activities.aggregate(ave_p=Avg('paid_money'))['avg_p']
