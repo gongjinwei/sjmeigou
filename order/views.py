@@ -235,7 +235,7 @@ class BalanceView(CreateOnlyViewSet):
             store = st['store']
             sr=None
             # 取分享减活动
-            if JoinSharingReduce.objects.filter(sharing_activity__store=store,sharing_activity__is_ended=False,user=request.user).exists():
+            if JoinSharingReduce.objects.filter(sharing_activity__store=store,sharing_activity__is_ended=False,user=request.user,has_paid=False).exists():
                 join_reduce=JoinSharingReduce.objects.filter(sharing_activity__store=store,sharing_activity__is_ended=False,user=request.user)[0]
                 sr={'id':join_reduce.id,'reduce_money':join_reduce.sharing_activity.reduce_money}
 
