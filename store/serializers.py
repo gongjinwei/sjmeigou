@@ -275,7 +275,7 @@ class BargainActivitySerializer(serializers.ModelSerializer):
         min_paid = paid_activities.aggregate(min_p=Min('paid_money'))['min_p']
         avg_paid = paid_activities.aggregate(avg_p=Avg('paid_money'))['avg_p']
 
-        return {'paid_nums':paid_num,'max_paid':max_paid,'min_paid':min_paid,'avg_paid':avg_paid}
+        return {'paid_nums':paid_num,'max_paid':max_paid if max_paid else 0,'min_paid':min_paid if min_paid else 0,'avg_paid':avg_paid if avg_paid else 0}
 
 
 
