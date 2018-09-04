@@ -678,5 +678,9 @@ class SharingReduceViewSets(CreateListViewSet):
 
     @action(methods=['post'],detail=True,serializer_class=serializers.JoinSharingReduceSerializer,permission_classes=(AllowAny,))
     def join(self,request,pk=None):
-        obj = self.get_object()
-        return Response('ok')
+        activity = customer_get_object(self)
+        if hasattr(request,'user') and request.user.is_authenticated:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=request.user,sharing_activity=activity)
+        return Response({'code':1000,'msg':'分享成功'})

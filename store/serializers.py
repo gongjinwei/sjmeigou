@@ -345,3 +345,11 @@ class JoinSharingReduceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.JoinSharingReduce
         fields = '__all__'
+
+    def create(self, validated_data):
+        instance,created=self.Meta.model.objects.get_or_create(defaults=validated_data,**validated_data)
+        if not created:
+            instance.sharing_times +=1
+            instance.has_paid=False
+            instance.save()
+        return instance
