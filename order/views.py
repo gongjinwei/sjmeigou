@@ -24,7 +24,7 @@ from tools.viewset import CreateListDeleteViewSet, CreateListViewSet, ListOnlyVi
     ListDetailDeleteViewSet, ListRetrieveCreateViewSets, RetrieveOnlyViewSets
 from tools.contrib import get_deliver_pay, store_order_refund, prepare_dwd_order,customer_get_object
 from wxpay.views import weixinpay, dwd
-from platforms.models import AccountRecharge, Account
+from platforms.models import AccountRecharge, Account,StoreTransferCharge
 from delivery.models import InitDwdOrder, InitGoodRefund
 
 client = get_redis_connection()
@@ -590,11 +590,12 @@ class StoreOrderView(ListDetailDeleteViewSet):
                     order.order_trades.filter(paid_time__isnull=False).update(deal_time=datetime.datetime.now())
                 order.save()
                 # 商家将收到余额,平台代收余额减少
+                transfer_charge = StoreTransferCharge.objects.get_or_create(store=order.store)
                 store_account = Account.objects.get(user=None, store=order.store, account_type=3)
-                store_account.bank_balance+=order.account
+                store_account.bank_balance+=order.account*transfer_charge.charge_percent
                 store_account.save()
                 plat_account = Account.objects.get(user=None,store=None,account_type=3)
-                plat_account.bank_balance-=order.account
+                plat_account.bank_balance-=order.account*transfer_charge.charge_percent
                 plat_account.save()
                 return Response({'code': 1000, 'msg': '收货成功', "return_code": "SUCCESS"})
             else:

@@ -110,3 +110,9 @@ class ToBankSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ToBank
         fields ='__all__'
+
+
+class StoreTransferChargeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.StoreTransferCharge
+        fields = '__all__'

@@ -16,5 +16,6 @@ router.register('protocol',views.ProtocolViewSets,base_name='protocol')
 router.register('refundReason',views.RefundReasonViewSets,base_name='refundReason')
 router.register('bargainPoster',views.BargainPosterViewSets,base_name='bargainPoster')
 router.register('bankNo',views.BankNoView,base_name='bankNo')
+router.register('storeTransferCharge',views.StoreTransferChargeViewSets,base_name='storeTransferCharge')
 
 urlpatterns=router.urls

@@ -241,3 +241,9 @@ class BargainPosterViewSets(ModelViewSet):
 class BankNoView(ListOnlyViewSet):
     queryset = models.BankNo.objects.all()
     serializer_class = serializers.BankNoSerializer
+
+
+class StoreTransferChargeViewSets(ModelViewSet):
+    queryset = models.StoreTransferCharge.objects.all()
+    serializer_class = serializers.StoreTransferChargeSerializer
+    permission_classes = (IsAdminUser,)

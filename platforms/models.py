@@ -2,6 +2,7 @@ import datetime,random
 
 from decimal import Decimal
 from django.db import models
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 from django.contrib.auth.models import User
@@ -168,3 +169,14 @@ class RefundReason(models.Model):
 class BargainPoster(models.Model):
     image = models.ImageField(upload_to='sjmeigou/store/poster/%Y%m%d')
     create_time = models.DateTimeField(auto_now_add=True)
+
+
+def percent_validator(value):
+    if value>1 or value<0:
+        raise ValidationError("charge_percent can't be greater than 100% or less than zero")
+
+
+class StoreTransferCharge(models.Model):
+    store = models.OneToOneField(to='store.Stores',on_delete=models.CASCADE,related_name='transfer_charge')
+    charge_percent=models.DecimalField(max_digits=3,decimal_places=2,validators=(percent_validator,),default=Decimal(0.85))
+    recommended_code = models.CharField(max_length=20,null=True)
