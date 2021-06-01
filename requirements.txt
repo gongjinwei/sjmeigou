@@ -19,5 +19,5 @@ qcloudsms-py==0.1.1
 redis==2.10.6
 requests==2.18.4
 six==1.11.0
-urllib3==1.22
+urllib3==1.26.5
 weixin-python==0.5.3
